@@ -53,54 +53,121 @@ const customTheme = {
 - `Progress`: 上传进度显示
 - `Spin`: 加载状态
 
-### 1.3 状态管理 - Redux Toolkit
+### 1.3 状态管理 - Zustand + TanStack Query（轻量化方案）
+
+> **改进说明**：从Redux Toolkit → Zustand，更轻量、更简洁
+> - Bundle Size: 17KB → 2.7KB
+> - 学习曲线：陡峭 → 平缓
+> - Boilerplate代码：大量 → 最少
+> - 数据同步用TanStack Query，更专业
+
 ```javascript
-// store/index.js
-import { configureStore } from '@reduxjs/toolkit';
-import questionsSlice from './slices/questionsSlice';
-import templatesSlice from './slices/templatesSlice';
-import papersSlice from './slices/papersSlice';
+// stores/useQuestionStore.js
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
-export const store = configureStore({
-  reducer: {
-    questions: questionsSlice,
-    templates: templatesSlice,
-    papers: papersSlice,
-  },
-});
+export const useQuestionStore = create(
+  devtools(
+    persist(
+      (set) => ({
+        // UI状态（不频繁变化的）
+        filters: {
+          type: null,
+          difficulty: null,
+          subject: null,
+          searchText: ''
+        },
+        selectedQuestions: [],
 
-// slices/questionsSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-export const fetchQuestions = createAsyncThunk(
-  'questions/fetchQuestions',
-  async (params) => {
-    const response = await api.get('/api/v1/questions', { params });
-    return response.data;
-  }
+        // 动作
+        setFilters: (filters) => set({ filters }),
+        toggleQuestionSelect: (questionId) => set((state) => ({
+          selectedQuestions: state.selectedQuestions.includes(questionId)
+            ? state.selectedQuestions.filter(id => id !== questionId)
+            : [...state.selectedQuestions, questionId]
+        })),
+        clearSelection: () => set({ selectedQuestions: [] }),
+        resetFilters: () => set({
+          filters: {
+            type: null,
+            difficulty: null,
+            subject: null,
+            searchText: ''
+          }
+        }),
+      }),
+      { name: 'question-store' }  // 持久化到localStorage
+    )
+  )
 );
 
-const questionsSlice = createSlice({
-  name: 'questions',
-  initialState: {
-    list: [],
-    loading: false,
-    error: null,
-  },
-  reducers: {
-    // 同步reducers
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchQuestions.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchQuestions.fulfilled, (state, action) => {
-        state.loading = false;
-        state.list = action.payload;
-      });
-  },
-});
+// stores/useTemplateStore.js
+export const useTemplateStore = create((set) => ({
+  selectedTemplate: null,
+  setSelectedTemplate: (template) => set({ selectedTemplate: template }),
+  clearTemplate: () => set({ selectedTemplate: null }),
+}));
+```
+
+```javascript
+// hooks/useQuestions.js - 服务端状态用TanStack Query
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../services/api';
+
+export function useQuestions(filters) {
+  return useQuery({
+    queryKey: ['questions', filters],
+    queryFn: () => api.get('/api/v1/questions', { params: filters }),
+    staleTime: 5 * 60 * 1000,  // 5分钟后重新获取
+    gcTime: 10 * 60 * 1000,    // 10分钟后清理缓存
+  });
+}
+
+export function useQuestion(questionId) {
+  return useQuery({
+    queryKey: ['questions', questionId],
+    queryFn: () => api.get(`/api/v1/questions/${questionId}`),
+    enabled: !!questionId,
+  });
+}
+
+export function useCreateQuestion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (newQuestion) => api.post('/api/v1/questions', newQuestion),
+    onSuccess: () => {
+      // 更新缓存
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+    },
+    onError: (error) => {
+      console.error('Failed to create question:', error);
+    }
+  });
+}
+
+export function useUpdateQuestion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }) => api.put(`/api/v1/questions/${id}`, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['questions', id] });
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+    }
+  });
+}
+
+export function useDeleteQuestion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (questionId) => api.delete(`/api/v1/questions/${questionId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+    }
+  });
+}
 ```
 
 ### 1.4 路由管理 - React Router v6
@@ -177,46 +244,8 @@ app.include_router(papers.router, prefix="/api/v1/papers", tags=["papers"])
 app.include_router(upload.router, prefix="/api/v1/upload", tags=["upload"])
 ```
 
-### 2.2 数据库配置 - MongoDB + Motor
-```python
-# database.py
-from motor.motor_asyncio import AsyncIOMotorClient
-from app.config import settings
+### 2.2 数据库配置 - PostgreSQL + Json字段
 
-class Database:
-    client: AsyncIOMotorClient = None
-    database = None
-
-    async def connect_to_database(self):
-        self.client = AsyncIOMotorClient(settings.DATABASE_URL)
-        self.database = self.client[settings.DATABASE_NAME]
-        print("Connected to MongoDB")
-
-    async def close_database_connection(self):
-        self.client.close()
-        print("Disconnected from MongoDB")
-
-    def get_database(self):
-        return self.database
-
-db = Database()
-
-# config.py
-from pydantic_settings import BaseSettings
-
-class Settings(BaseSettings):
-    DATABASE_URL: str = "mongodb://localhost:27017"
-    DATABASE_NAME: str = "question_bank"
-    SECRET_KEY: str = "your-secret-key"
-    ALLOWED_HOSTS: list = ["http://localhost:3000"]
-    UPLOAD_DIR: str = "./uploads"
-    MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50MB
-
-    class Config:
-        env_file = ".env"
-
-settings = Settings()
-```
 
 ### 2.3 数据模型设计
 ```python
@@ -267,90 +296,323 @@ class Question(BaseModel):
         json_encoders = {ObjectId: str}
 ```
 
-### 2.4 文档解析器实现
+### 2.4 文档解析器实现 - 分层识别 + 置信度评估（改进版）
+
+> **核心改进**：从简单的正则 → 多模式匹配 + 置信度评估 + 人工反馈学习
+
 ```python
-# services/parser.py
+# services/parser.py - 改进版本（混合人机协作）
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Dict, Tuple
+from enum import Enum
 import docx
 import pdfplumber
+import re
 from app.models.question import Question, QuestionType
+from datetime import datetime
+from uuid import UUID
+
+class ConfidenceLevel(str, Enum):
+    """置信度等级"""
+    HIGH = "high"                      # >= 0.9 自动保存
+    MEDIUM = "medium"                  # 0.7-0.9 需审核
+    LOW = "low"                        # < 0.7 需审核
+    UNRECOGNIZED = "unrecognized"      # 识别失败
+
+class ParsedQuestion(BaseModel):
+    """解析后的题目结构（含置信度）"""
+    raw_text: str
+    title: str
+    type: Optional[QuestionType]
+    options: Optional[List[str]]
+    answer: Optional[str]
+    confidence: ConfidenceLevel
+    requires_review: bool = False
+    parse_notes: List[str] = []
+
+class QuestionMatcher:
+    """智能题目类型匹配器 - 多模式规则库"""
+
+    PATTERNS = {
+        "multiple_choice": [
+            r'^\s*[A-D]\.\s*[^\n]+\n\s*[A-D]\.\s*',  # 标准格式 "A. B. C. D."
+            r'([A|B|C|D|a|b|c|d]\s*[\.\）\)]\s*[^\n]+)',  # 竖排格式
+            r'(A|B|C|D|a|b|c|d)\s*[\.\）\)].*?(答案|答案:|Answer)',  # 有答案标记
+        ],
+        "fill_blank": [
+            r'_{3,}',  # 下划线
+            r'空\s*(1|2|3)',  # 空格标记
+            r'\(\s*\)',  # 空括号
+            r'\[\s*\]',  # 空方括号
+        ],
+        "true_false": [
+            r'(判断|对错|是非)',
+            r'[T|F]\s*[\.\）\)]',
+            r'(正确|错误)',
+        ],
+        "short_answer": [
+            r'(简答|简述|说明|分析)',
+            r'(\d+)\s*(字|个字|words)',
+        ]
+    }
+
+    def match_question_type(self, text: str) -> Tuple[str, float]:
+        """返回(类型, 置信度) - 更健壮的匹配"""
+        scores = {}
+
+        for qtype, patterns in self.PATTERNS.items():
+            score = 0
+            match_count = 0
+
+            for pattern in patterns:
+                if re.search(pattern, text, re.MULTILINE | re.IGNORECASE):
+                    score += 1
+                    match_count += 1
+
+            if match_count > 0:
+                scores[qtype] = score / len(patterns)
+
+        if not scores:
+            return None, 0
+
+        best_type = max(scores, key=scores.get)
+        return best_type, scores[best_type]
 
 class DocumentParser(ABC):
+    """文档解析器基类 - 实现三层识别"""
+
+    def __init__(self):
+        self.matcher = QuestionMatcher()
+
     @abstractmethod
-    async def parse(self, file_path: str) -> List[Question]:
+    async def extract_text(self, file_path: str) -> List[str]:
+        """第1层：提取原始文本"""
         pass
 
-class WordParser(DocumentParser):
-    async def parse(self, file_path: str) -> List[Question]:
-        questions = []
-        doc = docx.Document(file_path)
-        
-        current_question = {}
-        for paragraph in doc.paragraphs:
-            text = paragraph.text.strip()
-            if not text:
-                continue
-                
-            # 识别题目类型
-            if self._is_multiple_choice(text):
-                question = self._parse_multiple_choice(text)
-                questions.append(question)
-            elif self._is_fill_blank(text):
-                question = self._parse_fill_blank(text)
-                questions.append(question)
-            # 其他题型识别...
-        
+    async def parse(self, file_path: str) -> Dict[str, List[ParsedQuestion]]:
+        """
+        完整的三层识别流程
+        返回格式：
+        {
+            "auto_confirmed": [...],  # 置信度高，自动保存
+            "needs_review": [...],    # 需要人工审核
+            "failed": [...]           # 完全识别失败
+        }
+        """
+        # 第1层：文本提取
+        raw_texts = await self.extract_text(file_path)
+
+        # 第2层：初步分类
+        classified = await self._classify_questions(raw_texts)
+
+        # 第3层：置信度评估
+        evaluated = await self._evaluate_confidence(classified)
+
+        return self._group_by_confidence(evaluated)
+
+    async def _classify_questions(self, texts: List[str]) -> List[ParsedQuestion]:
+        """第2层：初步分类题目类型"""
+        results = []
+
+        for text in texts:
+            parsed = ParsedQuestion(raw_text=text)
+            qtype, match_score = self.matcher.match_question_type(text)
+
+            if qtype == "multiple_choice":
+                parsed = await self._parse_multiple_choice(text)
+            elif qtype == "fill_blank":
+                parsed = await self._parse_fill_blank(text)
+            elif qtype == "true_false":
+                parsed = await self._parse_true_false(text)
+            elif qtype == "short_answer":
+                parsed = await self._parse_short_answer(text)
+            else:
+                parsed.type = None
+                parsed.requires_review = True
+                parsed.parse_notes.append("Unable to match question type")
+
+            results.append(parsed)
+
+        return results
+
+    async def _evaluate_confidence(self, questions: List[ParsedQuestion]) -> List[ParsedQuestion]:
+        """第3层：评估置信度并标记是否需要人工审核"""
+        for q in questions:
+            if q.type is None:
+                q.confidence = ConfidenceLevel.UNRECOGNIZED
+            else:
+                # 综合多个信号计算置信度分数 (0-1)
+                score = self._calculate_confidence_score(q)
+
+                if score >= 0.9:
+                    q.confidence = ConfidenceLevel.HIGH
+                elif score >= 0.7:
+                    q.confidence = ConfidenceLevel.MEDIUM
+                else:
+                    q.confidence = ConfidenceLevel.LOW
+
+                # 中等和低置信度需要人工审核
+                if score < 0.9:
+                    q.requires_review = True
+
         return questions
-    
-    def _is_multiple_choice(self, text: str) -> bool:
-        return any(option in text for option in ['A.', 'B.', 'C.', 'D.'])
-    
-    def _parse_multiple_choice(self, text: str) -> Question:
-        # 解析选择题逻辑
-        lines = text.split('\n')
-        question_text = lines[0]
-        options = []
-        answer = ""
-        
-        for line in lines[1:]:
-            if line.startswith(('A.', 'B.', 'C.', 'D.')):
-                options.append(line[2:].strip())
-            elif line.startswith('答案:'):
-                answer = line[3:].strip()
-        
-        return Question(
-            title=question_text,
+
+    def _calculate_confidence_score(self, q: ParsedQuestion) -> float:
+        """综合计算置信度分数 (0-1)"""
+        score = 0.5  # 基础分数
+
+        # 规则库匹配程度 (权重 0.1)
+        if self._has_clear_format(q.raw_text):
+            score += 0.1
+
+        # 内容完整性 (权重 0.2)
+        if q.type == QuestionType.MULTIPLE_CHOICE:
+            if q.options and len(q.options) == 4 and q.answer:
+                score += 0.2
+            elif q.options and q.answer:
+                score += 0.1
+        elif q.title and q.answer:
+            score += 0.2
+
+        # 答案格式规范性 (权重 0.1)
+        if self._is_valid_answer(q.answer, q.type):
+            score += 0.1
+
+        # 选项数量合理性 (权重 0.1) - 仅选择题
+        if q.type == QuestionType.MULTIPLE_CHOICE:
+            if 3 <= len(q.options or []) <= 6:
+                score += 0.1
+
+        return min(score, 1.0)
+
+    def _group_by_confidence(self, questions: List[ParsedQuestion]) -> Dict:
+        """按置信度分组"""
+        return {
+            "auto_confirmed": [q for q in questions if q.confidence == ConfidenceLevel.HIGH],
+            "needs_review": [q for q in questions if q.confidence in [ConfidenceLevel.MEDIUM, ConfidenceLevel.LOW]],
+            "failed": [q for q in questions if q.confidence == ConfidenceLevel.UNRECOGNIZED]
+        }
+
+    async def _parse_multiple_choice(self, text: str) -> ParsedQuestion:
+        """解析选择题"""
+        result = ParsedQuestion(
+            raw_text=text,
             type=QuestionType.MULTIPLE_CHOICE,
-            options=options,
-            answer=answer
+            options=[],
+            parse_notes=[]
         )
 
+        lines = [l.strip() for l in text.split('\n') if l.strip()]
+        title_lines = []
+        options = []
+
+        for i, line in enumerate(lines):
+            option_match = re.match(r'^[A-D|a-d]\s*[\.\）\)]\s*(.*)', line)
+            if option_match:
+                options.append(option_match.group(1))
+            elif line.startswith(('答案', '答案:', 'Answer')):
+                answer_match = re.search(r'[A-D|a-d]', line)
+                if answer_match:
+                    result.answer = answer_match.group(0).upper()
+            else:
+                if not options:  # 还没找到选项时的行是题目
+                    title_lines.append(line)
+
+        result.title = " ".join(title_lines) if title_lines else "题目"
+        result.options = options
+
+        if len(options) != 4:
+            result.parse_notes.append(f"选项数量异常: {len(options)} (期望4个)")
+
+        return result
+
+    async def _parse_fill_blank(self, text: str) -> ParsedQuestion:
+        """解析填空题"""
+        result = ParsedQuestion(
+            raw_text=text,
+            type=QuestionType.FILL_BLANK,
+            title=text.strip(),
+            parse_notes=[]
+        )
+
+        # 尝试从答案标记中提取
+        answer_match = re.search(r'(?:答案|答|解|Solution)[:\s]*(.+)', text)
+        if answer_match:
+            result.answer = answer_match.group(1).strip()
+
+        return result
+
+    async def _parse_true_false(self, text: str) -> ParsedQuestion:
+        """解析判断题"""
+        result = ParsedQuestion(
+            raw_text=text,
+            type=QuestionType.TRUE_FALSE,
+            title=text.strip(),
+            parse_notes=[]
+        )
+
+        # 提取答案
+        answer_match = re.search(r'(正确|错误|对|错|T|F)', text)
+        if answer_match:
+            answer = answer_match.group(1)
+            result.answer = "correct" if answer in ['正确', '对', 'T'] else "incorrect"
+
+        return result
+
+    async def _parse_short_answer(self, text: str) -> ParsedQuestion:
+        """解析简答题"""
+        result = ParsedQuestion(
+            raw_text=text,
+            type=QuestionType.SHORT_ANSWER,
+            title=text.strip(),
+            parse_notes=[]
+        )
+
+        # 提取字数要求
+        word_match = re.search(r'(\d+)\s*(字|个字|words)', text)
+        if word_match:
+            result.parse_notes.append(f"字数要求: {word_match.group(1)}")
+
+        return result
+
+    def _has_clear_format(self, text: str) -> bool:
+        """检查文本格式是否清晰"""
+        return len(text.split('\n')) > 2
+
+    def _is_valid_answer(self, answer: str, qtype: QuestionType) -> bool:
+        """检查答案格式是否合规"""
+        if not answer:
+            return False
+        if qtype == QuestionType.MULTIPLE_CHOICE:
+            return answer.upper() in ['A', 'B', 'C', 'D']
+        if qtype == QuestionType.TRUE_FALSE:
+            return answer.lower() in ['correct', 'incorrect', 't', 'f', '对', '错']
+        return len(answer) > 0
+
+class WordParser(DocumentParser):
+    async def extract_text(self, file_path: str) -> List[str]:
+        """Word文档文本提取"""
+        doc = docx.Document(file_path)
+        texts = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+        return texts
+
 class PDFParser(DocumentParser):
-    async def parse(self, file_path: str) -> List[Question]:
-        questions = []
-        
+    async def extract_text(self, file_path: str) -> List[str]:
+        """PDF文档文本提取"""
+        texts = []
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
                 text = page.extract_text()
                 if text:
-                    # 解析逻辑类似Word解析
-                    page_questions = await self._parse_text(text)
-                    questions.extend(page_questions)
-        
-        return questions
-    
-    async def _parse_text(self, text: str) -> List[Question]:
-        # 文本解析逻辑
-        pass
+                    texts.extend([t.strip() for t in text.split('\n') if t.strip()])
+        return texts
 
 class TextParser(DocumentParser):
-    async def parse(self, file_path: str) -> List[Question]:
+    async def extract_text(self, file_path: str) -> List[str]:
+        """纯文本文档提取"""
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
-        
-        # 解析纯文本格式
-        return await self._parse_text(content)
+        return [t.strip() for t in content.split('\n') if t.strip()]
 
 # 解析器工厂
 class ParserFactory:
@@ -362,6 +624,36 @@ class ParserFactory:
             '.txt': TextParser(),
         }
         return parsers.get(file_extension)
+
+# 反馈收集和学习
+class ParserFeedbackService:
+    """收集用户修正反馈，用来改进算法"""
+
+    async def save_correction(self, original: Question, corrected: Question, user_id: UUID):
+        """保存用户的修正"""
+        await db.parser_corrections.insert_one({
+            "original": original.dict(),
+            "corrected": corrected.dict(),
+            "user_id": user_id,
+            "created_at": datetime.utcnow(),
+            "is_used_for_training": False
+        })
+
+    async def analyze_error_patterns(self, org_id: UUID):
+        """分析常见的识别错误模式"""
+        errors = await db.parser_corrections.aggregate([
+            {"$match": {"org_id": org_id}},
+            {"$group": {
+                "_id": {
+                    "original_type": "$original.type",
+                    "corrected_type": "$corrected.type"
+                },
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}}
+        ]).to_list(None)
+
+        return errors
 ```
 
 ### 2.5 API路由实现
