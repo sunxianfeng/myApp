@@ -9,7 +9,7 @@
 - 📋 **试卷生成** - 基于模板快速生成试卷，支持自定义配置
 - 🎨 **模板系统** - 灵活的模板设置，支持多种题型配置
 - 📊 **数据统计** - 完整的题目统计和使用分析
-- ☁️ **云存储** - 集成MinIO对象存储，支持大文件上传
+- ☁️ **云存储** - 集成Supabase Storage对象存储，支持大文件上传
 
 ## 技术栈
 
@@ -28,16 +28,30 @@
 - python-docx (Word处理)
 - pdfplumber (PDF处理)
 
-### 数据库和存储
-- PostgreSQL (主数据库，支持JSON字段)
-- Redis (缓存)
-- MinIO (对象存储)
+### 数据库和存储（云服务）
+- Supabase PostgreSQL (主数据库，支持JSON字段)
+- Upstash Redis (缓存，基于HTTP REST API)
+- Supabase Storage (对象存储)
 
 ## 快速开始
 
 ### 前置要求
 - Docker & Docker Compose
 - Git
+- Supabase 账号（数据库和存储）
+- Upstash 账号（Redis缓存）
+
+### 云服务配置
+
+#### 1. Supabase 配置
+1. 在 [Supabase](https://supabase.com) 创建项目
+2. 获取连接字符串：`postgresql://[user]:[password]@db.[project-id].supabase.co:5432/postgres`
+3. 创建存储桶用于文件上传（Settings → Storage）
+
+#### 2. Upstash 配置
+1. 在 [Upstash](https://upstash.com) 创建 Redis 数据库
+2. 获取 REST API URL 和 Token
+3. 格式：`https://:[token]@[region].upstash.io`
 
 ### 开发环境启动
 
@@ -49,7 +63,14 @@ cd question-generator-app
 # 复制环境变量文件
 cp .env.example .env
 
-# 启动开发环境
+# 编辑 .env，填入云服务配置信息
+# DATABASE_URL=postgresql://[user]:[password]@db.[project-id].supabase.co:5432/postgres
+# REDIS_URL=https://:[token]@[region].upstash.io
+# SUPABASE_URL=https://[project-id].supabase.co
+# SUPABASE_KEY=[anon-key]
+# SUPABASE_BUCKET=question-uploads
+
+# 启动开发环境（仅前端和后端）
 docker-compose up -d
 
 # 查看日志
@@ -64,14 +85,24 @@ docker-compose logs -f
 ### 生产环境部署
 
 ```bash
+# 在服务器上配置 .env 文件（使用真实的云服务凭证）
+# 确保以下环境变量已正确配置：
+# - DATABASE_URL (Supabase PostgreSQL)
+# - REDIS_URL (Upstash Redis)
+# - SUPABASE_URL 和 SUPABASE_KEY
+# - SUPABASE_BUCKET
+
 # 构建生产镜像
 docker-compose -f docker-compose.prod.yml build
 
-# 启动生产环境
+# 启动生产环境（仅后端和前端）
 docker-compose -f docker-compose.prod.yml up -d
 
-# 数据库迁移
+# 数据库迁移（针对Supabase）
 docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
+
+# 验证服务状态
+docker-compose -f docker-compose.prod.yml ps
 ```
 
 ## 项目结构

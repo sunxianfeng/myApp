@@ -1,49 +1,11 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: question_postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: question_user
-      POSTGRES_PASSWORD: question_password
-      POSTGRES_DB: question_generator
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - question_network
-
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: question_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - question_network
-
-  # MinIO Object Storage
-  minio:
-    image: minio/minio
-    container_name: question_minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - minio_data:/minio_data
-    command: server /minio_data --console-address ":9001"
-    networks:
-      - question_network
-
   # Backend API
+  # 数据库、缓存和存储使用云服务：
+  # - PostgreSQL: Supabase
+  # - Redis: Upstash
+  # - File Storage: Supabase Storage
   backend:
     build:
       context: ./backend
@@ -52,17 +14,15 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://question_user:question_password@postgres:5432/question_generator
-      - REDIS_URL=redis://redis:6379/0
-      - MINIO_ENDPOINT=minio:9000
+      # 从 .env 文件读取云服务配置
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_BUCKET=${SUPABASE_BUCKET}
       - ENVIRONMENT=development
-    depends_on:
-      - postgres
-      - redis
-      - minio
     volumes:
       - ./backend:/app
-      - ./data/uploads:/app/uploads
       - ./data/generated:/app/generated
     networks:
       - question_network
@@ -78,8 +38,6 @@ services:
       - "5173:5173"
     environment:
       - VITE_API_URL=http://localhost:8000/api
-    depends_on:
-      - backend
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
@@ -97,16 +55,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - backend
-      - frontend
     networks:
       - question_network
-
-volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
 
 networks:
   question_network:

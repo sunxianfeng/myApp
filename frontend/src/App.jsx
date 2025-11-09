@@ -6,11 +6,15 @@ import Templates from './pages/Templates'
 import Papers from './pages/Papers'
 import Upload from './pages/Upload'
 import Settings from './pages/Settings'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="questions" element={<Questions />} />
