@@ -38,6 +38,12 @@
   --shadow-2xl: 0 1px 3px rgba(0, 0, 0, 0.05), 0 40px 70px -12px rgba(0, 0, 0, 0.15);
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -48,11 +54,19 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  flex-direction: column;
+}
+
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 body::before {
@@ -247,8 +261,8 @@ h1 {
    Register Page Styles
    ======================================== */
 .main-container {
-  width: 100%;
-  max-width: 1000px;
+  width: calc(100% - 4rem);
+  max-width: 1200px;
   min-height: 600px;
   display: flex;
   background-color: var(--card);
@@ -256,6 +270,7 @@ h1 {
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   animation: formEntry 600ms ease-out;
+  margin: 0 auto;
 }
 
 .left-panel {
@@ -370,25 +385,62 @@ h1 {
 /* ========================================
    Responsive Design
    ======================================== */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .main-container {
-    flex-direction: column;
-    max-width: 500px;
-    min-height: auto;
+    max-width: 900px;
   }
 
   .left-panel {
     padding: 3rem;
+  }
+
+  .right-panel {
+    padding: 3rem;
+  }
+
+  .left-panel h1 {
+    font-size: 2rem;
+  }
+
+  .right-panel h2 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    max-width: 600px;
+    min-height: auto;
+    width: calc(100% - 2rem);
+    margin: 1rem auto;
+  }
+
+  .left-panel {
+    padding: 2.5rem;
     text-align: center;
+  }
+
+  .left-panel h1 {
+    font-size: 1.75rem;
   }
 
   .left-panel p {
     max-width: 100%;
     margin: 0 auto;
+    font-size: 1rem;
   }
 
   .right-panel {
-    padding: 3rem;
+    padding: 2.5rem;
+  }
+
+  .right-panel h2 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
   }
 }
 
@@ -400,7 +452,11 @@ h1 {
   }
 
   .main-container {
+    flex-direction: column;
     border-radius: var(--radius-lg);
+    width: calc(100% - 1rem);
+    margin: 0.5rem auto;
+    max-width: 100%;
   }
 
   h1 {

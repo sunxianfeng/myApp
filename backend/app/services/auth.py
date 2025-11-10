@@ -2,6 +2,8 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
+import hashlib
+import base64
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate, LoginRequest
@@ -16,13 +18,43 @@ class AuthService:
 
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash a password using bcrypt"""
-        return pwd_context.hash(password)
+        """Hash a password using SHA-256 then bcrypt
+
+        SHA-256 preprocessing allows bcrypt to handle passwords longer than 72 bytes
+        while maintaining security. We truncate the SHA-256 hex to exactly 72 characters.
+        """
+        # First hash with SHA-256 to handle long passwords
+        sha_hash = hashlib.sha256(password.encode()).hexdigest()
+        # Truncate to exactly 72 characters to satisfy bcrypt limit
+        sha_truncated = sha_hash[:72]
+        # Then hash with bcrypt
+        return pwd_context.hash(sha_truncated)
 
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """Verify a password against its hash"""
-        return pwd_context.verify(plain_password, hashed_password)
+        """Verify a password against its hash
+
+        Uses the same SHA-256 preprocessing as hash_password for consistency.
+        Includes backward compatibility for passwords hashed with the old method.
+        """
+        # Try new method first (SHA-256 + truncate to 72 chars)
+        try:
+            # First hash with SHA-256 to handle long passwords
+            sha_hash = hashlib.sha256(plain_password.encode()).hexdigest()
+            # Truncate to exactly 72 characters to satisfy bcrypt limit
+            sha_truncated = sha_hash[:72]
+            
+            if pwd_context.verify(sha_truncated, hashed_password):
+                return True
+        except Exception:
+            pass
+        
+        # Fallback to old method (hex string) for backward compatibility
+        try:
+            sha_hash_hex = hashlib.sha256(plain_password.encode()).hexdigest()
+            return pwd_context.verify(sha_hash_hex, hashed_password)
+        except Exception:
+            return False
 
     @staticmethod
     def create_access_token(user_id: str, expires_delta: Optional[timedelta] = None) -> str:

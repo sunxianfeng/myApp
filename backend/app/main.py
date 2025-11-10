@@ -1,5 +1,7 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import logging
 
 from app.config import settings
@@ -9,21 +11,29 @@ from app.models import User
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title=settings.APP_NAME,
-    version=settings.APP_VERSION,
-)
 
-
-@app.on_event("startup")
-async def startup_event():
-    """Create database tables on startup"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifecycle events"""
+    # Startup
     try:
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
     except Exception as e:
         logger.warning(f"Could not create database tables: {e}")
         logger.warning("Continuing without table creation...")
+    
+    yield
+    
+    # Shutdown (if needed)
+    logger.info("Application shutdown")
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    lifespan=lifespan,
+)
 
 # CORS middleware
 app.add_middleware(
@@ -44,3 +54,6 @@ async def health_check():
 @app.get("/docs")
 async def get_docs():
     return {"message": "API documentation"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

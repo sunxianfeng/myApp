@@ -44,8 +44,8 @@ const RegisterPage = () => {
         throw new Error(data.detail || 'Registration failed')
       }
 
-      // Redirect to login page
-      navigate('/login')
+      // Redirect to main app dashboard
+      navigate('/app')
     } catch (err) {
       setError(err.message)
     } finally {

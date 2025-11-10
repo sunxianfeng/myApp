@@ -13,9 +13,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/" element={<Layout />}>
+        <Route path="/app" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="questions" element={<Questions />} />
           <Route path="templates" element={<Templates />} />

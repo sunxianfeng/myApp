@@ -1,7 +1,7 @@
 [project]
 name = "question-generator-backend"
 version = "1.0.0"
-description = "教学出题系统后端 - FastAPI + MongoDB"
+description = "教学出题系统后端 - FastAPI + PostgreSql"
 authors = [
     {name = "Your Name", email = "your.email@example.com"}
 ]

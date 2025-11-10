@@ -5,7 +5,13 @@
       "Bash(pip install:*)",
       "Bash(timeout 10 uvicorn:*)",
       "Bash(timeout 10 python:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cat:*)",
+      "Bash(/Users/xianfengsun/Desktop/repo/myApp/backend/.venv/bin/pip list:*)",
+      "Bash(python3 -m venv:*)",
+      "Bash(source:*)",
+      "Bash(uvicorn:*)",
+      "Bash(/opt/homebrew/bin/python3:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -7,7 +7,17 @@ from uuid import UUID
 class UserCreate(BaseModel):
     """Schema for user registration"""
     email: EmailStr
-    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
+    password: str = Field(..., min_length=8, max_length=1000, description="Password must be 8-1000 characters")
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Validate password requirements"""
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if len(v) > 1000:
+            raise ValueError("Password must not exceed 1000 characters")
+        return v
 
     class Config:
         json_schema_extra = {
