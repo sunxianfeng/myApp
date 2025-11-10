@@ -11,7 +11,8 @@
       "Bash(python3 -m venv:*)",
       "Bash(source:*)",
       "Bash(uvicorn:*)",
-      "Bash(/opt/homebrew/bin/python3:*)"
+      "Bash(/opt/homebrew/bin/python3:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

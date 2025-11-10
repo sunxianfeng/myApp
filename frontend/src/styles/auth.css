@@ -199,17 +199,20 @@ h1 {
 }
 
 .btn-primary {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-  margin-top: 2.5rem;
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  margin-top: 2.5rem !important;
   position: relative;
   overflow: hidden;
   letter-spacing: 0.01em;
+  border: none !important;
+  border-style: solid !important;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px -5px var(--ring);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px -5px var(--ring) !important;
+  background-color: oklch(0.5 0.18 280) !important;
 }
 
 .btn-primary:active:not(:disabled) {
@@ -347,6 +350,18 @@ h1 {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ========================================
+   Override Dashboard Theme for Auth Pages
+   ======================================== */
+/* Force primary button styles to override dashboard-theme.css */
+form .btn-primary,
+form button.btn-primary {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border: none !important;
+  border-style: solid !important;
 }
 
 .staggered-item {
