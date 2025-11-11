@@ -5,11 +5,47 @@ from app.schemas.user import (
     TokenResponse,
     LoginResponse
 )
+from app.schemas.question import (
+    QuestionOption,
+    QuestionBase,
+    QuestionCreate,
+    QuestionUpdate,
+    QuestionResponse,
+    DocumentBase,
+    DocumentCreate,
+    DocumentResponse,
+    OCRProcessRequest,
+    OCRProcessResponse,
+    QuestionSearchRequest,
+    QuestionListResponse,
+    ProcessingStatistics,
+    QuestionVerificationRequest,
+    QuestionBatchUpdate,
+    APIResponse,
+    PaginatedResponse
+)
 
 __all__ = [
     "UserCreate",
     "LoginRequest",
     "UserResponse",
     "TokenResponse",
-    "LoginResponse"
+    "LoginResponse",
+    "QuestionOption",
+    "QuestionBase",
+    "QuestionCreate",
+    "QuestionUpdate",
+    "QuestionResponse",
+    "DocumentBase",
+    "DocumentCreate",
+    "DocumentResponse",
+    "OCRProcessRequest",
+    "OCRProcessResponse",
+    "QuestionSearchRequest",
+    "QuestionListResponse",
+    "ProcessingStatistics",
+    "QuestionVerificationRequest",
+    "QuestionBatchUpdate",
+    "APIResponse",
+    "PaginatedResponse"
 ]

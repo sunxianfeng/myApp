@@ -31,4 +31,37 @@ api.interceptors.response.use(
   }
 )
 
+// OCR相关API
+export const uploadImageForOCR = async (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  return await api.post('/v1/ocr/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+export const batchUploadImagesForOCR = async (files) => {
+  const formData = new FormData()
+  files.forEach(file => {
+    formData.append('files', file)
+  })
+  
+  return await api.post('/v1/ocr/batch-upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+export const extractTextFromImage = async (fileId) => {
+  return await api.get(`/v1/ocr/text-extract/${fileId}`)
+}
+
+export const getSupportedFormats = async () => {
+  return await api.get('/v1/ocr/supported-formats')
+}
+
 export default api
