@@ -213,10 +213,12 @@ h1 {
   transform: translateY(-2px) !important;
   box-shadow: 0 8px 20px -5px var(--ring) !important;
   background-color: oklch(0.5 0.18 280) !important;
+  color: var(--primary-foreground) !important;
 }
 
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
+  color: var(--primary-foreground) !important;
 }
 
 /* ========================================
@@ -283,6 +285,8 @@ h1 {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .left-panel h1 {
@@ -291,12 +295,15 @@ h1 {
   color: var(--foreground);
   letter-spacing: -0.025em;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .left-panel p {
   font-size: 1.1rem;
   color: var(--muted-foreground);
   max-width: 350px;
+  text-align: center;
+  margin: 0 auto;
 }
 
 .right-panel {
@@ -362,6 +369,11 @@ form button.btn-primary {
   color: var(--primary-foreground) !important;
   border: none !important;
   border-style: solid !important;
+}
+
+form .btn-primary:active:not(:disabled),
+form button.btn-primary:active:not(:disabled) {
+  color: var(--primary-foreground) !important;
 }
 
 .staggered-item {

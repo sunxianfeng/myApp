@@ -26,7 +26,7 @@ class OCRIntegrationService:
                            file_url: str = None, file_size: int = None,
                            file_type: str = None) -> Dict:
         """
-        处理文档图片的完整流程：OCR识别 -> 数据库存储
+        处理文档图片的完整流程:OCR识别 -> 数据库存储
         
         Args:
             image_paths: 图片路径列表

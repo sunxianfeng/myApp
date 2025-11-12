@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR File Upload</title>
+    <link rel="stylesheet" href="ocr_theme_1.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Merriweather&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: var(--font-sans);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--card);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            animation: fadeIn 600ms ease-out;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--muted-foreground);
+        }
+
+        .upload-section {
+            padding: 3rem;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--primary);
+            background-color: var(--accent);
+        }
+
+        .drop-zone-icon {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .drop-zone p {
+            font-size: 1.1rem;
+            color: var(--muted-foreground);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+            border: 1px solid var(--border);
+            margin-left: 1rem;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--accent);
+        }
+
+        .file-queue {
+            padding: 0 3rem 2rem;
+        }
+        
+        .file-queue h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            animation: slideIn 400ms ease-out;
+        }
+        
+        .file-preview {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            background-color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        
+        .file-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+        }
+
+        .file-details {
+            flex-grow: 1;
+        }
+        
+        .file-details p {
+            font-weight: 500;
+        }
+        
+        .file-details span {
+            font-size: 0.9rem;
+            color: var(--muted-foreground);
+        }
+
+        .progress-bar {
+            width: 100px;
+            height: 8px;
+            background-color: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 1rem;
+        }
+        
+        .progress {
+            width: 60%; /* Example progress */
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.5s ease;
+        }
+
+        .remove-btn {
+            cursor: pointer;
+            color: var(--muted-foreground);
+            transition: color 0.2s ease;
+        }
+        
+        .remove-btn:hover {
+            color: var(--destructive);
+        }
+
+        .action-bar {
+            padding: 2rem 3rem;
+            background-color: var(--secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .language-select select {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background-color: var(--card);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>OCR File Upload</h1>
+        <p>Upload images and documents to extract text.</p>
+    </div>
+
+    <div class="upload-section">
+        <div id="drop-zone" class="drop-zone">
+            <div class="drop-zone-icon">
+                <i data-lucide="upload-cloud" style="width: 48px; height: 48px;"></i>
+            </div>
+            <p>Drag & drop files here, or click to select</p>
+            <div>
+                <button id="select-images" class="btn btn-secondary">
+                    <i data-lucide="image" class="mr-2 h-5 w-5"></i> Select Images
+                </button>
+                <button id="select-docs" class="btn btn-secondary">
+                    <i data-lucide="file-text" class="mr-2 h-5 w-5"></i> Select Documents
+                </button>
+            </div>
+        </div>
+        <input type="file" id="file-input-images" class="hidden" multiple accept="image/*">
+        <input type="file" id="file-input-docs" class="hidden" multiple accept=".pdf,.doc,.docx,.zip">
+    </div>
+
+    <div id="file-queue" class="file-queue hidden">
+        <h3>File Queue</h3>
+        <div id="file-list"></div>
+    </div>
+
+    <div class="action-bar">
+        <div class="language-select">
+            <label for="lang" class="mr-2 font-medium">Language:</label>
+            <select id="lang" name="lang">
+                <option value="auto">Auto-detect</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+            </select>
+        </div>
+        <button class="btn btn-primary">
+            <i data-lucide="arrow-up-circle" class="mr-2 h-5 w-5"></i> Upload and Process
+        </button>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    const dropZone = document.getElementById('drop-zone');
+    const fileInputImages = document.getElementById('file-input-images');
+    const fileInputDocs = document.getElementById('file-input-docs');
+    const selectImagesBtn = document.getElementById('select-images');
+    const selectDocsBtn = document.getElementById('select-docs');
+    const fileQueue = document.getElementById('file-queue');
+    const fileList = document.getElementById('file-list');
+
+    // Button clicks to trigger file inputs
+    selectImagesBtn.addEventListener('click', () => fileInputImages.click());
+    selectDocsBtn.addEventListener('click', () => fileInputDocs.click());
+
+    // Drag and drop events
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+    
+    // Handle file selection from inputs
+    fileInputImages.addEventListener('change', (e) => handleFiles(e.target.files));
+    fileInputDocs.addEventListener('change', (e) => handleFiles(e.target.files));
+
+    function handleFiles(files) {
+        if (files.length === 0) return;
+        fileQueue.classList.remove('hidden');
+        
+        for (const file of files) {
+            addFileToList(file);
+        }
+    }
+
+    function addFileToList(file) {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+
+        const isImage = file.type.startsWith('image/');
+        const icon = isImage ? '' : getFileIcon(file.name);
+        
+        const preview = document.createElement('div');
+        preview.className = 'file-preview';
+        
+        if (isImage) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.onload = () => URL.revokeObjectURL(img.src);
+            preview.appendChild(img);
+        } else {
+            preview.innerHTML = `<i data-lucide="${icon}" style="color: var(--muted-foreground);"></i>`;
+        }
+
+        const details = document.createElement('div');
+        details.className = 'file-details';
+        details.innerHTML = `<p>${file.name}</p><span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>`;
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        progressBar.innerHTML = '<div class="progress" style="width: 0%;"></div>'; // Start with 0%
+
+        const removeBtn = document.createElement('div');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = '<i data-lucide="x-circle"></i>';
+        removeBtn.addEventListener('click', () => {
+            fileItem.remove();
+            if (fileList.children.length === 0) {
+                fileQueue.classList.add('hidden');
+            }
+        });
+
+        fileItem.appendChild(preview);
+        fileItem.appendChild(details);
+        fileItem.appendChild(progressBar);
+        fileItem.appendChild(removeBtn);
+        
+        fileList.appendChild(fileItem);
+        lucide.createIcons();
+    }
+    
+    function getFileIcon(fileName) {
+        const extension = fileName.split('.').pop().toLowerCase();
+        if (extension === 'pdf') return 'file-text';
+        if (['doc', 'docx'].includes(extension)) return 'file-text';
+        if (['zip', 'rar', '7z'].includes(extension)) return 'file-archive';
+        return 'file';
+    }
+
+</script>
+
+</body>
+</html>

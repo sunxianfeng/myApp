@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { uploadImageForOCR, batchUploadImagesForOCR } from '../services/api'
+import '../styles/upload.css'
 
 const Upload = () => {
   const [uploadMode, setUploadMode] = useState('single') // single | batch
@@ -8,15 +9,24 @@ const Upload = () => {
   const [error, setError] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [dragActive, setDragActive] = useState(false)
+  const [selectedLanguage, setSelectedLanguage] = useState('auto')
+  const [imageClicked, setImageClicked] = useState(false)
+  const [docsClicked, setDocsClicked] = useState(false)
   const fileInputRef = useRef(null)
+  const imageInputRef = useRef(null)
+  const docsInputRef = useRef(null)
 
   const handleFileSelect = (files) => {
     const validFiles = Array.from(files).filter(file => 
-      file.type.startsWith('image/')
+      file.type.startsWith('image/') || 
+      file.type === 'application/pdf' ||
+      file.type === 'application/msword' ||
+      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      file.type === 'application/zip'
     )
     
     if (validFiles.length === 0) {
-      setError('请选择图片文件')
+      setError('请选择支持的文件格式')
       return
     }
     
@@ -30,7 +40,7 @@ const Upload = () => {
       return
     }
     
-    setSelectedFiles(validFiles)
+    setSelectedFiles(prev => [...prev, ...validFiles])
     setError(null)
   }
 
@@ -53,6 +63,10 @@ const Upload = () => {
     handleFileSelect(e.target.files)
   }
 
+  const removeFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleUpload = async () => {
     if (selectedFiles.length === 0) {
       setError('请先选择文件')
@@ -73,9 +87,6 @@ const Upload = () => {
       
       setUploadResult(result)
       setSelectedFiles([])
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
     } catch (err) {
       setError(err.message || '上传失败')
     } finally {
@@ -91,173 +102,187 @@ const Upload = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
+  const getFileIcon = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase()
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'].includes(extension)) return 'image'
+    if (extension === 'pdf') return 'file-text'
+    if (['doc', 'docx'].includes(extension)) return 'file-text'
+    if (['zip', 'rar', '7z'].includes(extension)) return 'file-archive'
+    return 'file'
+  }
+
+  const isImage = (file) => {
+    return file.type.startsWith('image/')
+  }
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">图片OCR识别</h1>
-      
-      {/* 上传模式选择 */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-6">
-          <div className="flex space-x-4">
+    <div className="upload-page">
+      <div className="upload-container">
+        <div className="upload-header">
+          <h1>OCR File Upload</h1>
+          <p>Upload images and documents to extract text.</p>
+        </div>
+
+        {/* Mode Selection */}
+        <div className="upload-section">
+          <div className="mode-selector">
             <button
               onClick={() => setUploadMode('single')}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                uploadMode === 'single'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`mode-btn ${uploadMode === 'single' ? 'active' : ''}`}
             >
               单文件上传
             </button>
             <button
               onClick={() => setUploadMode('batch')}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                uploadMode === 'batch'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`mode-btn ${uploadMode === 'batch' ? 'active' : ''}`}
             >
               批量上传
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* 文件上传区域 */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-6">
-          <div
-            className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-              dragActive
-                ? 'border-blue-400 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
-            }`}
+          {/* Drop Zone */}
+          <div 
+            className={`drop-zone ${dragActive ? 'drag-over' : ''}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
           >
-            <div className="space-y-4">
-              <div className="mx-auto h-12 w-12 text-gray-400">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 48 48">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-lg text-gray-900">
-                  拖拽图片到此处，或点击选择文件
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  支持 JPG, PNG, BMP, TIFF, WEBP 格式，最大10MB
-                  {uploadMode === 'batch' && '，最多10个文件'}
-                </p>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple={uploadMode === 'batch'}
-                accept="image/*"
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
+            <div className="drop-zone-icon">
+              <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <p>Drag & drop files here, or click to select</p>
+            <div>
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="select-btn"
+                data-clicked={imageClicked}
+                onClick={() => {
+                  setImageClicked(true)
+                  imageInputRef.current?.click()
+                }}
               >
-                选择文件
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Select Images
+              </button>
+              <button
+                className="select-btn"
+                data-clicked={docsClicked}
+                onClick={() => {
+                  setDocsClicked(true)
+                  docsInputRef.current?.click()
+                }}
+              >
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Select Documents
               </button>
             </div>
           </div>
-
-          {/* 已选择文件列表 */}
-          {selectedFiles.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">已选择文件：</h3>
-              <div className="space-y-2">
-                {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
-                        <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                        <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setSelectedFiles(selectedFiles.filter((_, i) => i !== index))
-                      }}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 上传按钮 */}
-          {selectedFiles.length > 0 && (
-            <div className="mt-6">
-              <button
-                onClick={handleUpload}
-                disabled={isUploading}
-                className={`w-full px-4 py-3 rounded-lg font-medium ${
-                  isUploading
-                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {isUploading ? '识别中...' : '开始OCR识别'}
-              </button>
-            </div>
-          )}
-
-          {/* 错误信息 */}
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700">{error}</p>
-            </div>
-          )}
+          
+          <input
+            ref={imageInputRef}
+            type="file"
+            multiple={uploadMode === 'batch'}
+            accept="image/*"
+            onChange={handleFileInputChange}
+            className="hidden"
+          />
+          <input
+            ref={docsInputRef}
+            type="file"
+            multiple={uploadMode === 'batch'}
+            accept=".pdf,.doc,.docx,.zip"
+            onChange={handleFileInputChange}
+            className="hidden"
+          />
         </div>
+
+        {/* File Queue */}
+        {selectedFiles.length > 0 && (
+          <div className="file-queue">
+            <h3>File Queue</h3>
+            {selectedFiles.map((file, index) => (
+              <div key={index} className="file-item">
+                <div className="file-preview">
+                  {isImage(file) ? (
+                    <img src={URL.createObjectURL(file)} alt={file.name} />
+                  ) : (
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="file-details">
+                  <p>{file.name}</p>
+                  <span>{formatFileSize(file.size)}</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress" style={{width: isUploading ? '60%' : '0%'}}></div>
+                </div>
+                <div className="remove-btn" onClick={() => removeFile(index)}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Action Bar */}
+        <div className="action-bar">
+          <button 
+            onClick={handleUpload}
+            disabled={isUploading || selectedFiles.length === 0}
+            className="btn btn-primary"
+            style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', border: '1px solid var(--primary)', width: '33.33%', maxWidth: '200px'}}
+          >
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            {isUploading ? 'Processing...' : 'Upload and Process'}
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
       </div>
 
-      {/* 识别结果 */}
+      {/* Results */}
       {uploadResult && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">识别结果</h2>
+        <div className="results-container">
+          <div className="results-header">
+            <h2>识别结果</h2>
           </div>
-          <div className="p-6">
+          <div className="results-content">
             <div className="mb-4">
-              <p className="text-sm text-gray-600">
+              <p style={{color: 'var(--muted-foreground)'}}>
                 {uploadResult.message}
               </p>
               {uploadResult.data && (
-                <p className="text-sm text-gray-600 mt-1">
+                <p style={{color: 'var(--muted-foreground)', marginTop: '0.5rem'}}>
                   共识别到 {uploadResult.data.total_questions || 0} 道题目
                 </p>
               )}
             </div>
 
             {uploadResult.data?.questions && uploadResult.data.questions.length > 0 && (
-              <div className="space-y-6">
+              <div>
                 {uploadResult.data.questions.map((question, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-lg font-medium text-gray-900">
+                  <div key={index} className="question-item">
+                    <div className="question-header">
+                      <h3 className="question-number">
                         第{question.number}题
                       </h3>
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                      <span className="question-type">
                         {question.type === 'multiple_choice' ? '选择题' :
                          question.type === 'fill_blank' ? '填空题' :
                          question.type === 'true_false' ? '判断题' :
@@ -265,21 +290,23 @@ const Upload = () => {
                       </span>
                     </div>
                     
-                    <div className="mb-3">
-                      <p className="text-gray-800">{question.content}</p>
+                    <div className="question-content">
+                      {question.content}
                       {question.full_content && question.full_content !== question.content && (
-                        <p className="text-gray-600 mt-2 text-sm">{question.full_content}</p>
+                        <div style={{marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--muted-foreground)'}}>
+                          {question.full_content}
+                        </div>
                       )}
                     </div>
 
                     {question.options && question.options.length > 0 && (
-                      <div className="space-y-2">
+                      <div className="question-options">
                         {question.options.map((option, optIndex) => (
-                          <div key={optIndex} className="flex items-center space-x-2">
-                            <span className="font-medium text-gray-700">
+                          <div key={optIndex} className="option-item">
+                            <span className="option-label">
                               {option.label}.
                             </span>
-                            <span className="text-gray-800">{option.content}</span>
+                            <span className="option-text">{option.content}</span>
                           </div>
                         ))}
                       </div>
@@ -290,26 +317,22 @@ const Upload = () => {
             )}
 
             {uploadResult.data?.results && (
-              <div className="space-y-4">
+              <div>
                 {uploadResult.data.results.map((result, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-gray-900">{result.filename}</h3>
-                      <span className={`px-2 py-1 text-xs font-medium rounded ${
-                        result.success
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                  <div key={index} className="question-item">
+                    <div className="question-header">
+                      <h3 className="question-number">{result.filename}</h3>
+                      <span className={`question-type ${result.success ? '' : 'bg-red-100 text-red-800'}`}>
                         {result.success ? '成功' : '失败'}
                       </span>
                     </div>
                     
                     {result.success ? (
-                      <p className="text-sm text-gray-600">
+                      <p style={{color: 'var(--muted-foreground)'}}>
                         识别到 {result.total_questions} 道题目
                       </p>
                     ) : (
-                      <p className="text-sm text-red-600">{result.error}</p>
+                      <p style={{color: 'var(--destructive)'}}>{result.error}</p>
                     )}
                   </div>
                 ))}
@@ -318,22 +341,6 @@ const Upload = () => {
           </div>
         </div>
       )}
-
-      {/* 上传历史 */}
-      <div className="mt-6 bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">使用说明</h2>
-        </div>
-        <div className="p-6">
-          <div className="space-y-3 text-sm text-gray-600">
-            <p>• 支持的图片格式：JPG、PNG、BMP、TIFF、WEBP</p>
-            <p>• 单个文件大小限制：10MB</p>
-            <p>• 批量上传最多支持：10个文件</p>
-            <p>• 系统会自动识别题目类型：选择题、填空题、判断题、解答题</p>
-            <p>• 识别结果可以手动编辑和保存</p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
