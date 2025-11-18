@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard V4 - Minimal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="dashboard_theme.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        body {
+            background-color: var(--background);
+            font-family: var(--font-sans);
+            color: var(--foreground);
+        }
+        .card {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .sidebar {
+            background-color: var(--background);
+        }
+        .sidebar-item {
+            transition: background-color 0.2s ease;
+        }
+        .sidebar-item:hover {
+            background-color: var(--secondary);
+        }
+        .sidebar-item.active {
+            background-color: var(--sidebar-primary);
+            color: var(--sidebar-primary-foreground);
+            font-weight: 600;
+            border-radius: var(--radius);
+        }
+        .quick-action-item {
+            transition: background-color 0.2s ease;
+        }
+        .quick-action-item:hover {
+            background-color: var(--secondary);
+        }
+        .btn {
+            transition: transform 0.1s ease;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 50ms; }
+        .stagger-2 { animation-delay: 100ms; }
+        .stagger-3 { animation-delay: 150ms; }
+
+    </style>
+</head>
+<body class="flex text-sm">
+
+    <!-- Sidebar -->
+    <aside class="sidebar w-60 h-screen p-4 flex flex-col justify-between">
+        <div>
+            <div class="flex items-center mb-10 space-x-3">
+                <div class="w-9 h-9 flex items-center justify-center border-2 border-gray-800 rounded-lg flex-shrink-0">
+                    <div class="w-3.5 h-3.5 bg-gray-800 rounded-full"></div>
+                </div>
+                <h1 class="text-lg font-bold text-gray-800">我的应用</h1>
+            </div>
+            <nav class="flex flex-col space-y-2">
+                <a href="#" class="sidebar-item active flex items-center p-3">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3"></i>
+                    仪表板
+                </a>
+                <a href="#" class="sidebar-item flex items-center p-3 rounded-lg text-gray-600">
+                    <i data-lucide="file-text" class="w-4 h-4 mr-3"></i>
+                    题目管理
+                </a>
+                <a href="#" class="sidebar-item flex items-center p-3 rounded-lg text-gray-600">
+                    <i data-lucide="layout-template" class="w-4 h-4 mr-3"></i>
+                    模版管理
+                </a>
+                <a href="#" class="sidebar-item flex items-center p-3 rounded-lg text-gray-600">
+                    <i data-lucide="upload-cloud" class="w-4 h-4 mr-3"></i>
+                    文档上传
+                </a>
+            </nav>
+        </div>
+        <div>
+             <a href="#" class="sidebar-item flex items-center p-3 rounded-lg text-gray-600">
+                <i data-lucide="settings" class="w-4 h-4 mr-3"></i>
+                设置
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 bg-white rounded-2xl m-2">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">仪表板</h2>
+                <p class="text-gray-500">欢迎回来, Username!</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 40px;">
+                <div style="position: relative; width: 256px;">
+                    <i data-lucide="search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: rgb(156, 163, 175);"></i>
+                    <input type="text" placeholder="搜索..." style="width: 100%; box-sizing: border-box; padding-left: 44px; padding-right: 16px; padding-top: 8px; padding-bottom: 8px; border: 1px solid rgb(209, 213, 219); border-radius: 8px; background-color: rgb(249, 250, 251); outline: none;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://i.pravatar.cc/32" alt="User Avatar" class="w-8 h-8 rounded-full">
+                    <div>
+                        <p class="font-semibold text-gray-800">Username</p>
+                        <p class="text-xs text-gray-500">高级会员</p>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Core Data Section -->
+        <div class="card p-6 mb-8 fade-in-up stagger-1">
+            <h3 class="text-base font-semibold mb-5 flex items-center text-gray-800">
+                <i data-lucide="database" class="w-4 h-4 mr-2"></i>
+                核心数据
+            </h3>
+            <div class="grid grid-cols-4 divide-x divide-gray-200">
+                <!-- Metric 1: 总题目数 -->
+                <div class="px-6 flex items-center space-x-3">
+                    <i data-lucide="file-text" class="w-7 h-7 text-gray-400"></i>
+                    <div>
+                        <p class="text-xs text-gray-500">总题目数</p>
+                        <p class="text-xl font-semibold text-gray-800">89</p>
+                    </div>
+                </div>
+                <!-- Metric 2: 模板数量 -->
+                <div class="px-6 flex items-center space-x-3">
+                    <i data-lucide="layout-template" class="w-7 h-7 text-gray-400"></i>
+                    <div>
+                        <p class="text-xs text-gray-500">模板数量</p>
+                        <p class="text-xl font-semibold text-gray-800">12</p>
+                    </div>
+                </div>
+                <!-- Metric 3: 生成试卷 -->
+                <div class="px-6 flex items-center space-x-3">
+                    <i data-lucide="file-plus-2" class="w-7 h-7 text-gray-400"></i>
+                    <div>
+                        <p class="text-xs text-gray-500">生成试卷</p>
+                        <p class="text-xl font-semibold text-gray-800">25</p>
+                    </div>
+                </div>
+                <!-- Metric 4: 上传文档 -->
+                <div class="px-6 flex items-center space-x-3">
+                    <i data-lucide="upload-cloud" class="w-7 h-7 text-gray-400"></i>
+                    <div>
+                        <p class="text-xs text-gray-500">上传文档</p>
+                        <p class="text-xl font-semibold text-gray-800">4</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="card p-6 fade-in-up stagger-2">
+            <h3 class="text-base font-semibold mb-5 flex items-center text-gray-800">
+                <i data-lucide="zap" class="w-4 h-4 mr-2"></i>
+                快速操作
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Action 1: Upload Document -->
+                <a href="#" class="btn border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-500 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">
+                    <i data-lucide="file-up" class="w-8 h-8 mb-3"></i>
+                    <span class="font-semibold">上传新文档</span>
+                </a>
+                <!-- Action 2: Create Template -->
+                <a href="#" class="btn border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-500 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">
+                    <i data-lucide="plus-square" class="w-8 h-8 mb-3"></i>
+                    <span class="font-semibold">创建新模板</span>
+                </a>
+                <!-- Action 3: Generate Exam -->
+                <a href="#" class="btn border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-500 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">
+                    <i data-lucide="file-plus-2" class="w-8 h-8 mb-3"></i>
+                    <span class="font-semibold">生成试卷</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

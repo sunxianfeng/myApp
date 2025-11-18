@@ -1,0 +1,277 @@
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
+
+// API 配置
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+
+// 创建 axios 实例
+const api: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// 请求拦截器
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    // 在客户端获取 token
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token')
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// 响应拦截器
+api.interceptors.response.use(
+  (response: AxiosResponse) => {
+    return response.data
+  },
+  (error) => {
+    // 处理 401 未授权错误
+    if (error.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
+    }
+    
+    // 处理网络错误
+    if (!error.response) {
+      console.error('Network Error:', error.message)
+      return Promise.reject(new Error('网络连接失败，请检查网络设置'))
+    }
+    
+    // 处理其他错误
+    const errorMessage = error.response?.data?.message || error.message || '请求失败'
+    return Promise.reject(new Error(errorMessage))
+  }
+)
+
+// OCR 相关 API
+export const uploadImageForOCR = async (file: File): Promise<any> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  return await api.post('/v1/ocr/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+export const batchUploadImagesForOCR = async (files: File[]): Promise<any> => {
+  const formData = new FormData()
+  files.forEach(file => {
+    formData.append('files', file)
+  })
+  
+  return await api.post('/v1/ocr/batch-upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+export const extractTextFromImage = async (fileId: string): Promise<any> => {
+  return await api.get(`/v1/ocr/text-extract/${fileId}`)
+}
+
+export const getSupportedFormats = async (): Promise<any> => {
+  return await api.get('/v1/ocr/supported-formats')
+}
+
+// 认证相关 API
+export const login = async (credentials: { email: string; password: string }): Promise<any> => {
+  return await api.post('/v1/auth/login', credentials)
+}
+
+export const register = async (userData: { 
+  email: string; 
+  password: string; 
+  name: string 
+}): Promise<any> => {
+  return await api.post('/v1/auth/register', userData)
+}
+
+export const logout = async (): Promise<any> => {
+  return await api.post('/v1/auth/logout')
+}
+
+export const refreshToken = async (): Promise<any> => {
+  return await api.post('/v1/auth/refresh')
+}
+
+export const getCurrentUser = async (): Promise<any> => {
+  return await api.get('/v1/auth/me')
+}
+
+// 问题管理相关 API
+export const getQuestions = async (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+}): Promise<any> => {
+  return await api.get('/v1/questions', { params })
+}
+
+export const getQuestion = async (id: string): Promise<any> => {
+  return await api.get(`/v1/questions/${id}`)
+}
+
+export const createQuestion = async (questionData: any): Promise<any> => {
+  return await api.post('/v1/questions', questionData)
+}
+
+export const updateQuestion = async (id: string, questionData: any): Promise<any> => {
+  return await api.put(`/v1/questions/${id}`, questionData)
+}
+
+export const deleteQuestion = async (id: string): Promise<any> => {
+  return await api.delete(`/v1/questions/${id}`)
+}
+
+export const batchDeleteQuestions = async (ids: string[]): Promise<any> => {
+  return await api.post('/v1/questions/batch-delete', { ids })
+}
+
+// 模板管理相关 API
+export const getTemplates = async (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<any> => {
+  return await api.get('/v1/templates', { params })
+}
+
+export const getTemplate = async (id: string): Promise<any> => {
+  return await api.get(`/v1/templates/${id}`)
+}
+
+export const createTemplate = async (templateData: any): Promise<any> => {
+  return await api.post('/v1/templates', templateData)
+}
+
+export const updateTemplate = async (id: string, templateData: any): Promise<any> => {
+  return await api.put(`/v1/templates/${id}`, templateData)
+}
+
+export const deleteTemplate = async (id: string): Promise<any> => {
+  return await api.delete(`/v1/templates/${id}`)
+}
+
+export const applyTemplate = async (templateId: string, questionIds: string[]): Promise<any> => {
+  return await api.post(`/v1/templates/${templateId}/apply`, { questionIds })
+}
+
+// 文档管理相关 API
+export const getDocuments = async (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<any> => {
+  return await api.get('/v1/documents', { params })
+}
+
+export const getDocument = async (id: string): Promise<any> => {
+  return await api.get(`/v1/documents/${id}`)
+}
+
+export const createDocument = async (documentData: any): Promise<any> => {
+  return await api.post('/v1/documents', documentData)
+}
+
+export const updateDocument = async (id: string, documentData: any): Promise<any> => {
+  return await api.put(`/v1/documents/${id}`, documentData)
+}
+
+export const deleteDocument = async (id: string): Promise<any> => {
+  return await api.delete(`/v1/documents/${id}`)
+}
+
+export const generateDocument = async (templateId: string, questionIds: string[]): Promise<any> => {
+  return await api.post('/v1/documents/generate', { templateId, questionIds })
+}
+
+// 统计相关 API
+export const getDashboardStats = async (): Promise<any> => {
+  return await api.get('/v1/stats/dashboard')
+}
+
+export const getQuestionStats = async (params?: {
+  period?: string;
+}): Promise<any> => {
+  return await api.get('/v1/stats/questions', { params })
+}
+
+export const getUploadStats = async (params?: {
+  period?: string;
+}): Promise<any> => {
+  return await api.get('/v1/stats/uploads', { params })
+}
+
+// 文件上传相关 API
+export const uploadFile = async (file: File, type: string = 'general'): Promise<any> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('type', type)
+  
+  return await api.post('/v1/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+export const deleteFile = async (fileId: string): Promise<any> => {
+  return await api.delete(`/v1/upload/${fileId}`)
+}
+
+export const getFileUrl = async (fileId: string): Promise<any> => {
+  return await api.get(`/v1/upload/${fileId}/url`)
+}
+
+// 导出相关 API
+export const exportQuestions = async (params: {
+  format: 'excel' | 'pdf' | 'word';
+  questionIds?: string[];
+  templateId?: string;
+}): Promise<any> => {
+  return await api.post('/v1/export/questions', params, {
+    responseType: 'blob',
+  })
+}
+
+export const exportDocument = async (documentId: string, format: 'pdf' | 'word'): Promise<any> => {
+  return await api.post(`/v1/export/document/${documentId}`, { format }, {
+    responseType: 'blob',
+  })
+}
+
+// 设置相关 API
+export const getUserSettings = async (): Promise<any> => {
+  return await api.get('/v1/settings/user')
+}
+
+export const updateUserSettings = async (settings: any): Promise<any> => {
+  return await api.put('/v1/settings/user', settings)
+}
+
+export const getSystemSettings = async (): Promise<any> => {
+  return await api.get('/v1/settings/system')
+}
+
+// 健康检查 API
+export const healthCheck = async (): Promise<any> => {
+  return await api.get('/v1/health')
+}
+
+export default api
