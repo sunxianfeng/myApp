@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useRouter } from 'next/navigation'
 import { 
   addFile, 
   removeFile, 
@@ -12,14 +13,15 @@ import {
   clearError,
   uploadFile,
   uploadFiles,
-  fetchSupportedFormats
+  fetchSupportedFormats,
+  setUploadResult,
+  clearUploadResult
 } from '@/lib/slices/uploadSlice'
 import { AppDispatch, RootState } from '@/lib/store'
 
 // Define UploadedFile interface locally since it's not exported
 interface UploadedFile {
   id: string
-  file: File
   name: string
   size: number
   type: string
@@ -34,6 +36,7 @@ interface UploadedFile {
 const Upload = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { files, isUploading, error } = useSelector((state: RootState) => state.upload)
+  const router = useRouter()
   
   const [uploadMode, setUploadMode] = useState<'single' | 'batch'>('single')
   const [dragActive, setDragActive] = useState(false)
@@ -41,7 +44,11 @@ const Upload = () => {
   const [docsClicked, setDocsClicked] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState('auto')
   const [originalFiles, setOriginalFiles] = useState<{ [key: string]: File }>({})
-  const [result, setResult] = useState<any>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+
+  useEffect(() => {
+    dispatch(clearUploadResult())
+  }, [dispatch])
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -72,17 +79,16 @@ const Upload = () => {
     }
     
     // Convert File objects to UploadedFile objects and add to Redux
-    validFiles.forEach(file => {
+    validFiles.forEach(fileObj => {
       const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
-      // Store original file for image preview
-      setOriginalFiles(prev => ({ ...prev, [id]: file }))
-      
+      // Store original File separately to avoid non-serializable Redux state
+      setOriginalFiles(prev => ({ ...prev, [id]: fileObj }))
+
       dispatch(addFile({
         id,
-        file,
-        name: file.name,
-        size: file.size,
-        type: file.type,
+        name: fileObj.name,
+        size: fileObj.size,
+        type: fileObj.type,
         status: 'pending',
         progress: 0,
         uploadedAt: new Date().toISOString(),
@@ -132,6 +138,8 @@ const Upload = () => {
       return
     }
 
+    setIsAnalyzing(true)
+
     try {
       // 模拟 API 调用
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -155,10 +163,13 @@ const Upload = () => {
         }
       }
       
-      setResult(mockResult)
+      dispatch(setUploadResult(mockResult))
       dispatch(clearFiles())
+      router.push('/app/upload/result')
     } catch (err: any) {
       alert(err.message || '上传失败')
+    } finally {
+      setIsAnalyzing(false)
     }
   }
 
@@ -182,6 +193,8 @@ const Upload = () => {
   const isImage = (file: UploadedFile): boolean => {
     return file.type.startsWith('image/')
   }
+
+  const showProcessingIndicator = isUploading || isAnalyzing
 
   return (
     <div className="upload-page">
@@ -316,6 +329,36 @@ const Upload = () => {
           </button>
         </div>
 
+        {showProcessingIndicator && (
+          <div className="ocr-processing-indicator" role="status" aria-live="polite">
+            <div className="ocr-processing-visual">
+              <svg viewBox="0 0 180 180" className="ocr-processing-svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="scanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(99, 102, 241, 0.15)" />
+                    <stop offset="100%" stopColor="rgba(99, 102, 241, 0.45)" />
+                  </linearGradient>
+                </defs>
+                <rect x="30" y="30" width="120" height="120" rx="18" fill="var(--card)" stroke="var(--border)" strokeWidth="2" />
+                <rect x="50" y="55" width="60" height="8" rx="4" fill="var(--muted-foreground)" opacity="0.35" />
+                <rect x="50" y="75" width="40" height="8" rx="4" fill="var(--muted-foreground)" opacity="0.2" />
+                <rect x="50" y="95" width="70" height="8" rx="4" fill="var(--muted-foreground)" opacity="0.35" />
+                <path d="M65 120 L85 120 L75 135 Z" fill="rgba(14, 165, 233, 0.35)" />
+                <rect x="50" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.35)" />
+                <rect x="90" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.25)" />
+                <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.35" />
+              </svg>
+              <div className="ocr-scan-line" />
+              <span className="ocr-scan-corner corner-top-left" />
+              <span className="ocr-scan-corner corner-top-right" />
+              <span className="ocr-scan-corner corner-bottom-left" />
+              <span className="ocr-scan-corner corner-bottom-right" />
+            </div>
+            <p className="ocr-processing-label">图片解析中...</p>
+            <p className="ocr-processing-subtext">我们正在为您解析图片内容，请稍候</p>
+          </div>
+        )}
+
         {/* Error Message */}
         {error && (
           <div className="error-message">
@@ -324,91 +367,6 @@ const Upload = () => {
         )}
       </div>
 
-      {/* Results */}
-      {result && (
-        <div className="results-container">
-          <div className="results-header">
-            <h2>识别结果</h2>
-          </div>
-          <div className="results-content">
-            <div className="mb-4">
-              <p style={{color: 'var(--muted-foreground)'}}>
-                {result.message}
-              </p>
-              {result.data && (
-                <p style={{color: 'var(--muted-foreground)', marginTop: '0.5rem'}}>
-                  共识别到 {result.data.total_questions || 0} 道题目
-                </p>
-              )}
-            </div>
-
-            {result.data?.questions && result.data.questions.length > 0 && (
-              <div>
-                {result.data.questions.map((question: any, index: number) => (
-                  <div key={index} className="question-item">
-                    <div className="question-header">
-                      <h3 className="question-number">
-                        第{question.number}题
-                      </h3>
-                      <span className="question-type">
-                        {question.type === 'multiple_choice' ? '选择题' :
-                         question.type === 'fill_blank' ? '填空题' :
-                         question.type === 'true_false' ? '判断题' :
-                         question.type === 'essay' ? '解答题' : '其他'}
-                      </span>
-                    </div>
-                    
-                    <div className="question-content">
-                      {question.content}
-                      {question.full_content && question.full_content !== question.content && (
-                        <div style={{marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--muted-foreground)'}}>
-                          {question.full_content}
-                        </div>
-                      )}
-                    </div>
-
-                    {question.options && question.options.length > 0 && (
-                      <div className="question-options">
-                        {question.options.map((option: any, optIndex: number) => (
-                          <div key={optIndex} className="option-item">
-                            <span className="option-label">
-                              {option.label}.
-                            </span>
-                            <span className="option-text">{option.content}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {result.data?.results && (
-              <div>
-                {result.data.results.map((resultItem: any, index: number) => (
-                  <div key={index} className="question-item">
-                    <div className="question-header">
-                      <h3 className="question-number">{resultItem.filename}</h3>
-                      <span className={`question-type ${resultItem.success ? '' : 'bg-red-100 text-red-800'}`}>
-                        {resultItem.success ? '成功' : '失败'}
-                      </span>
-                    </div>
-                    
-                    {resultItem.success ? (
-                      <p style={{color: 'var(--muted-foreground)'}}>
-                        识别到 {resultItem.total_questions} 道题目
-                      </p>
-                    ) : (
-                      <p style={{color: 'var(--destructive)'}}>{resultItem.error}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

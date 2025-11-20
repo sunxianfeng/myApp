@@ -15,7 +15,8 @@ from app.services.question_service import get_question_service
 from app.schemas.question import (
     QuestionResponse, QuestionUpdate, QuestionSearchRequest, QuestionListResponse,
     DocumentResponse, OCRProcessRequest, OCRProcessResponse,
-    ProcessingStatistics, QuestionVerificationRequest, APIResponse
+        ProcessingStatistics, QuestionVerificationRequest, APIResponse,
+        QuestionBulkCreateRequest, QuestionBulkCreateResponse, QuestionCreate
 )
 from app.utils.auth import get_current_user
 from app.models.user import User
@@ -384,4 +385,69 @@ async def get_document_statistics(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get statistics: {str(e)}"
+        )
+
+@router.post("/bulk-create", response_model=QuestionBulkCreateResponse)
+async def bulk_create_questions(
+    request: QuestionBulkCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    批量创建题目（用户在前端选择并纠正后提交）
+    注意：与 OCR 自动写入不同，此接口只写入用户确认的题目。
+    """
+    try:
+        question_service = get_question_service(db)
+
+        # 创建文档记录（标记为 completed 以表示用户已确认）
+        document = question_service.create_document(
+            title=request.document_title,
+            filename=request.filename,
+            file_type=request.file_type,
+            file_size=request.file_size,
+            uploaded_by=str(current_user.id)
+        )
+
+        # 将前端题目转换成 OCR 结构字典以复用 create_questions_from_ocr
+        ocr_style_questions = []
+        for q in request.questions:
+            ocr_style_questions.append({
+                'number': q.number,
+                'content': q.content,
+                'full_content': q.full_content or q.content,
+                'type': q.question_type,
+                'options': [{'label': opt.label, 'content': opt.content} for opt in (q.options or [])],
+                'confidence': q.ocr_confidence if hasattr(q, 'ocr_confidence') else 1.0,
+            })
+
+        created_questions = question_service.create_questions_from_ocr(
+            ocr_questions=ocr_style_questions,
+            document_id=str(document.id),
+            created_by=str(current_user.id)
+        )
+
+        # 更新文档状态
+        question_service.update_document_status(
+            document_id=str(document.id),
+            status='completed',
+            total_questions=len(created_questions),
+            processed_questions=len(created_questions)
+        )
+
+        return QuestionBulkCreateResponse(
+            success=True,
+            document_id=str(document.id),
+            created_count=len(created_questions),
+            questions=[QuestionResponse.from_orm(q) for q in created_questions],
+            message='批量创建题目成功'
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to bulk create questions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to bulk create questions: {str(e)}"
         )

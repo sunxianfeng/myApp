@@ -9,7 +9,6 @@ import type { OCRUploadResponse, ExtractedTextResponse, SupportedFormatsResponse
 
 interface UploadedFile {
   id: string
-  file: File
   name: string
   size: number
   type: string
@@ -31,6 +30,7 @@ interface UploadState {
   totalProgress: number
   error: string | null
   batchMode: boolean
+  latestResult: any | null
 }
 
 const initialState: UploadState = {
@@ -43,6 +43,7 @@ const initialState: UploadState = {
   totalProgress: 0,
   error: null,
   batchMode: false,
+  latestResult: null,
 }
 
 // 获取支持的文件格式
@@ -67,7 +68,6 @@ export const uploadFile = createAsyncThunk(
       const uploadId = Date.now().toString()
       dispatch(addFile({
         id: uploadId,
-        file,
         name: file.name,
         size: file.size,
         type: file.type,
@@ -106,7 +106,6 @@ export const uploadFiles = createAsyncThunk(
         const uploadId = Date.now().toString() + Math.random().toString(36).substr(2, 9)
         dispatch(addFile({
           id: uploadId,
-          file,
           name: file.name,
           size: file.size,
           type: file.type,
@@ -263,6 +262,15 @@ const uploadSlice = createSlice({
       state.totalProgress = 0
       state.error = null
       state.batchMode = false
+      state.latestResult = null
+    },
+
+    setUploadResult: (state, action: PayloadAction<any>) => {
+      state.latestResult = action.payload
+    },
+
+    clearUploadResult: (state) => {
+      state.latestResult = null
     },
   },
   extraReducers: (builder) => {
@@ -360,6 +368,8 @@ export const {
   clearFiles,
   clearError,
   resetUpload,
+  setUploadResult,
+  clearUploadResult,
 } = uploadSlice.actions
 
 // 选择器
@@ -371,5 +381,6 @@ export const selectTotalProgress = (state: { upload: UploadState }) => state.upl
 export const selectUploadError = (state: { upload: UploadState }) => state.upload.error
 export const selectSupportedFormats = (state: { upload: UploadState }) => state.upload.supportedFormats
 export const selectBatchMode = (state: { upload: UploadState }) => state.upload.batchMode
+export const selectUploadResult = (state: { upload: UploadState }) => state.upload.latestResult
 
 export default uploadSlice.reducer

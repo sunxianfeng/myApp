@@ -143,6 +143,23 @@ export const batchDeleteQuestions = async (ids: string[]): Promise<any> => {
   return await api.post('/v1/questions/batch-delete', { ids })
 }
 
+// 批量创建题目（用户确认后提交）
+export const bulkCreateQuestions = async (payload: {
+  document_title: string;
+  filename: string;
+  file_type?: string;
+  file_size?: number;
+  questions: Array<{
+    number: number;
+    content: string;
+    full_content?: string;
+    question_type: string;
+    options?: Array<{ label: string; content: string }>;
+  }>;
+}): Promise<any> => {
+  return await api.post('/v1/questions/bulk-create', payload)
+}
+
 // 模板管理相关 API
 export const getTemplates = async (params?: {
   page?: number;

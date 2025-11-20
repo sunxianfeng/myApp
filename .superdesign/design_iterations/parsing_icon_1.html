@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parsing Icon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="ocr_theme_1.css">
+    <style>
+        body {
+            background-color: oklch(0.15 0.01 240);
+            color: oklch(0.98 0.01 240);
+            font-family: var(--font-sans);
+        }
+        .icon-container {
+            width: 4rem; /* 64px */
+            height: 4rem; /* 64px */
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+
+    <div class="flex flex-col items-center space-y-4">
+        <div class="icon-container">
+            <i data-lucide="loader-2" class="animate-spin w-full h-full"></i>
+        </div>
+        <p class="text-lg font-medium">Parsing Task...</p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>

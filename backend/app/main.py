@@ -47,9 +47,9 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth_router, prefix="/api/auth")
+app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(ocr_router, prefix="/api/v1/ocr")
-app.include_router(questions_router, prefix="/api/v1")
+app.include_router(questions_router, prefix="/api/v1/questions")
 
 @app.get("/api/v1/health")
 async def health_check():

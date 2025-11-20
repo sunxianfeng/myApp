@@ -127,13 +127,21 @@ class QuestionService:
             created_questions = []
             
             for ocr_q in ocr_questions:
+                options = ocr_q.get('options') or []
+                images = ocr_q.get('images') or {}
+                source_image_url = images.get('input') if isinstance(images, dict) else None
+                has_images = bool(images)
+
                 question = Question(
                     number=ocr_q.get('number', 0),
                     content=ocr_q.get('content', ''),
-                    full_content=ocr_q.get('full_content', ''),
-                    question_type=ocr_q.get('type', 'other'),
-                    options=ocr_q.get('options', []),
+                    full_content=ocr_q.get('full_content') or ocr_q.get('content', ''),
+                    question_type=ocr_q.get('type', 'essay'),
+                    options=options,
                     source_image_path=ocr_q.get('source_image', ''),
+                    source_image_url=source_image_url,
+                    question_images=images,
+                    has_images=has_images,
                     source_document_id=document_id,
                     ocr_confidence=str(ocr_q.get('confidence', 0)),
                     processing_status='completed',

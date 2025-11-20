@@ -11,6 +11,7 @@ yarn-error.log
 
 # Python
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 *.so
@@ -56,3 +57,5 @@ htmlcov/
 # Logs
 logs/
 *.log
+
+nul

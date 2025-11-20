@@ -202,6 +202,23 @@ class QuestionBatchUpdate(BaseModel):
     updates: QuestionUpdate = Field(..., description="更新数据")
 
 
+class QuestionBulkCreateRequest(BaseModel):
+    """批量创建题目请求模型（前端用户选择并纠正后提交）"""
+    document_title: str = Field(..., description="文档标题")
+    filename: str = Field(..., description="原始文件名")
+    file_type: Optional[str] = Field(None, description="文件类型")
+    file_size: Optional[int] = Field(None, description="文件大小")
+    questions: List[QuestionCreate] = Field(..., description="需要创建的题目列表（用户已选择并纠正）")
+
+class QuestionBulkCreateResponse(BaseModel):
+    """批量创建题目响应模型"""
+    success: bool = Field(..., description="是否成功")
+    document_id: Optional[str] = Field(None, description="创建的文档ID")
+    created_count: int = Field(..., description="创建的题目数量")
+    questions: List[QuestionResponse] = Field(..., description="创建后的题目列表")
+    message: Optional[str] = Field(None, description="操作信息")
+
+
 # 响应包装器
 class APIResponse(BaseModel):
     """通用API响应模型"""
