@@ -1,5 +1,5 @@
 # Environment variables
-.env
+#.env
 .env.local
 .env.*.local
 
@@ -37,7 +37,7 @@ build/
 .next/
 
 # Database
-*.db
+#*.db
 *.sqlite
 *.sqlite3
 
