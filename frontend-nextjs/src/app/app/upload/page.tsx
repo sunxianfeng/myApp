@@ -18,6 +18,7 @@ import {
   clearUploadResult
 } from '@/lib/slices/uploadSlice'
 import { AppDispatch, RootState } from '@/lib/store'
+import { uploadImageForOCR, batchUploadImagesForOCR } from '@/lib/api'
 
 // Define UploadedFile interface locally since it's not exported
 interface UploadedFile {
@@ -141,33 +142,55 @@ const Upload = () => {
     setIsAnalyzing(true)
 
     try {
-      // 模拟 API 调用
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      const mockResult = {
-        message: '上传成功',
-        data: {
-          total_questions: files.length * 5, // 模拟每文件5道题
-          questions: files.map((file, index) => ({
-            number: index + 1,
-            type: 'multiple_choice',
-            content: `这是从文件 ${file.name} 中识别的题目内容`,
-            full_content: `这是从文件 ${file.name} 中识别的完整题目内容，包含更多详细信息...`,
-            options: [
-              { label: 'A', content: '选项A的内容' },
-              { label: 'B', content: '选项B的内容' },
-              { label: 'C', content: '选项C的内容' },
-              { label: 'D', content: '选项D的内容' }
-            ]
-          }))
-        }
+      // Build array of actual File objects (kept in local `originalFiles`) matching Redux metadata order
+      const filesToUpload: File[] = files.map(f => originalFiles[f.id]).filter(Boolean)
+
+      if (filesToUpload.length === 0) {
+        alert('未找到需要上传的文件')
+        return
       }
-      
-      dispatch(setUploadResult(mockResult))
+
+      // Set status to uploading for UX
+      files.forEach(meta => {
+        dispatch(updateFileStatus({ id: meta.id, status: 'uploading', progress: 0 }))
+      })
+
+      let result: any = null
+
+      if (uploadMode === 'single') {
+        // uploadImageForOCR expects a single File
+        const file = filesToUpload[0]
+        const response = await uploadImageForOCR(file)
+        // response already returns parsed data via api interceptor
+        result = response
+
+        // mark processed
+        files.forEach(meta => {
+          dispatch(updateFileStatus({ id: meta.id, status: 'processing', progress: 100 }))
+        })
+      } else {
+        // batch mode
+        const response = await batchUploadImagesForOCR(filesToUpload)
+        result = response
+
+        // mark processed
+        files.forEach(meta => {
+          dispatch(updateFileStatus({ id: meta.id, status: 'processing', progress: 100 }))
+        })
+      }
+
+      // Save result into Redux for result page and clear queue
+      dispatch(setUploadResult(result))
       dispatch(clearFiles())
+      setOriginalFiles({})
       router.push('/app/upload/result')
     } catch (err: any) {
-      alert(err.message || '上传失败')
+      // Try to set file-level error if possible
+      const msg = err?.message || '上传失败'
+      alert(msg)
+      files.forEach(meta => {
+        dispatch(setFileError({ id: meta.id, error: msg }))
+      })
     } finally {
       setIsAnalyzing(false)
     }

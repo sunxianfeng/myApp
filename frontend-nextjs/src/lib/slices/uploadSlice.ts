@@ -184,7 +184,25 @@ const uploadSlice = createSlice({
   initialState,
   reducers: {
     addFile: (state, action: PayloadAction<UploadedFile>) => {
-      state.files.push(action.payload)
+      // Only store serializable metadata from the payload. Some callers
+      // may include a `file` property (a File object) which is
+      // non-serializable and causes Redux Toolkit warnings. Pick the
+      // allowed fields explicitly to avoid storing the raw File.
+      const payload: any = action.payload || {}
+      const sanitized: UploadedFile = {
+        id: payload.id,
+        name: payload.name,
+        size: payload.size,
+        type: payload.type,
+        status: payload.status || 'pending',
+        progress: payload.progress ?? 0,
+        error: payload.error,
+        extractedText: payload.extractedText,
+        confidence: payload.confidence,
+        uploadedAt: payload.uploadedAt || new Date().toISOString(),
+      }
+
+      state.files.push(sanitized)
       state.batchMode = state.files.length > 1
     },
     

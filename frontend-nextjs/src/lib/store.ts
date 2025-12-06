@@ -12,7 +12,15 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+        // Ignore certain actions and state paths that may contain
+        // non-serializable File objects (e.g. browsers `File`). The
+        // upload UI stores File objects in local component state but
+        // some callers may accidentally include them in actions. We
+        // sanitize in reducers but the middleware sees the action
+        // before reducers run, so ignore this action to avoid noisy
+        // warnings while keeping the rest of the checks enabled.
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE', 'upload/addFile'],
+        ignoredPaths: ['upload.files.*.file'],
       },
     }),
 })

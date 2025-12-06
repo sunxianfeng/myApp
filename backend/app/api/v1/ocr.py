@@ -35,13 +35,13 @@ async def upload_image_for_ocr(
     file: UploadFile = File(..., description="上传的图片文件")
 ):
     """
-    上传图片文件，进行OCR文字识别和题目解析
+    上传图片文件,进行OCR文字识别和题目解析
     
     Args:
         file: 上传的图片文件
         
     Returns:
-        OCR识别结果，包括识别的题目信息
+        OCR识别结果,包括识别的题目信息
     """
     try:
         # 验证文件类型
@@ -108,7 +108,7 @@ async def batch_upload_images_for_ocr(
     files: List[UploadFile] = File(..., description="上传的图片文件列表")
 ):
     """
-    批量上传图片文件，进行OCR文字识别和题目解析
+    批量上传图片文件,进行OCR文字识别和题目解析
     
     Args:
         files: 上传的图片文件列表
@@ -191,7 +191,7 @@ async def batch_upload_images_for_ocr(
         
         return {
             "success": True,
-            "message": f"批量处理完成，成功处理 {successful_files}/{len(files)} 个文件",
+            "message": f"批量处理完成,成功处理 {successful_files}/{len(files)} 个文件",
             "data": {
                 "total_files": len(files),
                 "successful_files": successful_files,
