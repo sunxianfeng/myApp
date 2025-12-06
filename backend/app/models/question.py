@@ -23,9 +23,14 @@ class Question(Base):
     subject = Column(String(100), comment="学科分类:数学、语文、英语等")
     topic_tags = Column(JSON, comment="知识点标签,存储为JSON数组")
     
+<<<<<<< Updated upstream
     # 选择题选项与图片（JSON格式存储）
     options = Column(JSON, comment="选择题选项, JSON格式: [{label: 'A', content: '选项内容'}]")
     question_images = Column(JSON, comment="题目相关的图片/附件信息")
+=======
+    # 选择题选项(JSON格式存储)
+    options = Column(JSON, comment="选择题选项,JSON格式:[{label: 'A', content: '选项内容'}]")
+>>>>>>> Stashed changes
     correct_answer = Column(Text, comment="正确答案")
     
     # 解析和答案
@@ -38,7 +43,15 @@ class Question(Base):
     source_document_id = Column(UUID(as_uuid=True), ForeignKey('documents.id'), comment="来源文档ID")
     ocr_confidence = Column(String(10), comment="OCR识别置信度")
     
+<<<<<<< Updated upstream
     has_images = Column(Boolean, default=False, comment="是否包含图片/附件")
+=======
+    # 图片相关字段(TODO: 后续实现)
+    # TODO: 实现图片存储和管理功能
+    # question_images = Column(JSON, comment="题目中的图片信息,JSON格式存储图片URL和描述")
+    # has_images = Column(Boolean, default=False, comment="是否包含图片")
+    
+>>>>>>> Stashed changes
     # 状态和元数据
     is_verified = Column(Boolean, default=False, comment="是否已人工验证")
     is_active = Column(Boolean, default=True, comment="是否启用")
