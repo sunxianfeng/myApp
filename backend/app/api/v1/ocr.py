@@ -10,7 +10,7 @@ import aiofiles
 from pathlib import Path
 import logging
 
-from app.services.ocr import get_ocr_service
+from app.services.qwen_ocr import get_ocr_service
 from app.config import settings
 
 logger = logging.getLogger(__name__)

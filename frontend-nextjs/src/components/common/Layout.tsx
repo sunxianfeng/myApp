@@ -112,7 +112,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <h2 className="text-2xl font-bold text-gray-800">仪表板</h2>
             <p className="text-gray-500">欢迎回来, Username!</p>
           </div>
-          <div className="flex items-center gap-10">
+          <div className="flex items-center gap-20">
             {/* Search Bar */}
             <div className="relative w-80">
               <Search

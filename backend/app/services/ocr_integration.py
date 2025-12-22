@@ -7,7 +7,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from app.services.ocr import get_ocr_service
+from app.services.qwen_ocr import get_ocr_service
 from app.services.question_service import get_question_service
 
 logger = logging.getLogger(__name__)

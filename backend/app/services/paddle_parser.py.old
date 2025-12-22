@@ -1,0 +1,246 @@
+"""
+PaddleOCR Layout Result Parser
+解析 PaddleOCR 布局识别结果，提取题目和图片信息
+"""
+import re
+from typing import Any, Dict, List, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def parse_paddle_layout_result(result: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    解析 PaddleOCR 布局识别结果
+    
+    Args:
+        result: PaddleOCR API 返回的 result 字段
+        
+    Returns:
+        包含 questions 和 images 的字典:
+        {
+            "questions": [
+                {
+                    "content": "题目内容",
+                    "type": "choice|blank|essay|...",
+                    "options": [...],
+                    "position": {...},
+                    ...
+                }
+            ],
+            "images": {
+                "image_0": "base64_string",
+                ...
+            }
+        }
+    """
+    layout_results = result.get("layoutParsingResults", [])
+    if not layout_results:
+        logger.warning("No layoutParsingResults found in PaddleOCR response")
+        return {"questions": [], "images": {}}
+    
+    # 提取 OCR 文本结果
+    ocr_data = layout_results[0].get("overall_ocr_res", {})
+    texts = ocr_data.get("rec_texts", [])
+    boxes = ocr_data.get("rec_boxes", [])
+    scores = ocr_data.get("rec_scores", [])
+    
+    # 提取图片信息
+    images = _extract_images(layout_results[0])
+    
+    # 解析题目
+    questions = _parse_questions(texts, boxes, scores)
+    
+    logger.info(f"Parsed {len(questions)} questions and {len(images)} images")
+    
+    return {
+        "questions": questions,
+        "images": images
+    }
+
+
+def _extract_images(layout_result: Dict[str, Any]) -> Dict[str, str]:
+    """从布局结果中提取图片"""
+    images = {}
+    
+    # 检查是否有图片区域
+    regions = layout_result.get("regions", [])
+    for idx, region in enumerate(regions):
+        if region.get("type") == "figure" or region.get("type") == "image":
+            # 如果有 base64 编码的图片
+            image_data = region.get("image_base64") or region.get("image")
+            if image_data:
+                images[f"image_{idx}"] = image_data
+    
+    return images
+
+
+def _parse_questions(
+    texts: List[str], 
+    boxes: List[List[List[float]]], 
+    scores: List[float]
+) -> List[Dict[str, Any]]:
+    """
+    从 OCR 识别的文本中解析题目
+    
+    策略：
+    1. 查找题号模式 (1. 2. 或 1、2、等)
+    2. 将题号到下一个题号之间的文本合并为一道题
+    3. 识别题型和选项
+    """
+    if not texts:
+        return []
+    
+    questions = []
+    current_question = None
+    
+    for idx, text in enumerate(texts):
+        text = text.strip()
+        if not text:
+            continue
+            
+        bbox = boxes[idx] if idx < len(boxes) else []
+        score = scores[idx] if idx < len(scores) else 0.0
+        
+        # 检查是否是题号开头
+        question_match = re.match(r'^(\d+)[.、)]', text)
+        
+        if question_match:
+            # 保存上一道题
+            if current_question:
+                questions.append(_finalize_question(current_question))
+            
+            # 开始新题
+            question_num = question_match.group(1)
+            question_text = text[len(question_match.group(0)):].strip()
+            
+            current_question = {
+                "number": int(question_num),
+                "content": question_text,
+                "raw_texts": [text],
+                "bboxes": [bbox],
+                "scores": [score],
+                "options": []
+            }
+        elif current_question:
+            # 继续当前题目
+            current_question["raw_texts"].append(text)
+            current_question["bboxes"].append(bbox)
+            current_question["scores"].append(score)
+            
+            # 检查是否是选项 (A. B. C. D. 或 A、B、C、D、)
+            option_match = re.match(r'^([A-Z])[.、)]', text)
+            if option_match:
+                option_label = option_match.group(1)
+                option_text = text[len(option_match.group(0)):].strip()
+                current_question["options"].append({
+                    "label": option_label,
+                    "content": option_text
+                })
+            else:
+                # 将文本添加到题目内容
+                if current_question["content"]:
+                    current_question["content"] += " " + text
+                else:
+                    current_question["content"] = text
+    
+    # 保存最后一道题
+    if current_question:
+        questions.append(_finalize_question(current_question))
+    
+    return questions
+
+
+def _finalize_question(question: Dict[str, Any]) -> Dict[str, Any]:
+    """完善题目信息"""
+    # 推断题型
+    question_type = _infer_question_type(
+        question["content"], 
+        question.get("options", [])
+    )
+    
+    # 计算位置信息
+    position = _calculate_position(question.get("bboxes", []))
+    
+    # 计算平均置信度
+    scores = question.get("scores", [])
+    avg_confidence = sum(scores) / len(scores) if scores else 0.0
+    
+    return {
+        "number": question.get("number"),
+        "content": question["content"].strip(),
+        "type": question_type,
+        "options": question.get("options", []),
+        "position": position,
+        "confidence": avg_confidence,
+        "full_content": " ".join(question.get("raw_texts", [])),
+    }
+
+
+def _infer_question_type(content: str, options: List[Dict[str, str]]) -> str:
+    """根据题目内容和选项推断题型"""
+    content_lower = content.lower()
+    
+    # 有选项且有多个 -> 选择题
+    if options and len(options) >= 2:
+        # 判断单选还是多选
+        if any(keyword in content_lower for keyword in ["多选", "多项", "选出所有", "全部正确"]):
+            return "multiple_choice"
+        return "single_choice"
+    
+    # 填空题特征
+    if any(pattern in content for pattern in ["____", "（）", "()", "【】", "[]"]):
+        return "fill_blank"
+    
+    # 判断题特征
+    if any(keyword in content_lower for keyword in ["正确", "错误", "是否", "对错", "t/f", "true/false"]):
+        return "true_false"
+    
+    # 简答题/论述题特征
+    if any(keyword in content_lower for keyword in ["简述", "论述", "分析", "解释", "说明", "阐述"]):
+        return "essay"
+    
+    # 计算题特征
+    if any(keyword in content_lower for keyword in ["计算", "求", "解", "证明"]):
+        return "calculation"
+    
+    # 默认为简答题
+    return "short_answer"
+
+
+def _calculate_position(bboxes: List[List[List[float]]]) -> Optional[Dict[str, float]]:
+    """计算题目在页面中的位置"""
+    if not bboxes:
+        return None
+    
+    try:
+        all_x_coords = []
+        all_y_coords = []
+        
+        for bbox in bboxes:
+            if bbox:
+                for point in bbox:
+                    if len(point) >= 2:
+                        all_x_coords.append(point[0])
+                        all_y_coords.append(point[1])
+        
+        if not all_x_coords or not all_y_coords:
+            return None
+        
+        x_min, x_max = min(all_x_coords), max(all_x_coords)
+        y_min, y_max = min(all_y_coords), max(all_y_coords)
+        
+        return {
+            "x_min": x_min,
+            "x_max": x_max,
+            "y_min": y_min,
+            "y_max": y_max,
+            "center_x": (x_min + x_max) / 2,
+            "center_y": (y_min + y_max) / 2,
+            "width": x_max - x_min,
+            "height": y_max - y_min,
+        }
+    except (TypeError, IndexError, ValueError) as e:
+        logger.warning(f"Failed to calculate position: {e}")
+        return None
+
