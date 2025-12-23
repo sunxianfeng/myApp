@@ -4,6 +4,7 @@ from app.database import get_db
 from app.schemas.user import UserCreate, LoginRequest, LoginResponse, UserResponse
 from app.services.auth import AuthService
 from app.models.user import User
+from app.utils.auth import get_current_user
 
 router = APIRouter(tags=["authentication"])
 
@@ -57,5 +58,46 @@ async def login(
 
     return {
         "access_token": access_token,
+        "token_type": "bearer"
+    }
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get current authenticated user information
+    
+    Returns the current user's profile information based on the JWT token
+    """
+    return current_user
+
+
+@router.post("/logout")
+async def logout(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Logout user (client should remove token)
+    
+    Note: Since we're using JWT tokens, actual logout happens client-side
+    by removing the token. This endpoint is provided for compatibility.
+    """
+    return {"message": "Successfully logged out"}
+
+
+@router.post("/refresh")
+async def refresh_token(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Refresh access token
+    
+    Returns a new access token for the current user
+    """
+    new_token = AuthService.create_access_token(str(current_user.id))
+    return {
+        "access_token": new_token,
         "token_type": "bearer"
     }

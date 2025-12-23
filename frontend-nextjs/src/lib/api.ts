@@ -49,8 +49,9 @@ api.interceptors.response.use(
       return Promise.reject(new Error('网络连接失败，请检查网络设置'))
     }
     
-    // 处理其他错误
-    const errorMessage = error.response?.data?.message || error.message || '请求失败'
+    // 处理其他错误 - FastAPI returns {detail: "message"}
+    const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || '请求失败'
+    console.error(`API Error [${error.response?.status}]:`, errorMessage, error.config?.url)
     return Promise.reject(new Error(errorMessage))
   }
 )
