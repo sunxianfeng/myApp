@@ -1,39 +1,127 @@
 /* ========================================
    NEOBRUTALISM DESIGN - RESULT PAGE (ULTRA SPECIFICITY)
+   强制覆盖 globals.css 和 Tailwind
    ======================================== */
 
-/* 强制背景和字体 */
-body .result-page {
+/* 创建最高优先级层 */
+@layer neobrutalism {}
+
+/* 强制背景和字体 - 最高优先级 */
+html body .result-page,
+html body div.result-page,
+body div.result-page,
+div.result-page {
   background-color: #F8F7F5 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   color: #000000 !important;
+  padding: 2rem !important;
+  min-height: 100vh !important;
+  box-sizing: border-box !important;
 }
 
-/* 核心容器：强制厚边框和阴影 */
-body .result-page .result-hero,
-body .result-page .bulk-actions-bar,
-body .result-page .question-card,
-body .result-page .file-status-card {
+/* 重置所有全局样式对result-page的影响 */
+html body .result-page *,
+body .result-page *,
+.result-page * {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  box-sizing: border-box !important;
+}
+
+/* ========================================
+   HERO SECTION
+   ======================================== */
+html body .result-page .result-hero,
+body div.result-page .result-hero,
+div.result-page div.result-hero {
+  background-color: #FFD100 !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 12px 12px 0px 0px rgba(0,0,0,1) !important;
+  padding: 2.5rem !important;
+  margin-bottom: 2rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 1.5rem !important;
+}
+
+body .result-page .hero-left {
+  flex: 1 !important;
+  min-width: 300px !important;
+}
+
+body .result-page .hero-label {
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  margin: 0 0 0.5rem 0 !important;
+}
+
+body .result-page .result-hero h1 {
+  font-size: 2.5rem !important;
+  font-weight: 900 !important;
+  margin: 0 0 1rem 0 !important;
+  line-height: 1.2 !important;
+}
+
+body .result-page .result-hero p {
+  font-size: 1.125rem !important;
+  margin: 0 !important;
+  line-height: 1.6 !important;
+}
+
+body .result-page .highlight {
+  background-color: #000000 !important;
+  color: #FFD100 !important;
+  padding: 0.25rem 0.5rem !important;
+  font-weight: 900 !important;
+}
+
+body .result-page .result-hero-buttons {
+  display: flex !important;
+  gap: 1rem !important;
+}
+
+/* ========================================
+   BULK ACTIONS BAR
+   ======================================== */
+body .result-page .bulk-actions-bar {
+  background-color: #A3E635 !important;
   border: 4px solid #000000 !important;
   border-radius: 0px !important;
   box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
-  background-color: #FFFFFF !important;
-  opacity: 1 !important;
-  transform: none !important;
+  padding: 1.5rem !important;
+  margin-bottom: 2rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
 }
 
-/* Hero 特殊颜色 */
-body .result-page .result-hero {
-  background-color: #FFD100 !important;
-  box-shadow: 12px 12px 0px 0px rgba(0,0,0,1) !important;
+body .result-page .bulk-select-buttons {
+  display: flex !important;
+  gap: 0.75rem !important;
+  flex-wrap: wrap !important;
 }
 
-/* 批量操作条特殊颜色 */
-body .result-page .bulk-actions-bar {
-  background-color: #A3E635 !important;
+body .result-page .bulk-save-section {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
 }
 
-/* 强制按钮样式 */
+body .result-page .save-error-message {
+  color: #DC2626 !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
 body .result-page .neo-btn,
 body .result-page button.neo-btn {
   border: 4px solid #000000 !important;
@@ -46,6 +134,19 @@ body .result-page button.neo-btn {
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.05em !important;
+}
+
+body .result-page .neo-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+}
+
+body .result-page .neo-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
 }
 
 body .result-page .neo-btn-orange {
@@ -54,30 +155,81 @@ body .result-page .neo-btn-orange {
   box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
 }
 
+body .result-page .neo-btn-orange:hover {
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+}
+
 body .result-page .neo-btn-white {
   background-color: #FFFFFF !important;
   color: #000000 !important;
 }
 
-/* 纠正题目按钮 */
-body .result-page .correction-btn {
-  background-color: #FF7A00 !important;
-  color: #FFFFFF !important;
-  border: 4px solid #000000 !important;
-  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
-  font-weight: 900 !important;
-  border-radius: 0px !important;
+/* ========================================
+   QUESTIONS GRID
+   ======================================== */
+body .result-page .questions-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 1.5rem !important;
+  margin-bottom: 3rem !important;
 }
 
-/* 选中状态 */
+/* ========================================
+   QUESTION CARD
+   ======================================== */
+body .result-page .question-card {
+  background-color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  padding: 2rem !important;
+  transition: all 0.3s !important;
+}
+
 body .result-page .question-card.selected {
   border-color: #6366f1 !important;
   box-shadow: 12px 12px 0px 0px rgba(0,0,0,1) !important;
+  transform: translate(-2px, -2px) !important;
 }
 
-/* 展开/折叠按钮 */
-body .result-page .expand-btn,
-body .result-page .checkbox-btn {
+body .result-page .question-card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 1.5rem !important;
+  gap: 1rem !important;
+}
+
+body .result-page .question-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  flex-wrap: wrap !important;
+}
+
+body .result-page .question-number {
+  font-size: 1.25rem !important;
+  font-weight: 900 !important;
+  margin: 0 !important;
+}
+
+body .result-page .question-type-badge {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+body .result-page .question-controls {
+  display: flex !important;
+  gap: 0.75rem !important;
+}
+
+body .result-page .checkbox-btn,
+body .result-page .expand-btn {
   border: 4px solid #000000 !important;
   border-radius: 0px !important;
   background: #FFFFFF !important;
@@ -86,16 +238,506 @@ body .result-page .checkbox-btn {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+}
+
+body .result-page .checkbox-btn:hover,
+body .result-page .expand-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+}
+
+body .result-page .checkbox-btn {
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
 }
 
 body .result-page .checkbox-btn.checked {
   background-color: #6366f1 !important;
+  color: #FFFFFF !important;
 }
 
-/* 针对截图里的蓝色按钮强制覆盖 */
-body .result-page [class*="bg-blue-"],
-body .result-page [class*="bg-indigo-"] {
-  background-color: #6366f1 !important;
+body .result-page .empty-box {
+  width: 24px !important;
+  height: 24px !important;
+  border: 3px solid #000000 !important;
+}
+
+/* ========================================
+   QUESTION CONTENT
+   ======================================== */
+body .result-page .question-content-section {
+  margin-bottom: 1.5rem !important;
+}
+
+body .result-page .question-text {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  margin: 0 0 1rem 0 !important;
+  line-height: 1.6 !important;
+}
+
+body .result-page .question-full-text {
+  font-size: 1rem !important;
+  margin: 0 0 1.5rem 0 !important;
+  line-height: 1.6 !important;
+  color: #333333 !important;
+}
+
+body .result-page .question-options-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+}
+
+body .result-page .question-option-item {
+  display: flex !important;
+  gap: 1rem !important;
+  align-items: flex-start !important;
+}
+
+body .result-page .option-label {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  padding: 0.5rem 0.75rem !important;
+  font-weight: 900 !important;
+  font-size: 1rem !important;
+  min-width: 40px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+body .result-page .option-text {
+  flex: 1 !important;
+  margin: 0 !important;
+  padding: 0.5rem 0 !important;
+  line-height: 1.6 !important;
+}
+
+/* ========================================
+   COLLAPSED VIEW
+   ======================================== */
+body .result-page .question-collapsed-view {
+  display: flex !important;
+  gap: 1rem !important;
+  align-items: center !important;
+  padding: 1rem 0 !important;
+}
+
+body .result-page .collapsed-number {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  padding: 0.5rem 0.75rem !important;
+  font-weight: 900 !important;
+  font-size: 0.875rem !important;
+}
+
+body .result-page .collapsed-text {
+  font-weight: 600 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* ========================================
+   CORRECTION BUTTON
+   ======================================== */
+body .result-page .correction-btn {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  font-weight: 900 !important;
+  border-radius: 0px !important;
+  padding: 0.75rem 1.5rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  cursor: pointer !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.2s !important;
+}
+
+body .result-page .correction-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* ========================================
+   EDIT FORM
+   ======================================== */
+body .result-page .question-edit-form {
+  background-color: #F8F7F5 !important;
+  border: 4px solid #000000 !important;
+  padding: 1.5rem !important;
+  margin-top: 1rem !important;
+}
+
+body .result-page .edit-textarea {
+  width: 100% !important;
+  min-height: 120px !important;
   border: 4px solid #000000 !important;
   border-radius: 0px !important;
+  padding: 1rem !important;
+  font-size: 1rem !important;
+  font-family: inherit !important;
+  margin-bottom: 1rem !important;
+  resize: vertical !important;
+}
+
+body .result-page .edit-options-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  margin-bottom: 1rem !important;
+}
+
+body .result-page .edit-option-row {
+  display: flex !important;
+  gap: 1rem !important;
+  align-items: center !important;
+}
+
+body .result-page .edit-option-label {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  padding: 0.75rem !important;
+  font-weight: 900 !important;
+  min-width: 50px !important;
+  text-align: center !important;
+}
+
+body .result-page .edit-option-input {
+  flex: 1 !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  padding: 0.75rem !important;
+  font-size: 1rem !important;
+  font-family: inherit !important;
+}
+
+body .result-page .edit-actions {
+  display: flex !important;
+  gap: 1rem !important;
+  justify-content: flex-end !important;
+}
+
+body .result-page .edit-btn-save,
+body .result-page .edit-btn-cancel {
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  padding: 0.75rem 1.5rem !important;
+  cursor: pointer !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s !important;
+}
+
+body .result-page .edit-btn-save {
+  background-color: #A3E635 !important;
+  color: #000000 !important;
+}
+
+body .result-page .edit-btn-cancel {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+/* ========================================
+   FILE STATUS SECTION
+   ======================================== */
+body .result-page .file-status-section {
+  margin-top: 3rem !important;
+}
+
+body .result-page .file-status-title {
+  font-size: 1.875rem !important;
+  font-weight: 900 !important;
+  margin: 0 0 1.5rem 0 !important;
+}
+
+body .result-page .file-status-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 1.5rem !important;
+}
+
+body .result-page .file-status-card {
+  background-color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  padding: 1.5rem !important;
+}
+
+body .result-page .file-status-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 1rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+body .result-page .file-name {
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  margin: 0 !important;
+  word-break: break-word !important;
+}
+
+body .result-page .file-status-tag {
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em !important;
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  flex-shrink: 0 !important;
+}
+
+body .result-page .file-status-tag.success {
+  background-color: #A3E635 !important;
+  color: #000000 !important;
+}
+
+body .result-page .file-status-tag.failed {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+body .result-page .file-description {
+  margin: 0 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+}
+
+body .result-page .file-description.error {
+  color: #DC2626 !important;
+  font-weight: 600 !important;
+}
+
+/* ========================================
+   MODAL
+   ======================================== */
+body .result-page .modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  padding: 1rem !important;
+}
+
+body .result-page .modal-container {
+  background-color: #FFFFFF !important;
+  border: 6px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 16px 16px 0px 0px rgba(0,0,0,1) !important;
+  padding: 2.5rem !important;
+  max-width: 500px !important;
+  width: 100% !important;
+}
+
+body .result-page .modal-title {
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 0 0 2rem 0 !important;
+}
+
+body .result-page .modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+}
+
+body .result-page .modal-field {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+}
+
+body .result-page .modal-label {
+  font-weight: 900 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+body .result-page .modal-select,
+body .result-page .modal-input {
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  padding: 1rem !important;
+  font-size: 1rem !important;
+  font-family: inherit !important;
+  font-weight: 600 !important;
+}
+
+body .result-page .create-collection-btn {
+  background-color: #FFD100 !important;
+  color: #000000 !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  padding: 1rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.2s !important;
+}
+
+body .result-page .create-collection-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+}
+
+body .result-page .modal-actions {
+  display: flex !important;
+  gap: 1rem !important;
+  justify-content: flex-end !important;
+  margin-top: 1rem !important;
+}
+
+body .result-page .modal-btn-cancel,
+body .result-page .modal-btn-confirm {
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  padding: 1rem 2rem !important;
+  cursor: pointer !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.2s !important;
+}
+
+body .result-page .modal-btn-cancel {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+body .result-page .modal-btn-confirm {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+}
+
+body .result-page .modal-btn-cancel:hover,
+body .result-page .modal-btn-confirm:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+}
+
+body .result-page .modal-error {
+  background-color: #FEE2E2 !important;
+  border: 4px solid #DC2626 !important;
+  padding: 1rem !important;
+  margin-top: 1rem !important;
+  font-weight: 700 !important;
+  color: #DC2626 !important;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+body .empty-state {
+  min-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2rem !important;
+  background-color: #F8F7F5 !important;
+}
+
+body .empty-state-card {
+  background-color: #FFFFFF !important;
+  border: 6px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 16px 16px 0px 0px rgba(0,0,0,1) !important;
+  padding: 3rem !important;
+  text-align: center !important;
+  max-width: 500px !important;
+}
+
+body .empty-state-card h2 {
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 0 0 1rem 0 !important;
+}
+
+body .empty-state-card p {
+  font-size: 1.125rem !important;
+  margin: 0 0 2rem 0 !important;
+  line-height: 1.6 !important;
+}
+
+body .empty-state-btn {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  padding: 1rem 2rem !important;
+  cursor: pointer !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.2s !important;
+}
+
+body .empty-state-btn:hover {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* ========================================
+   NO QUESTIONS MESSAGE
+   ======================================== */
+body .result-page .no-questions-message {
+  background-color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  padding: 3rem !important;
+  text-align: center !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+}
+
+body .result-page .no-questions-message p {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 768px) {
+  body .result-page {
+    padding: 1rem !important;
+  }
+  
+  body .result-page .result-hero h1 {
+    font-size: 1.875rem !important;
+  }
+  
+  body .result-page .question-card {
+    padding: 1.5rem !important;
+  }
+  
+  body .result-page .file-status-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
