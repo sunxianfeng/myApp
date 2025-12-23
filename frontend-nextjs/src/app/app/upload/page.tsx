@@ -1,5 +1,6 @@
 'use client'
 
+import './upload-neobrutalism.css'
 import React, { useState, useRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from 'next/navigation'
@@ -323,9 +324,6 @@ const Upload = () => {
                 <div className="file-details">
                   <p>{file.name}</p>
                   <span>{formatFileSize(file.size)}</span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress" style={{width: isUploading ? '60%' : '0%'}}></div>
                 </div>
                 <div className="remove-btn" onClick={() => removeFileFromList(index)}>
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -8,6 +8,7 @@ from app.config import settings
 from app.api.v1.auth import router as auth_router
 from app.api.v1.ocr import router as ocr_router
 from app.api.v1.questions import router as questions_router
+from app.api.v1.collections import router as collections_router
 from app.database import engine, Base
 from app.models import User
 
@@ -50,6 +51,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(ocr_router, prefix="/api/v1/ocr")
 app.include_router(questions_router, prefix="/api/v1/questions")
+app.include_router(collections_router, prefix="/api/v1/collections", tags=["collections"])
 
 @app.get("/api/v1/health")
 async def health_check():

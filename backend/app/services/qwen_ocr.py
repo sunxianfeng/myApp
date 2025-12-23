@@ -263,3 +263,4 @@ def get_ocr_service() -> QwenQuestionExtractor:
         _qwen_ocr_instance = QwenQuestionExtractor()
     return _qwen_ocr_instance
 
+

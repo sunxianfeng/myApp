@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { login, register, logout as logoutApi, getCurrentUser } from '@/lib/api'
-import type { User, LoginCredentials, RegisterData, AuthResponse } from '@/types/api'
+import type { User, LoginCredentials, RegisterData } from '@/types/api'
 
 interface AuthState {
   user: User | null
@@ -25,15 +25,27 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
-      const response: AuthResponse = await login(credentials)
-      
+      const response = await login(credentials)
+
+      if (!response?.access_token) {
+        throw new Error('登录响应缺少 access_token')
+      }
+
+      const accessToken = response.access_token
+
       // 保存token到localStorage
       if (typeof window !== 'undefined') {
-        localStorage.setItem('token', response.token)
-        localStorage.setItem('refreshToken', response.refreshToken)
+        localStorage.setItem('token', accessToken)
       }
-      
-      return response
+
+      // 获取当前用户信息
+      const user: User = await getCurrentUser()
+
+      return {
+        user,
+        token: accessToken,
+        refreshToken: null,
+      }
     } catch (error: any) {
       return rejectWithValue(error.message || '登录失败')
     }
@@ -45,15 +57,27 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData: RegisterData, { rejectWithValue }) => {
     try {
-      const response: AuthResponse = await register(userData)
-      
-      // 保存token到localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', response.token)
-        localStorage.setItem('refreshToken', response.refreshToken)
+      // 先注册用户
+      const registeredUser: User = await register(userData)
+
+      // 注册成功后立即登录以获取 token
+      const loginResp = await login({ email: userData.email, password: userData.password })
+
+      if (!loginResp?.access_token) {
+        throw new Error('登录响应缺少 access_token')
       }
-      
-      return response
+
+      const accessToken = loginResp.access_token
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', accessToken)
+      }
+
+      return {
+        user: registeredUser,
+        token: accessToken,
+        refreshToken: null,
+      }
     } catch (error: any) {
       return rejectWithValue(error.message || '注册失败')
     }
@@ -70,7 +94,6 @@ export const logoutUser = createAsyncThunk(
       // 清除localStorage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token')
-        localStorage.removeItem('refreshToken')
       }
       
       return true
@@ -78,7 +101,6 @@ export const logoutUser = createAsyncThunk(
       // 即使API调用失败，也要清除本地数据
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token')
-        localStorage.removeItem('refreshToken')
       }
       return rejectWithValue(error.message || '登出失败')
     }

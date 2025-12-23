@@ -23,7 +23,9 @@ from app.models.user import User
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/questions", tags=["questions"])
+# Use tag only; prefix is added when the router is included in main.py
+# to avoid double-prefix paths like /api/v1/questions/questions
+router = APIRouter(tags=["questions"])
 
 
 @router.post("/process-ocr", response_model=OCRProcessResponse)
@@ -440,6 +442,7 @@ async def bulk_create_questions(
             document_id=str(document.id),
             created_count=len(created_questions),
             questions=[QuestionResponse.from_orm(q) for q in created_questions],
+            question_ids=[str(q.id) for q in created_questions],
             message='批量创建题目成功'
         )
 

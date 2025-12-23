@@ -40,8 +40,17 @@ class Settings:
     SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqeG1lb3psYmpjaXJ2YnJha3VpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0OTU2NTEsImV4cCI6MjA3ODA3MTY1MX0.RUGImFoDG3R263VNIBKZBIG067awg05sS8BW8tv0GyQ")
     SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "question-uploads")
 
-    # DashScope API (Qwen-VL) for OCR
+    # PaddleOCR Layout Parsing API
+    PADDLE_OCR_API_URL = os.getenv(
+        "PADDLE_OCR_API_URL",
+        "https://tdf5a75cs2u36dm5.aistudio-app.com/layout-parsing",
+    )
+    PADDLE_OCR_API_TOKEN = os.getenv("PADDLE_OCR_API_TOKEN", "e1cc1ee27086e1a47c879fe99da375330e9fff66")
+    PADDLE_OCR_FILE_TYPE = int(os.getenv("PADDLE_OCR_FILE_TYPE", 1))
+    PADDLE_OCR_TIMEOUT = int(os.getenv("PADDLE_OCR_TIMEOUT", 60))
+
+    # Qwen OCR Configuration (Alibaba Cloud DashScope)
     DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "sk-cf7028f008864ce3b4605704f51f7726")
-    QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen-vl-plus")
+    QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen-vl-max")
 
 settings = Settings()

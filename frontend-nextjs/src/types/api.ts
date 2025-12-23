@@ -43,10 +43,8 @@ export interface RegisterData {
 }
 
 export interface AuthResponse {
-  user: User
-  token: string
-  refreshToken: string
-  expiresIn: number
+  access_token: string
+  token_type: string
 }
 
 // 问题相关类型
@@ -393,4 +391,114 @@ export interface SearchResult<T> {
   total: number
   query: string
   took: number
+}
+
+// 错题本相关类型
+export interface Category {
+  id: string
+  name: string
+  description?: string
+  icon?: string
+  color?: string
+  category_type: 'subject' | 'grade' | 'difficulty' | 'custom'
+  parent_id?: string
+  sort_order: number
+  is_active: boolean
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CategoryCreate {
+  name: string
+  description?: string
+  icon?: string
+  color?: string
+  category_type: 'subject' | 'grade' | 'difficulty' | 'custom'
+  parent_id?: string
+  sort_order?: number
+}
+
+export interface CategoryUpdate {
+  name?: string
+  description?: string
+  icon?: string
+  color?: string
+  category_type?: string
+  parent_id?: string
+  sort_order?: number
+  is_active?: boolean
+}
+
+export interface Collection {
+  id: string
+  title: string
+  description?: string
+  cover_image?: string
+  category_id?: string
+  question_count: number
+  total_practiced: number
+  is_public: boolean
+  is_favorite: boolean
+  is_active: boolean
+  sort_order: number
+  user_id: string
+  created_at: string
+  updated_at: string
+  last_practiced_at?: string
+}
+
+export interface CollectionCreate {
+  title: string
+  description?: string
+  cover_image?: string
+  category_id?: string
+  is_public?: boolean
+  is_favorite?: boolean
+  sort_order?: number
+}
+
+export interface CollectionUpdate {
+  title?: string
+  description?: string
+  cover_image?: string
+  category_id?: string
+  is_public?: boolean
+  is_favorite?: boolean
+  is_active?: boolean
+  sort_order?: number
+}
+
+export interface CollectionWithQuestions extends Collection {
+  questions: QuestionInCollection[]
+}
+
+export interface QuestionInCollection extends Question {
+  added_at?: string
+  notes?: string
+  mastery_level?: number
+  times_practiced?: number
+  last_practiced_at?: string
+}
+
+export interface AddQuestionsToCollectionRequest {
+  question_ids: string[]
+}
+
+export interface QuestionInCollectionUpdate {
+  notes?: string
+  mastery_level?: number
+}
+
+export interface CollectionStatsResponse {
+  total_collections: number
+  total_questions: number
+  total_practiced: number
+  by_category: Array<{
+    category_id: string
+    category_name: string
+    collection_count: number
+    question_count: number
+  }>
+  recent_collections: Collection[]
 }

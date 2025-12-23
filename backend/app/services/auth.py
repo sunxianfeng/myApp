@@ -91,7 +91,9 @@ class AuthService:
             return user_id
         except jwt.ExpiredSignatureError:
             return None
-        except jwt.JWTError:
+        except jwt.InvalidTokenError:
+            return None
+        except Exception:
             return None
 
     @staticmethod

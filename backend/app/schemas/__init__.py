@@ -24,6 +24,20 @@ from app.schemas.question import (
     APIResponse,
     PaginatedResponse
 )
+from app.schemas.collection import (
+    CategoryBase,
+    CategoryCreate,
+    CategoryUpdate,
+    CategoryResponse,
+    CollectionBase,
+    CollectionCreate,
+    CollectionUpdate,
+    CollectionResponse,
+    CollectionWithQuestionsResponse,
+    AddQuestionsToCollectionRequest,
+    QuestionInCollectionUpdate,
+    CollectionStatsResponse
+)
 
 __all__ = [
     "UserCreate",
@@ -47,5 +61,17 @@ __all__ = [
     "QuestionVerificationRequest",
     "QuestionBatchUpdate",
     "APIResponse",
-    "PaginatedResponse"
+    "PaginatedResponse",
+    "CategoryBase",
+    "CategoryCreate",
+    "CategoryUpdate",
+    "CategoryResponse",
+    "CollectionBase",
+    "CollectionCreate",
+    "CollectionUpdate",
+    "CollectionResponse",
+    "CollectionWithQuestionsResponse",
+    "AddQuestionsToCollectionRequest",
+    "QuestionInCollectionUpdate",
+    "CollectionStatsResponse"
 ]

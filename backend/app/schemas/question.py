@@ -216,6 +216,7 @@ class QuestionBulkCreateResponse(BaseModel):
     document_id: Optional[str] = Field(None, description="创建的文档ID")
     created_count: int = Field(..., description="创建的题目数量")
     questions: List[QuestionResponse] = Field(..., description="创建后的题目列表")
+    question_ids: List[str] = Field(default_factory=list, description="创建的题目ID列表")
     message: Optional[str] = Field(None, description="操作信息")
 
 

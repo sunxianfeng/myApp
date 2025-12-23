@@ -1,0 +1,101 @@
+/* ========================================
+   NEOBRUTALISM DESIGN - RESULT PAGE (ULTRA SPECIFICITY)
+   ======================================== */
+
+/* 强制背景和字体 */
+body .result-page {
+  background-color: #F8F7F5 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  color: #000000 !important;
+}
+
+/* 核心容器：强制厚边框和阴影 */
+body .result-page .result-hero,
+body .result-page .bulk-actions-bar,
+body .result-page .question-card,
+body .result-page .file-status-card {
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  background-color: #FFFFFF !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Hero 特殊颜色 */
+body .result-page .result-hero {
+  background-color: #FFD100 !important;
+  box-shadow: 12px 12px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* 批量操作条特殊颜色 */
+body .result-page .bulk-actions-bar {
+  background-color: #A3E635 !important;
+}
+
+/* 强制按钮样式 */
+body .result-page .neo-btn,
+body .result-page button.neo-btn {
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  padding: 0.85rem 1.75rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+body .result-page .neo-btn-orange {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+}
+
+body .result-page .neo-btn-white {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+/* 纠正题目按钮 */
+body .result-page .correction-btn {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  font-weight: 900 !important;
+  border-radius: 0px !important;
+}
+
+/* 选中状态 */
+body .result-page .question-card.selected {
+  border-color: #6366f1 !important;
+  box-shadow: 12px 12px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* 展开/折叠按钮 */
+body .result-page .expand-btn,
+body .result-page .checkbox-btn {
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+  background: #FFFFFF !important;
+  width: 56px !important;
+  height: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body .result-page .checkbox-btn.checked {
+  background-color: #6366f1 !important;
+}
+
+/* 针对截图里的蓝色按钮强制覆盖 */
+body .result-page [class*="bg-blue-"],
+body .result-page [class*="bg-indigo-"] {
+  background-color: #6366f1 !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0px !important;
+}

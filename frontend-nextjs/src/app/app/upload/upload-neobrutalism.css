@@ -1,0 +1,655 @@
+/* ========================================
+   NEOBRUTALISM DESIGN SYSTEM - UPLOAD PAGES
+   ======================================== */
+
+/* Root Variables */
+:root {
+  --neo-yellow: #FFD100;
+  --neo-lime: #A3E635;
+  --neo-orange: #FF7A00;
+  --neo-purple: #6366f1;
+  --neo-cyan: #22D3EE;
+  --neo-pink: #FF6B9D;
+  --neo-black: #000000;
+  --neo-white: #FFFFFF;
+  --neo-gray: #F8F7F5;
+  --neo-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+  --neo-shadow-sm: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  --neo-shadow-lg: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+  --neo-border: 4px solid var(--neo-black);
+}
+
+/* ========================================
+   BASE LAYOUT
+   ======================================== */
+
+.upload-page {
+  min-height: 100vh !important;
+  background-color: var(--neo-gray) !important;
+  padding: 2rem !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.upload-container {
+  max-width: 900px !important;
+  margin: 0 auto !important;
+  background-color: var(--neo-white) !important;
+  border: var(--neo-border) !important;
+  box-shadow: var(--neo-shadow) !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* ========================================
+   HEADER SECTION
+   ======================================== */
+
+.upload-header {
+  background-color: var(--neo-yellow) !important;
+  border-bottom: var(--neo-border) !important;
+  padding: 3rem 2rem !important;
+  text-align: center !important;
+}
+
+.upload-header h1 {
+  font-size: 3rem !important;
+  font-weight: 900 !important;
+  color: var(--neo-black) !important;
+  margin-bottom: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: -0.02em !important;
+}
+
+.upload-header p {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--neo-black) !important;
+  opacity: 0.8 !important;
+}
+
+/* ========================================
+   MODE SELECTOR
+   ======================================== */
+
+.upload-section {
+  padding: 3rem !important;
+}
+
+.mode-selector {
+  display: flex !important;
+  gap: 1.5rem !important;
+  justify-content: center !important;
+  margin-bottom: 3rem !important;
+}
+
+.mode-btn {
+  padding: 1rem 2.5rem !important;
+  font-size: 1.1rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  border: 4px solid var(--neo-black) !important;
+  background-color: var(--neo-white) !important;
+  color: var(--neo-black) !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+.mode-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.mode-btn.active {
+  background-color: var(--neo-purple) !important;
+  color: var(--neo-white) !important;
+  transform: translate(4px, 4px) !important;
+  box-shadow: none !important;
+}
+
+/* ========================================
+   DROP ZONE
+   ======================================== */
+
+.drop-zone {
+  border: 4px dashed var(--neo-black) !important;
+  background-color: var(--neo-white) !important;
+  padding: 4rem 2rem !important;
+  text-align: center !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+}
+
+.drop-zone::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 0, 0, 0.02) 10px,
+    rgba(0, 0, 0, 0.02) 20px
+  ) !important;
+  pointer-events: none !important;
+}
+
+.drop-zone.drag-over {
+  background-color: var(--neo-cyan) !important;
+  border-color: var(--neo-black) !important;
+  border-style: solid !important;
+  transform: scale(1.02) !important;
+}
+
+.drop-zone-icon {
+  margin-bottom: 2rem !important;
+  display: inline-block !important;
+}
+
+.drop-zone-icon svg {
+  width: 80px !important;
+  height: 80px !important;
+  stroke: var(--neo-black) !important;
+  stroke-width: 3 !important;
+}
+
+.drop-zone p {
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  color: var(--neo-black) !important;
+  margin-bottom: 2.5rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.drop-zone > div {
+  display: flex !important;
+  gap: 1.5rem !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ========================================
+   SELECT BUTTONS
+   ======================================== */
+
+.select-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1.25rem 2rem !important;
+  font-size: 1.1rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  border: 4px solid var(--neo-black) !important;
+  background-color: var(--neo-lime) !important;
+  color: var(--neo-black) !important;
+  cursor: pointer !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+}
+
+.select-btn:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.select-btn:active,
+.select-btn[data-clicked="true"] {
+  transform: translate(4px, 4px) !important;
+  box-shadow: none !important;
+  background-color: var(--neo-purple) !important;
+  color: var(--neo-white) !important;
+}
+
+.select-btn svg {
+  margin-right: 0.75rem !important;
+  stroke-width: 3 !important;
+}
+
+/* ========================================
+   FILE QUEUE
+   ======================================== */
+
+.file-queue {
+  padding: 3rem !important;
+  background-color: var(--neo-white) !important;
+}
+
+.file-queue h3 {
+  font-size: 1.75rem !important;
+  font-weight: 900 !important;
+  color: var(--neo-black) !important;
+  margin-bottom: 2rem !important;
+  text-transform: uppercase !important;
+  padding-bottom: 1rem !important;
+  border-bottom: 4px solid var(--neo-black) !important;
+}
+
+.file-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+  padding: 1.5rem !important;
+  background-color: var(--neo-white) !important;
+  border: 4px solid var(--neo-black) !important;
+  margin-bottom: 1.5rem !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  transition: transform 0.2s ease !important;
+}
+
+.file-item:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.file-preview {
+  width: 64px !important;
+  height: 64px !important;
+  border: 3px solid var(--neo-black) !important;
+  background-color: var(--neo-gray) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.file-preview img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.file-preview svg {
+  stroke: var(--neo-black) !important;
+  stroke-width: 3 !important;
+}
+
+.file-details {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.file-details p {
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  color: var(--neo-black) !important;
+  margin-bottom: 0.5rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.file-details span {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--neo-black) !important;
+  opacity: 0.6 !important;
+}
+
+.progress-bar {
+  width: 150px !important;
+  height: 20px !important;
+  border: 3px solid var(--neo-black) !important;
+  background-color: var(--neo-white) !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.progress {
+  height: 100% !important;
+  background-color: var(--neo-lime) !important;
+  transition: width 0.3s ease !important;
+  position: relative !important;
+}
+
+.progress::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.1) 5px,
+    rgba(0, 0, 0, 0.1) 10px
+  ) !important;
+}
+
+.remove-btn {
+  width: 48px !important;
+  height: 48px !important;
+  border: 3px solid var(--neo-black) !important;
+  background-color: var(--neo-white) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.remove-btn:hover {
+  background-color: var(--neo-orange) !important;
+  transform: rotate(90deg) !important;
+}
+
+.remove-btn svg {
+  stroke: var(--neo-black) !important;
+  stroke-width: 3 !important;
+}
+
+/* ========================================
+   ACTION BAR
+   ======================================== */
+
+.action-bar {
+  padding: 2rem 3rem !important;
+  background-color: var(--neo-gray) !important;
+  border-top: var(--neo-border) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.action-bar .btn-primary {
+  padding: 1.5rem 3rem !important;
+  font-size: 1.25rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  border: 4px solid var(--neo-black) !important;
+  background-color: var(--neo-orange) !important;
+  color: var(--neo-white) !important;
+  cursor: pointer !important;
+  box-shadow: var(--neo-shadow) !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+.action-bar .btn-primary:hover:not(:disabled) {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 11px 11px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.action-bar .btn-primary:active:not(:disabled) {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.action-bar .btn-primary:disabled {
+  background-color: #CCCCCC !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+.action-bar .btn-primary svg {
+  stroke-width: 3 !important;
+}
+
+/* ========================================
+   OCR PROCESSING INDICATOR
+   ======================================== */
+
+.ocr-processing-indicator {
+  margin-top: 3rem !important;
+  padding: 3rem 2rem !important;
+  background-color: var(--neo-purple) !important;
+  border: var(--neo-border) !important;
+  box-shadow: var(--neo-shadow) !important;
+  text-align: center !important;
+  animation: pulse 2s ease-in-out infinite !important;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.ocr-processing-visual {
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 auto 2rem !important;
+  position: relative !important;
+  border: 4px solid var(--neo-black) !important;
+  background-color: var(--neo-white) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+.ocr-processing-svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.ocr-scan-line {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 6px !important;
+  background: var(--neo-yellow) !important;
+  border-top: 3px solid var(--neo-black) !important;
+  border-bottom: 3px solid var(--neo-black) !important;
+  animation: scanMove 2s ease-in-out infinite !important;
+}
+
+@keyframes scanMove {
+  0%, 100% { top: 10%; opacity: 0.8; }
+  50% { top: 80%; opacity: 1; }
+}
+
+.ocr-scan-corner {
+  position: absolute !important;
+  width: 30px !important;
+  height: 30px !important;
+  border: 5px solid var(--neo-black) !important;
+}
+
+.corner-top-left {
+  top: -5px !important;
+  left: -5px !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+.corner-top-right {
+  top: -5px !important;
+  right: -5px !important;
+  border-left: none !important;
+  border-bottom: none !important;
+}
+
+.corner-bottom-left {
+  bottom: -5px !important;
+  left: -5px !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+.corner-bottom-right {
+  bottom: -5px !important;
+  right: -5px !important;
+  border-left: none !important;
+  border-top: none !important;
+}
+
+.ocr-processing-label {
+  font-size: 1.75rem !important;
+  font-weight: 900 !important;
+  color: var(--neo-white) !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.ocr-processing-subtext {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: var(--neo-white) !important;
+  opacity: 0.9 !important;
+}
+
+/* ========================================
+   ERROR MESSAGE
+   ======================================== */
+
+.error-message {
+  padding: 1.5rem !important;
+  background-color: var(--neo-orange) !important;
+  border: var(--neo-border) !important;
+  color: var(--neo-white) !important;
+  font-weight: 900 !important;
+  font-size: 1.1rem !important;
+  margin: 2rem 3rem !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+/* ========================================
+   HIDDEN INPUT
+   ======================================== */
+
+.hidden {
+  display: none !important;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .upload-page {
+    padding: 1rem !important;
+  }
+
+  .upload-header h1 {
+    font-size: 2rem !important;
+  }
+
+  .upload-header p {
+    font-size: 1rem !important;
+  }
+
+  .upload-section {
+    padding: 2rem 1.5rem !important;
+  }
+
+  .mode-selector {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .mode-btn {
+    width: 100% !important;
+    padding: 1rem !important;
+  }
+
+  .drop-zone {
+    padding: 3rem 1.5rem !important;
+  }
+
+  .drop-zone p {
+    font-size: 1.1rem !important;
+  }
+
+  .drop-zone > div {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .select-btn {
+    width: 100% !important;
+    padding: 1rem 1.5rem !important;
+  }
+
+  .file-queue {
+    padding: 2rem 1.5rem !important;
+  }
+
+  .file-item {
+    flex-wrap: wrap !important;
+  }
+
+  .progress-bar {
+    width: 100% !important;
+    order: 3 !important;
+  }
+
+  .action-bar {
+    padding: 1.5rem !important;
+  }
+
+  .action-bar .btn-primary {
+    width: 100% !important;
+    padding: 1.25rem 2rem !important;
+    font-size: 1.1rem !important;
+  }
+
+  .upload-container {
+    box-shadow: var(--neo-shadow-sm) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --neo-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+    --neo-border: 3px solid var(--neo-black);
+  }
+
+  .upload-header {
+    padding: 2rem 1.5rem !important;
+  }
+
+  .file-queue h3 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.upload-container {
+  animation: fadeIn 0.5s ease-out !important;
+}
+
+.file-item {
+  animation: fadeIn 0.3s ease-out !important;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.neo-badge {
+  display: inline-block !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  border: 3px solid var(--neo-black) !important;
+  background-color: var(--neo-yellow) !important;
+  color: var(--neo-black) !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.neo-divider {
+  height: 4px !important;
+  background-color: var(--neo-black) !important;
+  margin: 2rem 0 !important;
+}
+

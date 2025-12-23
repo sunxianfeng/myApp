@@ -291,4 +291,88 @@ export const healthCheck = async (): Promise<any> => {
   return await api.get('/v1/health')
 }
 
+// 错题本分类相关 API
+export const getCategories = async (categoryType?: string): Promise<any> => {
+  return await api.get('/v1/collections/categories', { 
+    params: categoryType ? { category_type: categoryType } : {} 
+  })
+}
+
+export const createCategory = async (categoryData: any): Promise<any> => {
+  return await api.post('/v1/collections/categories', categoryData)
+}
+
+export const getCategory = async (categoryId: string): Promise<any> => {
+  return await api.get(`/v1/collections/categories/${categoryId}`)
+}
+
+export const updateCategory = async (categoryId: string, categoryData: any): Promise<any> => {
+  return await api.put(`/v1/collections/categories/${categoryId}`, categoryData)
+}
+
+export const deleteCategory = async (categoryId: string): Promise<any> => {
+  return await api.delete(`/v1/collections/categories/${categoryId}`)
+}
+
+// 错题本相关 API
+export const getCollections = async (params?: {
+  category_id?: string;
+  is_favorite?: boolean;
+  skip?: number;
+  limit?: number;
+}): Promise<any> => {
+  return await api.get('/v1/collections/collections', { params })
+}
+
+export const createCollection = async (collectionData: any): Promise<any> => {
+  return await api.post('/v1/collections/collections', collectionData)
+}
+
+export const getCollection = async (collectionId: string, includeQuestions: boolean = true): Promise<any> => {
+  return await api.get(`/v1/collections/collections/${collectionId}`, {
+    params: { include_questions: includeQuestions }
+  })
+}
+
+export const updateCollection = async (collectionId: string, collectionData: any): Promise<any> => {
+  return await api.put(`/v1/collections/collections/${collectionId}`, collectionData)
+}
+
+export const deleteCollection = async (collectionId: string): Promise<any> => {
+  return await api.delete(`/v1/collections/collections/${collectionId}`)
+}
+
+// 错题本题目管理 API
+export const addQuestionsToCollection = async (
+  collectionId: string, 
+  questionIds: string[]
+): Promise<any> => {
+  return await api.post(`/v1/collections/collections/${collectionId}/questions`, {
+    question_ids: questionIds
+  })
+}
+
+export const removeQuestionFromCollection = async (
+  collectionId: string, 
+  questionId: string
+): Promise<any> => {
+  return await api.delete(`/v1/collections/collections/${collectionId}/questions/${questionId}`)
+}
+
+export const updateQuestionInCollection = async (
+  collectionId: string,
+  questionId: string,
+  updateData: { notes?: string; mastery_level?: number }
+): Promise<any> => {
+  return await api.put(
+    `/v1/collections/collections/${collectionId}/questions/${questionId}`,
+    updateData
+  )
+}
+
+// 错题本统计 API
+export const getCollectionStats = async (): Promise<any> => {
+  return await api.get('/v1/collections/stats')
+}
+
 export default api
