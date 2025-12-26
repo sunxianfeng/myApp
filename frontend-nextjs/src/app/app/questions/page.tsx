@@ -31,7 +31,7 @@ import {
   selectCollectionLoading,
   addQuestionsToCol,
 } from '@/lib/slices/collectionSlice'
-import { getCollectionsWithQuestions } from '@/lib/api'
+import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection } from '@/lib/api'
 
 import './questions-neobrutalism.css'
 
@@ -300,6 +300,249 @@ const QuestionDetailModal = ({
   )
 }
 
+// Collection Assignment Modal Component
+const CollectionAssignmentModal = ({ 
+  question, 
+  isOpen, 
+  onClose,
+  onAssign 
+}: { 
+  question: any
+  isOpen: boolean
+  onClose: () => void
+  onAssign: (collectionIds: string[]) => void
+}) => {
+  const [availableCollections, setAvailableCollections] = useState<any[]>([])
+  const [selectedCollections, setSelectedCollections] = useState<Set<string>>(new Set())
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      if (!isOpen) return
+      setIsLoading(true)
+      try {
+        const collections = await getCollectionsForAssignment()
+        setAvailableCollections(Array.isArray(collections) ? collections : [])
+      } catch (err) {
+        console.error('Failed to load collections:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadCollections()
+  }, [isOpen])
+
+  const handleToggleCollection = (collectionId: string) => {
+    const newSelected = new Set(selectedCollections)
+    if (newSelected.has(collectionId)) {
+      newSelected.delete(collectionId)
+    } else {
+      newSelected.add(collectionId)
+    }
+    setSelectedCollections(newSelected)
+  }
+
+  const handleAssign = () => {
+    onAssign(Array.from(selectedCollections))
+    setSelectedCollections(new Set())
+    onClose()
+  }
+
+  if (!isOpen || !question) return null
+
+  return (
+    <div 
+      className="modal-overlay" 
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px',
+      }}
+    >
+      <div 
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          maxWidth: '500px',
+          width: '100%',
+          maxHeight: '70vh',
+          overflow: 'auto',
+          border: '4px solid black',
+          boxShadow: '8px 8px 0 rgba(0, 0, 0, 1)',
+        }}
+      >
+        <div style={{ 
+          padding: '24px',
+          borderBottom: '3px solid black',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: '#F3F4F6',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <IconMove size={24} />
+            <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>
+              Assign to Collections
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'white',
+              border: '3px solid black',
+              borderRadius: '6px',
+              padding: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Close"
+          >
+            <IconX size={20} />
+          </button>
+        </div>
+
+        <div style={{ padding: '24px' }}>
+          {/* Question Preview */}
+          <div style={{ 
+            marginBottom: '20px',
+            padding: '12px',
+            backgroundColor: '#FEFCE8',
+            border: '2px solid black',
+            borderRadius: '8px',
+          }}>
+            <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '0.875rem' }}>Question</div>
+            <div style={{ fontWeight: 500, fontSize: '0.9rem', lineHeight: '1.4' }}>
+              {question.content.length > 100 ? `${question.content.substring(0, 100)}...` : question.content}
+            </div>
+          </div>
+
+          {/* Collections List */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontWeight: 900, marginBottom: '16px', fontSize: '1.125rem' }}>
+              Select Collections
+            </h3>
+            
+            {isLoading ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#6B7280' }}>
+                Loading collections...
+              </div>
+            ) : availableCollections.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#6B7280' }}>
+                No collections available. Create one first.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflow: 'auto' }}>
+                {availableCollections.map((collection) => (
+                  <label
+                    key={collection.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '12px',
+                      border: '2px solid black',
+                      borderRadius: '8px',
+                      backgroundColor: selectedCollections.has(collection.id) ? '#E0F2FE' : 'white',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!selectedCollections.has(collection.id)) {
+                        e.currentTarget.style.backgroundColor = '#F8FAFC'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!selectedCollections.has(collection.id)) {
+                        e.currentTarget.style.backgroundColor = 'white'
+                      }
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedCollections.has(collection.id)}
+                      onChange={() => handleToggleCollection(collection.id)}
+                      style={{
+                        marginRight: '12px',
+                        width: '18px',
+                        height: '18px',
+                        cursor: 'pointer',
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{collection.title}</div>
+                      {collection.description && (
+                        <div style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '2px' }}>
+                          {collection.description}
+                        </div>
+                      )}
+                    </div>
+                    <div 
+                      style={{ 
+                        width: '12px', 
+                        height: '12px', 
+                        backgroundColor: generateColorFromString(collection.id),
+                        border: '2px solid black',
+                        borderRadius: '3px',
+                        marginLeft: '8px',
+                      }} 
+                    />
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <button
+              onClick={onClose}
+              style={{
+                padding: '12px 24px',
+                border: '3px solid black',
+                borderRadius: '8px',
+                backgroundColor: 'white',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAssign}
+              disabled={selectedCollections.size === 0}
+              style={{
+                padding: '12px 24px',
+                border: '3px solid black',
+                borderRadius: '8px',
+                backgroundColor: selectedCollections.size > 0 ? '#22C55E' : '#E5E7EB',
+                color: selectedCollections.size > 0 ? 'white' : '#9CA3AF',
+                fontWeight: 700,
+                cursor: selectedCollections.size > 0 ? 'pointer' : 'not-allowed',
+                fontSize: '0.9rem',
+              }}
+            >
+              Assign ({selectedCollections.size})
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const QuestionCard = ({
   question,
   collection,
@@ -411,6 +654,10 @@ const QuestionsContent = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null)
   const [selectedQuestionCollection, setSelectedQuestionCollection] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Modal state for collection assignment
+  const [assignmentQuestion, setAssignmentQuestion] = useState<any>(null)
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -552,7 +799,8 @@ const QuestionsContent = () => {
         }
         break
       case 'move':
-        window.alert('Move to another collection...')
+        setAssignmentQuestion(payload)
+        setIsAssignmentModalOpen(true)
         break
       case 'tags':
         window.alert('Manage tags...')
@@ -570,6 +818,37 @@ const QuestionsContent = () => {
       }
     } else {
       window.alert('Creating a new question...')
+    }
+  }
+
+  const handleAssignToCollections = async (collectionIds: string[]) => {
+    if (!assignmentQuestion || collectionIds.length === 0) return
+
+    try {
+      setIsProcessing(true)
+      
+      // Assign question to each selected collection
+      await Promise.all(
+        collectionIds.map(collectionId =>
+          addQuestionsToCollection(collectionId, [assignmentQuestion.id])
+        )
+      )
+
+      // Refresh unified data to reflect changes
+      const data = await getCollectionsWithQuestions()
+      if (Array.isArray(data)) {
+        setCollectionsWithQuestions(data)
+        const flattened = data.flatMap((c: any) => (Array.isArray(c.questions) ? c.questions : []))
+        setAllQuestions(flattened)
+      }
+
+      // Show success message
+      window.alert(`Question assigned to ${collectionIds.length} collection(s) successfully!`)
+    } catch (e: any) {
+      console.error('Failed to assign question:', e)
+      setPageError(e?.message || 'Failed to assign question to collections.')
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -871,6 +1150,17 @@ const QuestionsContent = () => {
           setSelectedQuestion(null)
           setSelectedQuestionCollection(null)
         }}
+      />
+
+      {/* Collection Assignment Modal */}
+      <CollectionAssignmentModal
+        question={assignmentQuestion}
+        isOpen={isAssignmentModalOpen}
+        onClose={() => {
+          setIsAssignmentModalOpen(false)
+          setAssignmentQuestion(null)
+        }}
+        onAssign={handleAssignToCollections}
       />
     </div>
   )

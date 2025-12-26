@@ -370,6 +370,15 @@ export const getCollectionsWithQuestions = async (): Promise<any> => {
   return await api.get('/v1/collections/collections-with-questions')
 }
 
+// 获取未分配到任何集合的题目
+export const getUnassignedQuestions = async (params?: {
+  skip?: number;
+  limit?: number;
+  search?: string;
+}): Promise<any> => {
+  return await api.get('/v1/questions/unassigned', { params })
+}
+
 // 错题本题目管理 API
 export const addQuestionsToCollection = async (
   collectionId: string, 
@@ -396,6 +405,13 @@ export const updateQuestionInCollection = async (
     `/v1/collections/collections/${collectionId}/questions/${questionId}`,
     updateData
   )
+}
+
+// 获取可用于分配的集合列表（简化版，不包含题目）
+export const getCollectionsForAssignment = async (): Promise<any> => {
+  return await api.get('/v1/collections/collections', {
+    params: { include_questions: false }
+  })
 }
 
 // 错题本统计 API
