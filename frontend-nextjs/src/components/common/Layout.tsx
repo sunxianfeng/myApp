@@ -1,10 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-function Icon({ name, className }: { name: 'dashboard' | 'file' | 'fileX' | 'template' | 'upload' | 'settings' | 'search' | 'chevronDown'; className?: string }) {
+function Icon({ name, className }: { name: 'dashboard' | 'file' | 'template' | 'upload' | 'settings' | 'search' | 'chevronDown'; className?: string }) {
   const common = { className, fill: 'none', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', 'aria-hidden': true }
   switch (name) {
     case 'dashboard':
@@ -21,15 +21,6 @@ function Icon({ name, className }: { name: 'dashboard' | 'file' | 'fileX' | 'tem
         <svg {...common}>
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
           <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'fileX':
-      return (
-        <svg {...common}>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M10 10l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M10 14l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
       )
     case 'template':
@@ -79,12 +70,34 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const isActive = (path: string): boolean => {
     if (path === '/app') {
       return pathname === '/app'
     }
     return pathname.startsWith(path)
+  }
+
+  // Prevent hydration mismatch by not rendering active states until mounted
+  const getNavItemClassName = (path: string): string => {
+    const baseClasses = 'sidebar-item flex items-center p-3 rounded-lg'
+    if (!mounted) {
+      return `${baseClasses} text-gray-600`
+    }
+    
+    let active = false
+    if (path === '/app') {
+      active = pathname === '/app'
+    } else {
+      active = pathname.startsWith(path)
+    }
+    
+    return `${baseClasses} ${active ? 'active' : 'text-gray-600'}`
   }
 
   return (
@@ -105,9 +118,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* 仪表板 */}
             <Link
               href="/app"
-              className={`sidebar-item flex items-center p-3 ${
-                isActive('/app') && pathname === '/app' ? 'active' : 'rounded-lg text-gray-600'
-              }`}
+              className={getNavItemClassName('/app')}
             >
               <Icon name="dashboard" className="w-4 h-4 mr-3" />
               仪表板
@@ -116,31 +127,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* 题目管理 */}
             <Link
               href="/app/questions"
-              className={`sidebar-item flex items-center p-3 ${
-                isActive('/app/questions') && pathname === '/app/questions' ? 'active' : 'rounded-lg text-gray-600'
-              }`}
+              className={getNavItemClassName('/app/questions')}
             >
               <Icon name="file" className="w-4 h-4 mr-3" />
               题目管理
             </Link>
 
-            {/* 未分配题目 */}
-            <Link
-              href="/app/questions/unassigned"
-              className={`sidebar-item flex items-center p-3 ${
-                isActive('/app/questions/unassigned') ? 'active' : 'rounded-lg text-gray-600'
-              }`}
-            >
-              <Icon name="fileX" className="w-4 h-4 mr-3" />
-              <span className="ml-2">未分配题目</span>
-            </Link>
-
             {/* 模版管理 */}
             <Link
               href="/app/templates"
-              className={`sidebar-item flex items-center p-3 ${
-                isActive('/app/templates') ? 'active' : 'rounded-lg text-gray-600'
-              }`}
+              className={getNavItemClassName('/app/templates')}
             >
               <Icon name="template" className="w-4 h-4 mr-3" />
               模版管理
@@ -149,9 +145,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* 文档上传 */}
             <Link
               href="/app/upload"
-              className={`sidebar-item flex items-center p-3 ${
-                isActive('/app/upload') ? 'active' : 'rounded-lg text-gray-600'
-              }`}
+              className={getNavItemClassName('/app/upload')}
             >
               <Icon name="upload" className="w-4 h-4 mr-3" />
               文档上传
@@ -163,9 +157,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div>
           <Link
             href="/app/settings"
-            className={`sidebar-item flex items-center p-3 rounded-lg ${
-              isActive('/app/settings') ? 'active' : 'text-gray-600'
-            }`}
+            className={getNavItemClassName('/app/settings')}
           >
             <Icon name="settings" className="w-4 h-4 mr-3" />
             设置

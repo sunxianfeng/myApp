@@ -706,9 +706,6 @@ const QuestionsContent = () => {
 
   // View mode state - card is default
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
-  
-  // Filter state for showing only unassigned questions
-  const [showOnlyUnassigned, setShowOnlyUnassigned] = useState(false)
 
   // Modal state for question details
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null)
@@ -749,7 +746,7 @@ const QuestionsContent = () => {
           setCollectionsWithQuestions([])
         }
 
-        // Set all questions (both assigned and unassigned)
+        // Set all questions (will be filtered to show only unassigned ones)
         if (allQuestionsData && Array.isArray(allQuestionsData.questions)) {
           setAllQuestions(allQuestionsData.questions)
         } else if (Array.isArray(allQuestionsData)) {
@@ -863,12 +860,10 @@ const QuestionsContent = () => {
     });
   }, [allQuestions, collectionsWithQuestions]);
 
-  // Filter questions based on unassigned toggle
+  // Only show unassigned questions (questions not in any collection)
   const filteredQuestions = useMemo(() => {
-    return showOnlyUnassigned 
-      ? allQuestionsWithCollection.filter(q => q.isUnassigned)
-      : allQuestionsWithCollection;
-  }, [allQuestionsWithCollection, showOnlyUnassigned]);
+    return allQuestionsWithCollection.filter(q => q.isUnassigned);
+  }, [allQuestionsWithCollection]);
 
   const handleAction = (action: string, payload: any) => {
     console.log('Action:', action, 'Payload:', payload)
@@ -946,7 +941,11 @@ const QuestionsContent = () => {
   const handleDropQuestionToCollection = async (collectionId: string, questionId: string) => {
     try {
       setIsProcessing(true)
+      
       await dispatch(addQuestionsToCol({ collectionId, questionIds: [questionId] })).unwrap()
+
+      // Small delay to ensure backend processing is complete
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // Refresh both collections and all questions data to reflect changes
       const [collectionsData, allQuestionsData] = await Promise.all([
@@ -963,7 +962,11 @@ const QuestionsContent = () => {
       } else if (Array.isArray(allQuestionsData)) {
         setAllQuestions(allQuestionsData)
       }
+
+      // Also refresh the Redux collections state to keep it in sync
+      await dispatch(fetchCollections()).unwrap()
     } catch (e: any) {
+      console.error('Failed to move question:', e)
       setPageError(e?.message || 'Failed to move question.')
     } finally {
       setIsProcessing(false)
@@ -978,8 +981,7 @@ const QuestionsContent = () => {
           <div>
             <h1>Question Management</h1>
             <p>
-              All questions and collections. 
-              {showOnlyUnassigned ? ' Showing only unassigned questions.' : ' Click "Unassigned Only" to filter.'}
+              All collections and unassigned questions. Drag questions into collections to organize them.
             </p>
           </div>
 
@@ -999,13 +1001,6 @@ const QuestionsContent = () => {
               style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
             >
               <IconList size={16} style={{ marginRight: 6 }} />
-            </button>
-            <button
-              className={`neo-btn ${showOnlyUnassigned ? 'neo-btn-primary' : 'neo-btn-white'}`}
-              onClick={() => setShowOnlyUnassigned(!showOnlyUnassigned)}
-              style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
-            >
-              Unassigned Only
             </button>
           </div>
         </div>
@@ -1061,21 +1056,22 @@ const QuestionsContent = () => {
                   }}
                 >
                   <div className="card-content">
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, textAlign: 'center' }}>
-                      <IconFolder size={32} />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, textAlign: 'center', height: '100%' }}>
                       <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{c.title}</div>
                       <div style={{
-                        fontSize: '2rem',
+                        fontSize: '3rem',
                         fontWeight: 900,
                         color: '#333',
                         textShadow: '0 0 3px white, 0 0 5px white',
                         lineHeight: 1,
+                        margin: '12px 0',
                       }}>
                         {Array.isArray(c.questions) ? c.questions.length : 0}
                       </div>
                       <div style={{ fontSize: '0.875rem', color: '#6B7280', fontWeight: 600 }}>
                         {Array.isArray(c.questions) && c.questions.length === 1 ? 'question' : 'questions'}
                       </div>
+                      <IconFolder size={24} style={{ marginTop: '8px', opacity: 0.6 }} />
                     </div>
                   </div>
                   <div className="card-footer">
@@ -1225,13 +1221,6 @@ const QuestionsContent = () => {
         <div className="questions-empty">
           <p style={{ fontWeight: 900, fontSize: '1.25rem' }}>No questions found.</p>
           <p>Get started by creating a new question or collection.</p>
-        </div>
-      )}
-
-      {(allQuestions.length > 0 && !filteredQuestions.length && showOnlyUnassigned && !isProcessing) && (
-        <div className="questions-empty">
-          <p style={{ fontWeight: 900, fontSize: '1.25rem' }}>No unassigned questions found.</p>
-          <p>All questions have been assigned to collections.</p>
         </div>
       )}
 

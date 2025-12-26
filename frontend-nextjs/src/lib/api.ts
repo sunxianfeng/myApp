@@ -370,15 +370,6 @@ export const getCollectionsWithQuestions = async (): Promise<any> => {
   return await api.get('/v1/collections/collections-with-questions')
 }
 
-// 获取未分配到任何集合的题目
-export const getUnassignedQuestions = async (params?: {
-  skip?: number;
-  limit?: number;
-  search?: string;
-}): Promise<any> => {
-  return await api.get('/v1/questions/unassigned', { params })
-}
-
 // 错题本题目管理 API
 export const addQuestionsToCollection = async (
   collectionId: string, 
