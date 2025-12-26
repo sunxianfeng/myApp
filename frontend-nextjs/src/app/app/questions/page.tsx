@@ -477,12 +477,12 @@ const QuestionsContent = () => {
   // 1) collections (cards) - excluding the default collection
   // 2) questions from all collections (including default)
   const collectionCards = useMemo(() => {
-    // Prefer redux collections for canonical list (and for new collections created).
-    // If redux isn't loaded yet, fall back to unified endpoint collections.
-    const allCols = Array.isArray(collections) && collections.length 
-      ? collections 
-      : Array.isArray(collectionsWithQuestions) 
-        ? collectionsWithQuestions.filter((c: any) => !!c?.id) 
+    // Always prefer collectionsWithQuestions as it includes the questions array
+    // Fall back to redux collections only if unified data isn't loaded yet
+    const allCols = Array.isArray(collectionsWithQuestions) && collectionsWithQuestions.length
+      ? collectionsWithQuestions.filter((c: any) => !!c?.id)
+      : Array.isArray(collections) && collections.length 
+        ? collections 
         : []
     
     // Deduplicate by ID and filter out the default collection
@@ -495,7 +495,10 @@ const QuestionsContent = () => {
     
     allCols.forEach((c: any) => {
       if (!isDefault(c) && c?.id) {
-        collectionMap.set(c.id, c)
+        // Prefer the version with questions array if available
+        if (!collectionMap.has(c.id) || (Array.isArray(c.questions) && !collectionMap.get(c.id).questions)) {
+          collectionMap.set(c.id, c)
+        }
       }
     })
     
@@ -670,9 +673,21 @@ const QuestionsContent = () => {
                   }}
                 >
                   <div className="card-content">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-                      <IconFolder size={28} />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, textAlign: 'center' }}>
+                      <IconFolder size={32} />
                       <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{c.title}</div>
+                      <div style={{
+                        fontSize: '2rem',
+                        fontWeight: 900,
+                        color: '#333',
+                        textShadow: '0 0 3px white, 0 0 5px white',
+                        lineHeight: 1,
+                      }}>
+                        {Array.isArray(c.questions) ? c.questions.length : 0}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: '#6B7280', fontWeight: 600 }}>
+                        {Array.isArray(c.questions) && c.questions.length === 1 ? 'question' : 'questions'}
+                      </div>
                     </div>
                   </div>
                   <div className="card-footer">
