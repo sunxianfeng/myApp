@@ -1,5 +1,6 @@
 /* ========================================
    UNIFIED QUESTIONS PAGE STYLES
+   Updated: 2025-12-26 - List View Redesign
    ======================================== */
 
 :root {
@@ -50,16 +51,103 @@
 
 .unified-main-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
   padding: 16px;
+  /* Ensure grid items maintain aspect ratio */
+  grid-auto-rows: 1fr;
 }
 
 .unified-main-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
   padding: 16px;
+  background-color: var(--neo-bg-color);
+  border: 2px solid var(--neo-border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* List view styles - macOS Finder inspired */
+.list-view-header {
+  display: grid;
+  grid-template-columns: 32px 2fr 100px 1fr 120px 50px;
+  gap: 16px;
+  padding: 8px 16px;
+  background-color: var(--neo-bg-offset);
+  border-bottom: 2px solid var(--neo-border-color);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--neo-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  align-items: center;
+}
+
+.list-view-row {
+  display: grid;
+  grid-template-columns: 32px 2fr 100px 1fr 120px 50px;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--neo-border-color-light);
+  align-items: center;
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+  font-size: 0.875rem;
+  min-height: 36px;
+}
+
+.list-view-row:hover {
+  background-color: var(--neo-bg-offset);
+}
+
+.list-view-row:last-child {
+  border-bottom: none;
+}
+
+.list-view-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.list-view-name {
+  font-weight: 600;
+  color: var(--neo-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-view-type {
+  color: var(--neo-text-secondary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.list-view-collection {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--neo-text-secondary);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-view-date {
+  color: var(--neo-text-secondary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.list-view-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .collection-section {
@@ -145,11 +233,16 @@
   flex-direction: column;
   overflow: hidden;
   transition: all 0.2s ease-in-out;
+  /* Make cards approximately square */
+  aspect-ratio: 1 / 1;
+  min-height: 280px;
+  max-height: 320px;
 }
 
 .unified-question-card:hover {
   transform: translateY(-2px) translateX(-2px);
   box-shadow: 6px 6px 0 0 var(--neo-shadow-color);
+  cursor: pointer;
 }
 
 .card-header {
@@ -184,12 +277,28 @@
 }
 
 .card-content {
-  padding: 12px;
-  font-size: 1rem;
+  padding: 16px;
+  font-size: 0.95rem;
   line-height: 1.5;
   color: var(--neo-text-primary);
-  flex-grow: 1; /* Allows cards in a grid to have equal height */
-  min-height: 80px; /* Ensure cards have a minimum height */
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+}
+
+/* For question cards - text should be left-aligned and clamped */
+.unified-question-card .card-content {
+  display: block;
+  text-align: left;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  -webkit-box-orient: vertical;
 }
 
 .card-footer {
@@ -376,3 +485,4 @@
   outline: 3px dashed var(--neo-primary-color);
   outline-offset: 2px;
 }
+/* Cache bust: 1766752440 */

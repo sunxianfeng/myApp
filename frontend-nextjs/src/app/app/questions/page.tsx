@@ -624,66 +624,193 @@ const QuestionsContent = () => {
 
       {/* Unified view: collections + default questions */}
       <main className={viewMode === 'card' ? 'unified-main-grid' : 'unified-main-list'}>
-        {/* Collection cards */}
-        {nonDefaultCollectionCards.map((c: any, idx: number) => {
-          const cId = String(c.id)
-          const isDragOver = dragOverCollectionId === cId
-          return (
-            <div key={`collection-${cId}-${idx}`} style={{ display: 'flex', flexDirection: 'column' }}>
+        {viewMode === 'list' && (
+          <div className="list-view-header">
+            <div></div>
+            <div>Name</div>
+            <div>Type</div>
+            <div>Collection</div>
+            <div>Date Created</div>
+            <div></div>
+          </div>
+        )}
+
+        {viewMode === 'card' ? (
+          <>
+            {/* Collection cards */}
+            {nonDefaultCollectionCards.map((c: any, idx: number) => {
+              const cId = String(c.id)
+              const isDragOver = dragOverCollectionId === cId
+              return (
+                <div
+                  key={`collection-${cId}-${idx}`}
+                  className={`unified-question-card${isDragOver ? ' drag-over' : ''}`}
+                  style={{
+                    borderLeft: `6px solid ${generateColorFromString(cId)}`,
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => router.push(`/app/collections/${cId}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') router.push(`/app/collections/${cId}`)
+                  }}
+                  onDragOver={(e) => {
+                    // allow drop
+                    e.preventDefault()
+                    setDragOverCollectionId(cId)
+                  }}
+                  onDragLeave={() => {
+                    setDragOverCollectionId((prev) => (prev === cId ? null : prev))
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    const qId = e.dataTransfer.getData('application/x-question-id')
+                    if (!qId) return
+                    handleDropQuestionToCollection(cId, qId)
+                  }}
+                >
+                  <div className="card-content">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                      <IconFolder size={28} />
+                      <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{c.title}</div>
+                    </div>
+                  </div>
+                  <div className="card-footer">
+                    <span className="card-meta-tag">Collection</span>
+                    <span className="card-meta-date">{new Date(c.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              )
+            })}
+
+            {/* All questions */}
+            {allQuestionsWithCollection.map((q: any) => (
+              <QuestionCard
+                key={`question-${String(q.id)}`}
+                question={q}
+                collection={q.collection}
+                onAction={handleAction}
+                onClick={() => {
+                  setSelectedQuestion(q)
+                  setSelectedQuestionCollection(q.collection)
+                  setIsModalOpen(true)
+                }}
+                draggable
+              />
+            ))}
+          </>
+        ) : (
+          <>
+            {/* List view - Collections */}
+            {nonDefaultCollectionCards.map((c: any, idx: number) => {
+              const cId = String(c.id)
+              return (
+                <div
+                  key={`list-collection-${cId}-${idx}`}
+                  className="list-view-row"
+                  onClick={() => router.push(`/app/collections/${cId}`)}
+                >
+                  <div className="list-view-icon">
+                    <IconFolder size={20} color={generateColorFromString(cId)} />
+                  </div>
+                  <div className="list-view-name">{c.title}</div>
+                  <div className="list-view-type">Collection</div>
+                  <div className="list-view-collection">—</div>
+                  <div className="list-view-date">{new Date(c.created_at).toLocaleDateString()}</div>
+                  <div className="list-view-actions">
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger asChild>
+                        <button
+                          className="card-action-btn"
+                          aria-label="Collection Actions"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <IconMore size={16} />
+                        </button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Portal>
+                        <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
+                          <DropdownMenu.Item className="card-dropdown-item" onSelect={() => router.push(`/app/collections/${cId}`)}>
+                            <IconFolder size={14} />
+                            <span>Open Collection</span>
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Separator className="card-dropdown-separator" />
+                          <DropdownMenu.Item className="card-dropdown-item danger" onSelect={() => window.alert('Delete collection')}>
+                            <IconTrash size={14} />
+                            <span>Delete</span>
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Portal>
+                    </DropdownMenu.Root>
+                  </div>
+                </div>
+              )
+            })}
+
+            {/* List view - Questions */}
+            {allQuestionsWithCollection.map((q: any) => (
               <div
-                className={`unified-question-card${isDragOver ? ' drag-over' : ''}`}
-                style={{
-                  borderLeft: `6px solid ${generateColorFromString(cId)}`,
+                key={`list-question-${String(q.id)}`}
+                className="list-view-row"
+                onClick={() => {
+                  setSelectedQuestion(q)
+                  setSelectedQuestionCollection(q.collection)
+                  setIsModalOpen(true)
                 }}
-                role="button"
-                tabIndex={0}
-                onClick={() => router.push(`/app/collections/${cId}`)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') router.push(`/app/collections/${cId}`)
-                }}
-                onDragOver={(e) => {
-                  // allow drop
-                  e.preventDefault()
-                  setDragOverCollectionId(cId)
-                }}
-                onDragLeave={() => {
-                  setDragOverCollectionId((prev) => (prev === cId ? null : prev))
-                }}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  const qId = e.dataTransfer.getData('application/x-question-id')
-                  if (!qId) return
-                  handleDropQuestionToCollection(cId, qId)
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('application/x-question-id', String(q.id))
+                  e.dataTransfer.effectAllowed = 'move'
                 }}
               >
-                <div className="card-content" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <IconFolder size={22} />
-                  <div style={{ fontWeight: 900 }}>{c.title}</div>
+                <div className="list-view-icon">
+                  <IconEdit />
                 </div>
-                <div className="card-footer">
-                  <span className="card-meta-tag">Collection</span>
-                  <span className="card-meta-date">{new Date(c.created_at).toLocaleDateString()}</span>
+                <div className="list-view-name">{q.content}</div>
+                <div className="list-view-type">{q.question_type || 'Question'}</div>
+                <div className="list-view-collection">
+                  <IconFolder size={12} />
+                  {q.collection?.title || 'Uncategorized'}
+                </div>
+                <div className="list-view-date">{new Date(q.created_at).toLocaleDateString()}</div>
+                <div className="list-view-actions">
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button
+                        className="card-action-btn"
+                        aria-label="Question Actions"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <IconMore size={16} />
+                      </button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
+                        <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('edit', q)}>
+                          <IconEdit />
+                          <span>Edit Question</span>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('tags', q)}>
+                          <IconTag size={14} />
+                          <span>Manage Tags</span>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('move', q)}>
+                          <IconMove size={14} />
+                          <span>Change Collection</span>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Separator className="card-dropdown-separator" />
+                        <DropdownMenu.Item className="card-dropdown-item danger" onSelect={() => handleAction('delete', q)}>
+                          <IconTrash size={14} />
+                          <span>Delete</span>
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
                 </div>
               </div>
-            </div>
-          )
-        })}
-
-        {/* All questions */}
-        {allQuestionsWithCollection.map((q: any) => (
-          <QuestionCard
-            key={`question-${String(q.id)}`}
-            question={q}
-            collection={q.collection}
-            onAction={handleAction}
-            onClick={() => {
-              setSelectedQuestion(q)
-              setSelectedQuestionCollection(q.collection)
-              setIsModalOpen(true)
-            }}
-            draggable
-          />
-        ))}
+            ))}
+          </>
+        )}
       </main>
 
       {(!allQuestions.length && !isProcessing) && (
