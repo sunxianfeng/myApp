@@ -14,7 +14,7 @@ class Question(Base):
     
     # 题目基本信息
     number = Column(Integer, nullable=False, comment="题目编号")
-    content = Column(Text, nullable=False, comment="题目主要内容")
+    content = Column(JSON, nullable=False, comment="题目主要内容（JSON结构，兼容旧的纯文本迁移为 {text: ...}）")
     full_content = Column(Text, comment="题目完整内容(包括多行文本)")
     
     # 题目类型和分类

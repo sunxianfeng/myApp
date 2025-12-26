@@ -26,7 +26,64 @@ const questionTypeMap: Record<string, string> = {
 const UploadResultPage = () => {
   const dispatch = useDispatch<AppDispatch>()
   const router = useRouter()
-  const result = useSelector((state: RootState) => state.upload.latestResult)
+  const resultFromStore = useSelector((state: RootState) => state.upload.latestResult)
+
+  // Use `undefined` as "initializing" state to avoid briefly rendering the empty-state.
+  // IMPORTANT: initialize from store synchronously to prevent hydration mismatch
+  // (server HTML is generated without store data; client may have it on first render).
+  const [result, setResult] = useState<any>(() => resultFromStore ?? undefined)
+
+  useEffect(() => {
+    // Prefer store result when available
+    if (resultFromStore) {
+      setResult(resultFromStore)
+      return
+    }
+
+    // If result is not in store (e.g. direct navigation), check if we should use mock data.
+    // This logic runs only on the client, avoiding hydration mismatch.
+    const enableMock = new URLSearchParams(window.location.search).get('mock') !== '0'
+    if (enableMock) {
+      const mockQuestions: any[] = [
+        {
+          id: 'mock-1',
+          number: 1,
+          question_type: 'multiple_choice',
+          content: '下列关于 JavaScript 的说法正确的是（ ）。',
+          full_content: '下列关于 JavaScript 的说法正确的是（ ）。',
+          options: [
+            { label: 'A', content: 'JavaScript 是一种编译型语言' },
+            { label: 'B', content: 'JavaScript 主要运行在浏览器和 Node.js 环境中' },
+            { label: 'C', content: 'JavaScript 只能用于前端开发' },
+            { label: 'D', content: 'JavaScript 不能操作 DOM' },
+          ],
+        },
+        {
+          id: 'mock-2',
+          number: 2,
+          question_type: 'fill_blank',
+          content: 'React 中用于管理组件状态的 Hook 是 ________。',
+          full_content: 'React 中用于管理组件状态的 Hook 是 ________。',
+          options: [],
+        },
+      ]
+
+      setResult({
+        data: {
+          questions: mockQuestions,
+          total_questions: mockQuestions.length,
+          results: [{ filename: 'mock.png', success: true, total_questions: mockQuestions.length }],
+          document_title: 'Mock 文档',
+          filename: 'mock.png',
+          file_type: 'image',
+          file_size: undefined,
+        },
+      })
+    } else {
+      // Explicitly set to null to render the empty-state
+      setResult(null)
+    }
+  }, [resultFromStore])
 
   const questions = result?.data?.questions ?? []
   interface EditableQuestion {
@@ -43,25 +100,28 @@ const UploadResultPage = () => {
     draftOptions: Array<{ label: string; content: string }>
   }
 
-  const [items, setItems] = useState<EditableQuestion[]>(() => questions.map((q: any, idx: number): EditableQuestion => ({
-    id: q.id || `temp-${idx}`,
-    number: q.number || idx + 1,
-    question_type: q.type || q.question_type || 'multiple_choice',
-    content: q.content,
-    full_content: q.full_content || q.content,
-    options: q.options || [],
-    selected: false,
-    expanded: true,
-    editing: false,
-    draftContent: q.full_content || q.content,
-    draftOptions: (q.options || []).map((o: any) => ({ label: o.label, content: o.content }))
-  })))
+  const [items, setItems] = useState<EditableQuestion[]>([])
+
+  useEffect(() => {
+    if (questions.length > 0) {
+      setItems(questions.map((q: any, idx: number): EditableQuestion => ({
+        id: q.id || `temp-${idx}`,
+        number: q.number || idx + 1,
+        question_type: q.type || q.question_type || 'multiple_choice',
+        content: q.content,
+        full_content: q.full_content || q.content,
+        options: q.options || [],
+        selected: false,
+        expanded: true,
+        editing: false,
+        draftContent: q.full_content || q.content,
+        draftOptions: (q.options || []).map((o: any) => ({ label: o.label, content: o.content }))
+      })))
+    }
+  }, [questions])
+
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [showCollectionModal, setShowCollectionModal] = useState(false)
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string>('')
-  const [showNewCollectionForm, setShowNewCollectionForm] = useState(false)
-  const [newCollectionTitle, setNewCollectionTitle] = useState('')
   
   const collections = useSelector(selectCollections)
   const isCollectionSaving = useSelector(selectCollectionSaving)
@@ -83,19 +143,8 @@ const UploadResultPage = () => {
     [fileResults]
   )
 
-  if (!result) {
-    return (
-      <div className="empty-state">
-        <div className="empty-state-card">
-          <h2>暂无识别结果</h2>
-          <p>请返回上传页面，选择图片或文档进行 OCR 解析。</p>
-          <button className="empty-state-btn" onClick={handleReturnToUpload}>
-            返回上传页面
-          </button>
-        </div>
-      </div>
-    )
-  }
+  // NOTE: result is always defined due to the mocked fallback above,
+  // so we do not render the empty-state screen here.
 
   const renderQuestionType = (type?: string) => {
     if (!type) return '其他'
@@ -140,8 +189,8 @@ const UploadResultPage = () => {
       alert('请先勾选需要保存的题目')
       return
     }
-    // 显示选择错题本的弹窗
-    setShowCollectionModal(true)
+    // 直接执行保存逻辑，不再显示弹窗
+    handleConfirmSave()
   }
   
   const handleConfirmSave = async () => {
@@ -171,50 +220,61 @@ const UploadResultPage = () => {
       }
       
       console.log('准备保存题目，payload:', payload)
-      console.log('Token 前10个字符:', token?.substring(0, 10))
       
       const resp = await bulkCreateQuestions(payload)
       
-      // 第二步：如果选择了错题本，将题目添加到错题本中
-      if (selectedCollectionId || showNewCollectionForm) {
-        let targetCollectionId = selectedCollectionId
-        
-        // 如果是创建新错题本
-        if (showNewCollectionForm && newCollectionTitle.trim()) {
-          const newCollection: CollectionCreate = {
-            title: newCollectionTitle,
-            description: `从 ${result?.data?.filename || '上传'} 创建`,
-            is_favorite: false,
-            is_public: false,
-          }
-          const collectionResp = await dispatch(addCollection(newCollection)).unwrap()
-          targetCollectionId = collectionResp.id
+      // 第二步：找到或创建 "Default" 错题本
+      let defaultCollection = collections.find(c => c.title === '默认错题本' || c.title === 'Default')
+      
+      let targetCollectionId = defaultCollection?.id
+      
+      if (!targetCollectionId) {
+        const newCollection: CollectionCreate = {
+          title: '默认错题本',
+          description: '系统默认错题本，用于存放新识别的题目',
+          is_favorite: false,
+          is_public: false,
         }
-        
-        // 添加题目到错题本
-        if (targetCollectionId && resp.question_ids) {
-          await dispatch(addQuestionsToCol({
-            collectionId: targetCollectionId,
-            questionIds: resp.question_ids
-          })).unwrap()
-          alert(`保存成功！创建 ${resp.created_count} 题，并已添加到错题本。`)
-          router.push(`/app/collections/${targetCollectionId}`)
-        } else {
-          alert(`保存成功，创建 ${resp.created_count} 题。`)
-        }
-      } else {
-        alert(`保存成功，创建 ${resp.created_count} 题。`)
+        const collectionResp = await dispatch(addCollection(newCollection)).unwrap()
+        targetCollectionId = collectionResp.id
       }
       
-      setShowCollectionModal(false)
-      setSelectedCollectionId('')
-      setShowNewCollectionForm(false)
-      setNewCollectionTitle('')
+      // 第三步：将题目添加到错题本
+      if (targetCollectionId && resp.question_ids) {
+        await dispatch(addQuestionsToCol({
+          collectionId: targetCollectionId,
+          questionIds: resp.question_ids
+        })).unwrap()
+      }
+
+      // 直接跳转到「题目管理」页面（不弹窗），并携带这次新建的题目 ID
+      const ids = Array.isArray(resp.question_ids) ? resp.question_ids : []
+      const query = ids.length ? `?ids=${encodeURIComponent(ids.join(','))}` : ''
+      router.push(`/app/questions${query}`)
     } catch (e: any) {
       setSaveError(e.message || '保存失败')
     } finally {
       setSaving(false)
     }
+  }
+
+  // While initializing on first client render, don't show "暂无识别结果".
+  if (result === undefined) {
+    return null
+  }
+
+  if (!result) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state-card">
+          <h2>暂无识别结果</h2>
+          <p>请返回上传页面，选择图片或文档进行 OCR 解析。</p>
+          <button className="empty-state-btn" onClick={handleReturnToUpload}>
+            返回上传页面
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -401,106 +461,6 @@ const UploadResultPage = () => {
                 )}
               </div>
             ))}
-          </div>
-        </div>
-      )}
-      
-      {/* 选择错题本弹窗 - Neobrutalism Style */}
-      {showCollectionModal && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <h2 className="modal-title">保存到错题本</h2>
-            
-            {!showNewCollectionForm ? (
-              <div className="modal-content">
-                <div className="modal-field">
-                  <label className="modal-label">
-                    选择错题本
-                  </label>
-                  <select
-                    value={selectedCollectionId}
-                    onChange={(e) => setSelectedCollectionId(e.target.value)}
-                    className="modal-select"
-                  >
-                    <option value="">不选择错题本（仅保存题目）</option>
-                    {collections.map(col => (
-                      <option key={col.id} value={col.id}>
-                        {col.title} ({col.question_count} 题)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <button
-                  onClick={() => setShowNewCollectionForm(true)}
-                  className="create-collection-btn"
-                >
-                  + 创建新错题本
-                </button>
-                
-                <div className="modal-actions">
-                  <button
-                    onClick={() => {
-                      setShowCollectionModal(false)
-                      setSelectedCollectionId('')
-                    }}
-                    className="modal-btn-cancel"
-                    disabled={saving}
-                  >
-                    取消
-                  </button>
-                  <button
-                    onClick={handleConfirmSave}
-                    className="modal-btn-confirm"
-                    disabled={saving}
-                  >
-                    {saving ? '保存中...' : '确认保存'}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="modal-content">
-                <div className="modal-field">
-                  <label className="modal-label">
-                    新错题本名称 *
-                  </label>
-                  <input
-                    type="text"
-                    value={newCollectionTitle}
-                    onChange={(e) => setNewCollectionTitle(e.target.value)}
-                    className="modal-input"
-                    placeholder="例如：数学错题集"
-                    autoFocus
-                  />
-                </div>
-                
-                <div className="modal-actions">
-                  <button
-                    onClick={() => {
-                      setShowNewCollectionForm(false)
-                      setNewCollectionTitle('')
-                    }}
-                    className="modal-btn-cancel"
-                    disabled={saving}
-                  >
-                    返回
-                  </button>
-                  <button
-                    onClick={handleConfirmSave}
-                    className="modal-btn-confirm"
-                    disabled={saving || !newCollectionTitle.trim()}
-                  >
-                    {saving ? '创建并保存中...' : '创建并保存'}
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {saveError && (
-              <div className="modal-error">
-                {saveError}
-              </div>
-            )}
           </div>
         </div>
       )}

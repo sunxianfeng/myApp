@@ -158,7 +158,8 @@ export const bulkCreateQuestions = async (payload: {
     options?: Array<{ label: string; content: string }>;
   }>;
 }): Promise<any> => {
-  return await api.post('/v1/questions/bulk-create', payload)
+  // NOTE: 临时用于联调/测试：跳过后端 Document 创建
+  return await api.post('/v1/questions/bulk-create?skip_document=true', payload)
 }
 
 // 模板管理相关 API

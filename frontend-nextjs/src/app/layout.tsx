@@ -1,13 +1,7 @@
 import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import ReduxProvider from '@/components/providers/ReduxProvider'
 import ErrorBoundary from '@/components/common/ErrorBoundary'
-
-const plusJakartaSans = Plus_Jakarta_Sans({ 
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700']
-})
 
 export const metadata: Metadata = {
   title: {
@@ -89,11 +83,8 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className={plusJakartaSans.className}>
+      <body style={{ fontFamily: "'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
         <ErrorBoundary>
           <ReduxProvider>
             {children}

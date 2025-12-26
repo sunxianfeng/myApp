@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 import logging
 from datetime import datetime
+import uuid
 
 from app.models.question import Question, Document
 from app.database import get_db
@@ -37,6 +38,13 @@ class QuestionService:
             创建的文档对象
         """
         try:
+            # uploaded_by 在模型中是 UUID(as_uuid=True)。
+            # 这里允许上层传入 str/UUID，并在服务层统一转换，避免 SQLite/Postgres 方言
+            # 在 bind 时对 str 调用 .hex 导致: 'str' object has no attribute 'hex'
+            uploaded_by_uuid = None
+            if uploaded_by:
+                uploaded_by_uuid = uploaded_by if isinstance(uploaded_by, uuid.UUID) else uuid.UUID(str(uploaded_by))
+
             document = Document(
                 title=title,
                 filename=filename,
@@ -44,7 +52,7 @@ class QuestionService:
                 file_url=file_url,
                 file_size=file_size,
                 file_type=file_type,
-                uploaded_by=uploaded_by,
+                uploaded_by=uploaded_by_uuid,
                 processing_status='pending'
             )
             
@@ -114,18 +122,23 @@ class QuestionService:
                                created_by: str) -> List[Question]:
         """
         从OCR结果创建题目记录
-        
+
         Args:
             ocr_questions: OCR识别的题目列表
             document_id: 文档ID
             created_by: 创建用户ID
-            
+
         Returns:
             创建的题目列表
         """
         try:
             created_questions = []
-            
+
+            created_by_uuid = created_by if isinstance(created_by, uuid.UUID) else uuid.UUID(str(created_by))
+            document_id_uuid = None
+            if document_id:
+                document_id_uuid = document_id if isinstance(document_id, uuid.UUID) else uuid.UUID(str(document_id))
+
             for ocr_q in ocr_questions:
                 options = ocr_q.get('options') or []
                 images = ocr_q.get('images') or {}
@@ -142,27 +155,27 @@ class QuestionService:
                     source_image_url=source_image_url,
                     question_images=images,
                     has_images=has_images,
-                    source_document_id=document_id,
+                    source_document_id=document_id_uuid,
                     ocr_confidence=str(ocr_q.get('confidence', 0)),
                     processing_status='completed',
-                    created_by=created_by,
+                    created_by=created_by_uuid,
                     # TODO: 图片相关字段待实现
                     # question_images=ocr_q.get('images', []),
                     # has_images=bool(ocr_q.get('images', []))
                 )
-                
+
                 self.db.add(question)
                 created_questions.append(question)
-            
+
             self.db.commit()
-            
+
             # 刷新所有题目以获取ID
             for question in created_questions:
                 self.db.refresh(question)
-            
+
             logger.info(f"Created {len(created_questions)} questions for document {document_id}")
             return created_questions
-            
+
         except Exception as e:
             self.db.rollback()
             logger.error(f"Failed to create questions from OCR: {e}")

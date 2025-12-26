@@ -128,7 +128,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* User Profile */}
             <div className="flex items-center gap-3">
               <img
-                src="https://i.pravatar.cc/32"
+                src={
+                  'data:image/svg+xml;utf8,' +
+                  encodeURIComponent(
+                    `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                      <rect width="32" height="32" rx="16" fill="#E5E7EB"/>
+                      <circle cx="16" cy="13" r="6" fill="#9CA3AF"/>
+                      <path d="M6.5 28c2.5-6 16.5-6 19 0" fill="#9CA3AF"/>
+                    </svg>`
+                  )
+                }
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full"
               />

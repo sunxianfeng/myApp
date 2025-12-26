@@ -1,8 +1,9 @@
 """
 题目相关的Pydantic模型 - 用于API请求和响应的数据验证
 """
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
+import uuid
 from pydantic import BaseModel, Field, validator
 
 
@@ -11,14 +12,13 @@ class QuestionOption(BaseModel):
     label: str = Field(..., description="选项标签，如A、B、C、D")
     content: str = Field(..., description="选项内容")
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class QuestionBase(BaseModel):
     """题目基础模型"""
     number: int = Field(..., description="题目编号")
-    content: str = Field(..., description="题目主要内容")
+    content: Union[str, Dict[str, Any]] = Field(..., description="题目主要内容（JSON或纯文本）")
     full_content: Optional[str] = Field(None, description="题目完整内容")
     question_type: str = Field(..., description="题目类型")
     difficulty_level: Optional[str] = Field("medium", description="难度级别")
@@ -43,8 +43,7 @@ class QuestionBase(BaseModel):
             raise ValueError(f'Difficulty level must be one of: {allowed_levels}')
         return v
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class QuestionCreate(QuestionBase):
@@ -53,14 +52,11 @@ class QuestionCreate(QuestionBase):
     source_image_path: Optional[str] = Field(None, description="来源图片路径")
     source_image_url: Optional[str] = Field(None, description="来源图片URL")
     ocr_confidence: Optional[str] = Field(None, description="OCR识别置信度")
-    # TODO: 图片相关字段待实现
-    # question_images: Optional[List[Dict[str, Any]]] = Field(None, description="题目中的图片信息")
-    # has_images: Optional[bool] = Field(False, description="是否包含图片")
 
 
 class QuestionUpdate(BaseModel):
     """更新题目请求模型"""
-    content: Optional[str] = Field(None, description="题目主要内容")
+    content: Optional[Union[str, Dict[str, Any]]] = Field(None, description="题目主要内容（JSON或纯文本）")
     full_content: Optional[str] = Field(None, description="题目完整内容")
     question_type: Optional[str] = Field(None, description="题目类型")
     difficulty_level: Optional[str] = Field(None, description="难度级别")
@@ -76,25 +72,21 @@ class QuestionUpdate(BaseModel):
 
 class QuestionResponse(QuestionBase):
     """题目响应模型"""
-    id: str = Field(..., description="题目ID")
+    id: uuid.UUID = Field(..., description="题目ID")
     source_image_path: Optional[str] = Field(None, description="来源图片路径")
     source_image_url: Optional[str] = Field(None, description="来源图片URL")
-    source_document_id: Optional[str] = Field(None, description="来源文档ID")
+    source_document_id: Optional[uuid.UUID] = Field(None, description="来源文档ID")
     ocr_confidence: Optional[str] = Field(None, description="OCR识别置信度")
     is_verified: bool = Field(False, description="是否已人工验证")
     is_active: bool = Field(True, description="是否启用")
     processing_status: str = Field(..., description="处理状态")
-    created_by: str = Field(..., description="创建用户ID")
-    verified_by: Optional[str] = Field(None, description="验证用户ID")
+    created_by: uuid.UUID = Field(..., description="创建用户ID")
+    verified_by: Optional[uuid.UUID] = Field(None, description="验证用户ID")
     created_at: datetime = Field(..., description="创建时间")
     updated_at: datetime = Field(..., description="更新时间")
     verified_at: Optional[datetime] = Field(None, description="验证时间")
-    # TODO: 图片相关字段待实现
-    # question_images: Optional[List[Dict[str, Any]]] = Field(None, description="题目中的图片信息")
-    # has_images: Optional[bool] = Field(False, description="是否包含图片")
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class DocumentBase(BaseModel):
@@ -106,8 +98,7 @@ class DocumentBase(BaseModel):
     file_size: Optional[int] = Field(None, description="文件大小（字节）")
     file_type: Optional[str] = Field(None, description="文件类型")
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class DocumentCreate(DocumentBase):
@@ -117,19 +108,18 @@ class DocumentCreate(DocumentBase):
 
 class DocumentResponse(DocumentBase):
     """文档响应模型"""
-    id: str = Field(..., description="文档ID")
+    id: uuid.UUID = Field(..., description="文档ID")
     processing_status: str = Field(..., description="处理状态")
     total_questions: int = Field(0, description="提取的题目总数")
     processed_questions: int = Field(0, description="已处理的题目数")
     ocr_confidence_avg: Optional[str] = Field(None, description="平均OCR置信度")
     extraction_errors: Optional[List[Dict[str, Any]]] = Field(None, description="提取错误信息")
-    uploaded_by: str = Field(..., description="上传用户ID")
+    uploaded_by: uuid.UUID = Field(..., description="上传用户ID")
     created_at: datetime = Field(..., description="创建时间")
     updated_at: datetime = Field(..., description="更新时间")
     processed_at: Optional[datetime] = Field(None, description="处理完成时间")
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class OCRProcessRequest(BaseModel):

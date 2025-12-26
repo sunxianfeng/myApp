@@ -1,0 +1,241 @@
+/* ========================================
+   NEOBRUTALISM DESIGN - QUESTIONS PAGE
+   (Copied from organize page styling to match wireframe)
+   ======================================== */
+
+html body .questions-page,
+html body div.questions-page,
+body div.questions-page,
+div.questions-page {
+  background-color: #F8F7F5 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  color: #000000 !important;
+  padding: 2rem !important;
+  min-height: 100vh !important;
+  box-sizing: border-box !important;
+}
+
+html body .questions-page *,
+body .questions-page *,
+.questions-page * {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  box-sizing: border-box !important;
+}
+
+/* Header */
+.questions-header {
+  background-color: #A3E635 !important;
+  border: 4px solid #000000 !important;
+  padding: 1.5rem 2.5rem !important;
+  margin-bottom: 1.25rem !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.questions-header h1 {
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 0 !important;
+}
+
+.questions-error {
+  background: #FFEDD5 !important;
+  border: 4px solid #000 !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  padding: 1rem 1.25rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Layout Container */
+.questions-container {
+  display: flex !important;
+  gap: 2rem !important;
+  align-items: flex-start !important;
+}
+
+/* Sidebar - Directory Style */
+.questions-sidebar {
+  width: 320px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+}
+
+.sidebar-section {
+  background-color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  padding: 1.5rem !important;
+}
+
+.section-title {
+  font-size: 1.25rem !important;
+  font-weight: 900 !important;
+  margin: 0 0 1.5rem 0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 4px solid #000000 !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.collection-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+}
+
+.collection-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: 0.75rem 1rem !important;
+  border: 3px solid #000000 !important;
+  background-color: #FFFFFF !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-weight: 700 !important;
+}
+
+.collection-item:hover,
+.collection-item.drop-over {
+  background-color: #FFD100 !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.collection-icon {
+  font-size: 1.5rem !important;
+}
+
+.collection-count {
+  margin-left: auto !important;
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+}
+
+/* Main Content Area */
+.questions-main {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+}
+
+.questions-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 1.5rem !important;
+}
+
+/* Question Card - Document Icon Style */
+.question-card {
+  background-color: #FFFFFF !important;
+  border: 4px solid #000000 !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  padding: 1.5rem !important;
+  cursor: grab !important;
+  position: relative !important;
+  transition: all 0.2s !important;
+}
+
+.question-card:active {
+  cursor: grabbing !important;
+}
+
+.question-card:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.question-card-icon {
+  font-size: 2.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.question-card-title {
+  font-weight: 900 !important;
+  font-size: 1rem !important;
+  margin-bottom: 0.5rem !important;
+  display: -webkit-box !important;
+  line-clamp: 2 !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.question-card-meta {
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  color: #666666 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
+.questions-empty {
+  grid-column: 1 / -1 !important;
+  text-align: center !important;
+  padding: 4rem !important;
+  background: #fff !important;
+  border: 4px dashed #ccc !important;
+}
+
+/* Create New Zone */
+.create-zone {
+  margin-top: 1rem !important;
+  border: 4px dashed #000000 !important;
+  padding: 1.5rem !important;
+  text-align: center !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.create-zone:hover,
+.create-zone.drop-over {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+  border-style: solid !important;
+}
+
+/* Buttons */
+.neo-btn {
+  border: 4px solid #000000 !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.neo-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.neo-btn-orange {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background-color: rgba(248, 247, 245, 0.8) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 100 !important;
+  font-weight: 900 !important;
+  font-size: 1.5rem !important;
+}
