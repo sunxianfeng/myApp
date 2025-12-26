@@ -31,7 +31,7 @@ import {
   selectCollectionLoading,
   addQuestionsToCol,
 } from '@/lib/slices/collectionSlice'
-import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection } from '@/lib/api'
+import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection, getQuestions } from '@/lib/api'
 
 import './questions-neobrutalism.css'
 
@@ -556,7 +556,10 @@ const QuestionCard = ({
   onClick?: () => void
   draggable?: boolean
 }) => {
-  const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+  // Handle unassigned questions with a special color and icon
+  const isUnassigned = question.isUnassigned || collection?.id === 'unassigned' || !collection?.id
+  const collectionColor = isUnassigned ? '#E5E7EB' : generateColorFromString(collection.id)
+  const collectionTitle = isUnassigned ? 'Uncategorized' : (collection?.title || 'Uncategorized')
 
   return (
     <div
@@ -579,7 +582,7 @@ const QuestionCard = ({
       <div className="card-header">
         <div className="collection-tag">
           <IconFolder size={14} style={{ marginRight: '6px' }} />
-          {collection?.title || 'Uncategorized'}
+          {collectionTitle}
         </div>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
@@ -649,6 +652,9 @@ const QuestionsContent = () => {
 
   // View mode state - card is default
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
+  
+  // Filter state for showing only unassigned questions
+  const [showOnlyUnassigned, setShowOnlyUnassigned] = useState(false)
 
   // Modal state for question details
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null)
@@ -678,15 +684,23 @@ const QuestionsContent = () => {
         await dispatch(fetchCollections()).unwrap()
 
         // 2) Load unified data for this page (collections + questions)
-        const data = await getCollectionsWithQuestions()
-        if (Array.isArray(data)) {
-          setCollectionsWithQuestions(data)
+        const [collectionsData, allQuestionsData] = await Promise.all([
+          getCollectionsWithQuestions(),
+          getQuestions({ limit: 1000 }) // Fetch all questions
+        ])
 
-          // Flatten questions so empty-state logic still works.
-          const flattened = data.flatMap((c: any) => (Array.isArray(c.questions) ? c.questions : []))
-          setAllQuestions(flattened)
+        if (Array.isArray(collectionsData)) {
+          setCollectionsWithQuestions(collectionsData)
         } else {
           setCollectionsWithQuestions([])
+        }
+
+        // Set all questions (both assigned and unassigned)
+        if (allQuestionsData && Array.isArray(allQuestionsData.questions)) {
+          setAllQuestions(allQuestionsData.questions)
+        } else if (Array.isArray(allQuestionsData)) {
+          setAllQuestions(allQuestionsData)
+        } else {
           setAllQuestions([])
         }
       } catch (err: any) {
@@ -758,34 +772,49 @@ const QuestionsContent = () => {
   }, [collectionCards])
 
   const allQuestionsWithCollection = useMemo(() => {
-    if (!collectionsWithQuestions) return [];
-    const questionMap = new Map();
+    if (!allQuestions.length) return [];
     
-    collectionsWithQuestions.forEach((collection: any) => {
-      if (!collection || !Array.isArray(collection.questions)) return;
-      collection.questions.forEach((question: any) => {
-        // Ensure we use string ID as key for proper deduplication
-        const questionId = String(question.id);
-        if (!questionMap.has(questionId)) {
-          // Check if this is a default collection
-          const isDefaultCol = !collection.id || 
-            collection.title === 'Uncategorized' || 
-            collection.title === '默认错题本' || 
-            collection.title === 'Default';
-          
-          questionMap.set(questionId, {
-            ...question,
-            // Keep the actual collection info for all questions
-            collection: isDefaultCol 
-              ? { id: 'default', title: 'Uncategorized' }
-              : collection,
-          });
-        }
+    // Create a map of question ID to collections for quick lookup
+    const questionToCollectionsMap = new Map<string, any[]>();
+    
+    if (collectionsWithQuestions) {
+      collectionsWithQuestions.forEach((collection: any) => {
+        if (!collection || !Array.isArray(collection.questions)) return;
+        collection.questions.forEach((question: any) => {
+          const questionId = String(question.id);
+          if (!questionToCollectionsMap.has(questionId)) {
+            questionToCollectionsMap.set(questionId, []);
+          }
+          questionToCollectionsMap.get(questionId)!.push(collection);
+        });
       });
-    });
+    }
     
-    return Array.from(questionMap.values());
-  }, [collectionsWithQuestions]);
+    // Map all questions and assign their collection info
+    return allQuestions.map((question: any) => {
+      const questionId = String(question.id);
+      const assignedCollections = questionToCollectionsMap.get(questionId) || [];
+      
+      // For display purposes, show the first collection or mark as uncategorized
+      const primaryCollection = assignedCollections.length > 0 
+        ? assignedCollections[0]
+        : { id: 'unassigned', title: 'Uncategorized' };
+      
+      return {
+        ...question,
+        collection: primaryCollection,
+        assignedCollections, // Store all collections this question belongs to
+        isUnassigned: assignedCollections.length === 0,
+      };
+    });
+  }, [allQuestions, collectionsWithQuestions]);
+
+  // Filter questions based on unassigned toggle
+  const filteredQuestions = useMemo(() => {
+    return showOnlyUnassigned 
+      ? allQuestionsWithCollection.filter(q => q.isUnassigned)
+      : allQuestionsWithCollection;
+  }, [allQuestionsWithCollection, showOnlyUnassigned]);
 
   const handleAction = (action: string, payload: any) => {
     console.log('Action:', action, 'Payload:', payload)
@@ -834,12 +863,20 @@ const QuestionsContent = () => {
         )
       )
 
-      // Refresh unified data to reflect changes
-      const data = await getCollectionsWithQuestions()
-      if (Array.isArray(data)) {
-        setCollectionsWithQuestions(data)
-        const flattened = data.flatMap((c: any) => (Array.isArray(c.questions) ? c.questions : []))
-        setAllQuestions(flattened)
+      // Refresh both collections and all questions data to reflect changes
+      const [collectionsData, allQuestionsData] = await Promise.all([
+        getCollectionsWithQuestions(),
+        getQuestions({ limit: 1000 })
+      ])
+
+      if (Array.isArray(collectionsData)) {
+        setCollectionsWithQuestions(collectionsData)
+      }
+
+      if (allQuestionsData && Array.isArray(allQuestionsData.questions)) {
+        setAllQuestions(allQuestionsData.questions)
+      } else if (Array.isArray(allQuestionsData)) {
+        setAllQuestions(allQuestionsData)
       }
 
       // Show success message
@@ -857,12 +894,20 @@ const QuestionsContent = () => {
       setIsProcessing(true)
       await dispatch(addQuestionsToCol({ collectionId, questionIds: [questionId] })).unwrap()
 
-      // Refresh unified data so UI reflects changes.
-      const data = await getCollectionsWithQuestions()
-      if (Array.isArray(data)) {
-        setCollectionsWithQuestions(data)
-        const flattened = data.flatMap((c: any) => (Array.isArray(c.questions) ? c.questions : []))
-        setAllQuestions(flattened)
+      // Refresh both collections and all questions data to reflect changes
+      const [collectionsData, allQuestionsData] = await Promise.all([
+        getCollectionsWithQuestions(),
+        getQuestions({ limit: 1000 })
+      ])
+
+      if (Array.isArray(collectionsData)) {
+        setCollectionsWithQuestions(collectionsData)
+      }
+
+      if (allQuestionsData && Array.isArray(allQuestionsData.questions)) {
+        setAllQuestions(allQuestionsData.questions)
+      } else if (Array.isArray(allQuestionsData)) {
+        setAllQuestions(allQuestionsData)
       }
     } catch (e: any) {
       setPageError(e?.message || 'Failed to move question.')
@@ -878,7 +923,10 @@ const QuestionsContent = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
           <div>
             <h1>Question Management</h1>
-            <p>Collections + default questions. Click into a collection or a question for details.</p>
+            <p>
+              All questions and collections. 
+              {showOnlyUnassigned ? ' Showing only unassigned questions.' : ' Click "Unassigned Only" to filter.'}
+            </p>
           </div>
 
           <div style={{ display: 'flex', gap: 8 }} suppressHydrationWarning>
@@ -897,6 +945,13 @@ const QuestionsContent = () => {
               style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
             >
               <IconList size={16} style={{ marginRight: 6 }} />
+            </button>
+            <button
+              className={`neo-btn ${showOnlyUnassigned ? 'neo-btn-primary' : 'neo-btn-white'}`}
+              onClick={() => setShowOnlyUnassigned(!showOnlyUnassigned)}
+              style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
+            >
+              Unassigned Only
             </button>
           </div>
         </div>
@@ -978,7 +1033,7 @@ const QuestionsContent = () => {
             })}
 
             {/* All questions */}
-            {allQuestionsWithCollection.map((q: any) => (
+            {filteredQuestions.map((q: any) => (
               <QuestionCard
                 key={`question-${String(q.id)}`}
                 question={q}
@@ -1042,7 +1097,7 @@ const QuestionsContent = () => {
             })}
 
             {/* List view - Questions */}
-            {allQuestionsWithCollection.map((q: any) => (
+            {filteredQuestions.map((q: any) => (
               <div
                 key={`list-question-${String(q.id)}`}
                 className="list-view-row"
@@ -1064,7 +1119,12 @@ const QuestionsContent = () => {
                 <div className="list-view-type">{q.question_type || 'Question'}</div>
                 <div className="list-view-collection">
                   <IconFolder size={12} />
-                  {q.collection?.title || 'Uncategorized'}
+                  <span style={{ 
+                    color: q.isUnassigned ? '#9CA3AF' : 'inherit',
+                    fontStyle: q.isUnassigned ? 'italic' : 'normal'
+                  }}>
+                    {q.collection?.title || 'Uncategorized'}
+                  </span>
                 </div>
                 <div className="list-view-date">{new Date(q.created_at).toLocaleDateString()}</div>
                 <div className="list-view-actions">
@@ -1111,6 +1171,13 @@ const QuestionsContent = () => {
         <div className="questions-empty">
           <p style={{ fontWeight: 900, fontSize: '1.25rem' }}>No questions found.</p>
           <p>Get started by creating a new question or collection.</p>
+        </div>
+      )}
+
+      {(allQuestions.length > 0 && !filteredQuestions.length && showOnlyUnassigned && !isProcessing) && (
+        <div className="questions-empty">
+          <p style={{ fontWeight: 900, fontSize: '1.25rem' }}>No unassigned questions found.</p>
+          <p>All questions have been assigned to collections.</p>
         </div>
       )}
 
