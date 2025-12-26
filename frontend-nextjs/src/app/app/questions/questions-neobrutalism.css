@@ -11,6 +11,15 @@
   --primary-accent: #A3E635;
   --secondary-accent: #FFD100;
   --danger-color: #EF4444;
+  --neo-bg-color: #FFFFFF;
+  --neo-bg-offset: #F3F4F6;
+  --neo-bg-offset-hover: #E5E7EB;
+  --neo-border-color: #D1D5DB;
+  --neo-border-color-light: #E5E7EB;
+  --neo-primary-color: #111827;
+  --neo-shadow-color: rgba(0, 0, 0, 0.1);
+  --neo-text-primary: #111827;
+  --neo-text-secondary: #6B7280;
 }
 
 .unified-questions-page {
@@ -41,168 +50,329 @@
 
 .unified-main-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.unified-main-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.collection-section {
+  border: 2px solid var(--neo-border-color);
+  border-radius: 8px;
+  background-color: var(--neo-bg-offset);
+  margin-bottom: 24px;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
+  overflow: hidden; /* Ensures child corners are clipped */
+}
+
+/* Collection Header */
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--neo-border-color);
+  background-color: var(--neo-bg-offset);
+}
+
+.collection-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collection-meta {
+  font-size: 0.875rem;
+  color: var(--neo-text-secondary);
+  padding: 8px 16px;
+  display: flex;
+  gap: 16px;
+  border-bottom: 2px solid var(--neo-border-color);
+  background-color: var(--neo-bg-offset);
+}
+
+/* List Item Styles */
+.list-item-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  font-weight: 700;
+  color: var(--neo-text-secondary);
+  border-bottom: 2px solid var(--neo-border-color);
+  background-color: var(--neo-bg-offset);
+}
+
+.list-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--neo-border-color-light);
+}
+
+.list-item-row:last-child {
+  border-bottom: none;
+}
+
+.list-item-content {
+  flex-grow: 1;
+}
+
+.list-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 200px;
+  justify-content: flex-end;
+  color: var(--neo-text-secondary);
 }
 
 /* Unified Question Card */
 .unified-question-card {
-  background-color: var(--card-bg);
-  border: 3px solid var(--border-color);
-  border-left-width: 6px;
-  box-shadow: 6px 6px 0px 0px var(--shadow-color);
+  background-color: var(--neo-bg-color);
+  border: 2px solid var(--neo-border-color);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   transition: all 0.2s ease-in-out;
 }
 
 .unified-question-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 8px 10px 0px 0px var(--shadow-color);
+  transform: translateY(-2px) translateX(-2px);
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 2px solid #F3F4F6;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--neo-border-color);
+  background-color: var(--neo-bg-offset);
+  font-size: 0.875rem;
 }
 
 .collection-tag {
   display: inline-flex;
   align-items: center;
-  font-size: 0.8rem;
   font-weight: 700;
-  padding: 4px 8px;
-  background-color: #F3F4F6;
-  border: 2px solid var(--border-color);
+  color: var(--neo-text-primary);
 }
 
 .card-action-btn {
-  background: transparent;
+  background: none;
   border: none;
   cursor: pointer;
   padding: 4px;
-  border-radius: 99px;
-  color: #6B7280;
+  border-radius: 4px;
+  color: var(--neo-text-secondary);
 }
+
 .card-action-btn:hover {
-  background-color: #F3F4F6;
-  color: var(--text-color);
+  background-color: var(--neo-bg-offset-hover);
+  color: var(--neo-text-primary);
 }
 
 .card-content {
-  padding: 1.25rem;
+  padding: 12px;
   font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.6;
-  flex-grow: 1;
+  line-height: 1.5;
+  color: var(--neo-text-primary);
+  flex-grow: 1; /* Allows cards in a grid to have equal height */
+  min-height: 80px; /* Ensure cards have a minimum height */
 }
 
 .card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-top: 2px solid #F3F4F6;
+  padding: 8px 12px;
+  border-top: 2px solid var(--neo-border-color);
   font-size: 0.8rem;
-  color: #6B7280;
+  color: var(--neo-text-secondary);
+  background-color: var(--neo-bg-offset);
 }
 
 .card-meta-tag {
-  font-weight: 700;
-  background-color: var(--secondary-accent);
-  padding: 2px 8px;
-  border: 2px solid var(--border-color);
-  color: var(--text-color);
+  background-color: var(--neo-bg-offset-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.card-meta-date {
+  font-size: 0.8rem;
 }
 
 /* Dropdown Menu (Radix) */
 .card-dropdown-content {
-  background-color: var(--card-bg);
-  border: 3px solid var(--border-color);
-  box-shadow: 4px 4px 0px 0px var(--shadow-color);
-  padding: 0.5rem;
-  min-width: 200px;
-  z-index: 50;
+  background-color: var(--neo-bg-color);
+  border: 2px solid var(--neo-border-color);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
+  padding: 6px;
+  min-width: 180px;
+  z-index: 10;
 }
 
 .card-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  font-weight: 700;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 0.875rem;
   outline: none;
 }
 
-.card-dropdown-item:hover {
-  background-color: var(--primary-accent);
+.card-dropdown-item:hover,
+.card-dropdown-item:focus {
+  background-color: var(--neo-bg-offset-hover);
+  color: var(--neo-text-primary);
 }
 
-.card-dropdown-item.danger:hover {
-  background-color: var(--danger-color);
-  color: white;
+.card-dropdown-item.danger {
+  color: #ef4444;
+}
+.card-dropdown-item.danger:hover,
+.card-dropdown-item.danger:focus {
+  background-color: #fee2e2;
+  color: #b91c1c;
 }
 
 .card-dropdown-separator {
-  height: 2px;
-  background-color: #F3F4F6;
-  margin: 0.5rem 0;
+  height: 1px;
+  background-color: var(--neo-border-color);
+  margin: 6px -6px;
 }
 
-/* Floating Action Button (FAB) */
+/* Button Styles */
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 2px solid var(--neo-border-color);
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 3px 3px 0 0 var(--neo-shadow-color);
+  text-decoration: none;
+}
+
+.neo-btn:hover {
+  transform: translateY(-1px) translateX(-1px);
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
+}
+
+.neo-btn:active {
+  transform: translateY(1px) translateX(1px);
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color);
+}
+
+.neo-btn-white {
+  background-color: var(--neo-bg-color);
+  color: var(--neo-text-primary);
+}
+
+.neo-btn[aria-pressed='true'] {
+  background-color: var(--neo-primary-color);
+  color: white;
+  box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.2);
+  transform: translateY(1px) translateX(1px);
+}
+
+/* FAB (Floating Action Button) */
 .fab {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 60px;
-  height: 60px;
-  background-color: var(--primary-accent);
-  border: 4px solid var(--border-color);
-  box-shadow: 6px 6px 0px 0px var(--shadow-color);
-  border-radius: 999px;
+  bottom: 30px;
+  right: 30px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--neo-primary-color);
+  color: white;
+  border: 2px solid var(--neo-border-color);
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  z-index: 40;
 }
 
 .fab:hover {
-  transform: translateY(-2px);
-  box-shadow: 8px 8px 0px 0px var(--shadow-color);
+  transform: translateY(-2px) translateX(-2px);
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color);
 }
 
-/* General Overrides & Helpers */
-.questions-error {
-  background: #FFEDD5 !important;
-  border: 4px solid #000 !important;
-  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
-  padding: 1rem 1.25rem !important;
-  font-weight: 800 !important;
-  margin-bottom: 1.5rem !important;
-}
-
+/* Empty State */
 .questions-empty {
-  grid-column: 1 / -1 !important;
-  text-align: center !important;
-  padding: 4rem !important;
-  background: #fff !important;
-  border: 4px dashed #ccc !important;
+  text-align: center;
+  padding: 60px 20px;
+  border: 2px dashed var(--neo-border-color);
+  border-radius: 8px;
+  margin: 20px;
+  background-color: var(--neo-bg-offset);
 }
 
+/* Loading Overlay */
 .loading-overlay {
-  position: fixed !important;
-  inset: 0 !important;
-  background-color: rgba(248, 247, 245, 0.8) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 100 !important;
-  font-weight: 900 !important;
-  font-size: 1.5rem !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  z-index: 99;
+}
+
+/* Error Message */
+.questions-error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 2px solid #fca5a5;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.folder-icon-container {
+  padding: 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--neo-bg-offset) 0%, var(--neo-bg-color) 100%);
+  border: 2px solid var(--neo-border-color);
+  box-shadow: 3px 3px 0 0 var(--neo-shadow-color);
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-icon-container:hover {
+  transform: translateY(-2px) translateX(-2px);
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
+}
+
+.drag-over {
+  outline: 3px dashed var(--neo-primary-color);
+  outline-offset: 2px;
 }

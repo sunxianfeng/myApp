@@ -461,3 +461,44 @@ async def bulk_create_questions(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to bulk create questions: {str(e)}"
         )
+
+
+@router.get("/", response_model=QuestionListResponse)
+async def list_questions(
+    skip: int = 0,
+    limit: int = 50,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get all questions for the current user (optionally filtered by keyword)."""
+    try:
+        question_service = get_question_service(db)
+
+        if search and search.strip():
+            questions = question_service.search_questions(
+                keyword=search.strip(),
+                skip=skip,
+                limit=limit,
+            )
+        else:
+            # If no search keyword is provided, return latest questions for current user.
+            questions = question_service.get_all_questions(
+                created_by=str(current_user.id),
+                skip=skip,
+                limit=limit,
+            )
+
+        return QuestionListResponse(
+            questions=[QuestionResponse.from_orm(q) for q in questions],
+            total=len(questions),
+            skip=skip,
+            limit=limit,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to list questions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get questions: {str(e)}",
+        )

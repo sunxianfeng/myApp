@@ -116,12 +116,33 @@ export const getCurrentUser = async (): Promise<any> => {
 
 // 问题管理相关 API
 export const getQuestions = async (params?: {
-  page?: number;
+  // Preferred (backend):
+  skip?: number;
   limit?: number;
   search?: string;
+
+  // Backwards compatibility (frontend callers):
+  page?: number;
   category?: string;
 }): Promise<any> => {
-  return await api.get('/v1/questions', { params })
+  const { page, limit, skip, search, category } = params || {}
+
+  const computedSkip =
+    typeof skip === 'number'
+      ? skip
+      : typeof page === 'number' && typeof limit === 'number'
+        ? Math.max(0, (page - 1) * limit)
+        : undefined
+
+  // category is currently ignored by backend; keep it for future use without breaking callers.
+  return await api.get('/v1/questions', {
+    params: {
+      skip: computedSkip,
+      limit,
+      search,
+      category,
+    },
+  })
 }
 
 export const getQuestion = async (id: string): Promise<any> => {
@@ -342,6 +363,11 @@ export const updateCollection = async (collectionId: string, collectionData: any
 
 export const deleteCollection = async (collectionId: string): Promise<any> => {
   return await api.delete(`/v1/collections/collections/${collectionId}`)
+}
+
+// 题目管理联合视图：一次性获取所有错题本 + 题目
+export const getCollectionsWithQuestions = async (): Promise<any> => {
+  return await api.get('/v1/collections/collections-with-questions')
 }
 
 // 错题本题目管理 API

@@ -335,6 +335,31 @@ class QuestionService:
             logger.error(f"Failed to search questions: {e}")
             raise
 
+    def get_all_questions(
+        self,
+        created_by: str,
+        skip: int = 0,
+        limit: int = 50,
+    ) -> List[Question]:
+        """Return latest active questions created by the given user."""
+        try:
+            created_by_uuid = created_by if isinstance(created_by, uuid.UUID) else uuid.UUID(str(created_by))
+
+            query = (
+                self.db.query(Question)
+                .filter(
+                    Question.created_by == created_by_uuid,
+                    Question.is_active == True,
+                )
+                .order_by(Question.created_at.desc())
+            )
+
+            return query.offset(skip).limit(limit).all()
+
+        except Exception as e:
+            logger.error(f"Failed to get all questions: {e}")
+            raise
+
 
 def get_question_service(db: Session) -> QuestionService:
     """获取题目服务实例"""

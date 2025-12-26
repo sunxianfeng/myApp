@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import ReduxProvider from '@/components/providers/ReduxProvider'
 import ErrorBoundary from '@/components/common/ErrorBoundary'
+import ErrorFallback from '@/components/common/ErrorFallback'
+import AntdRegistry from '@/lib/AntdRegistry'
 
 export const metadata: Metadata = {
   title: {
@@ -85,10 +87,12 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
       </head>
       <body style={{ fontFamily: "'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
-        <ErrorBoundary>
-          <ReduxProvider>
-            {children}
-          </ReduxProvider>
+        <ErrorBoundary fallback={ErrorFallback}>
+          <AntdRegistry>
+            <ReduxProvider>
+              {children}
+            </ReduxProvider>
+          </AntdRegistry>
         </ErrorBoundary>
       </body>
     </html>

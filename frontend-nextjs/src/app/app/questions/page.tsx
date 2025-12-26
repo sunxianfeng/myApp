@@ -1,21 +1,37 @@
 'use client'
 
 import React, { Suspense, useEffect, useMemo, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux'
-import { FileText, Folder, Tag, MoreHorizontal, Edit, Trash2, Plus, ChevronsUpDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+
+import {
+  Folder as IconFolder,
+  LayoutGrid as IconGrid,
+  List as IconList,
+  MoreHorizontal as IconMore,
+  Plus as IconPlus,
+  Trash2 as IconTrash,
+  Tag as IconTag,
+  ArrowRightLeft as IconMove,
+  X as IconX,
+} from 'lucide-react'
+
+const IconEdit = () => (
+  <span aria-hidden style={{ display: 'inline-block', width: 14, height: 14, fontWeight: 900 }}>
+    ✎
+  </span>
+)
 
 import type { AppDispatch } from '@/lib/store'
 import {
   addCollection,
-  addQuestionsToCol,
   fetchCollections,
-  removeQuestionFromCol,
   selectCollections,
   selectCollectionLoading,
+  addQuestionsToCol,
 } from '@/lib/slices/collectionSlice'
-import { getCollection, getQuestions } from '@/lib/api'
+import { getCollectionsWithQuestions } from '@/lib/api'
 
 import './questions-neobrutalism.css'
 
@@ -29,34 +45,330 @@ const generateColorFromString = (str: string) => {
   return `hsl(${hue}, 70%, 80%)`
 }
 
-const QuestionCard = ({ question, collection, onAction }: { question: any, collection: any, onAction: (action: string, payload: any) => void }) => {
+// Question Detail Modal Component
+const QuestionDetailModal = ({ 
+  question, 
+  collection, 
+  isOpen, 
+  onClose 
+}: { 
+  question: any
+  collection: any
+  isOpen: boolean
+  onClose: () => void 
+}) => {
+  if (!isOpen || !question) return null
+
   const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
 
   return (
-    <div className="unified-question-card" style={{ borderLeftColor: collectionColor }}>
+    <div 
+      className="modal-overlay" 
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px',
+      }}
+    >
+      <div 
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          maxWidth: '800px',
+          width: '100%',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          border: '4px solid black',
+          boxShadow: '8px 8px 0 rgba(0, 0, 0, 1)',
+        }}
+      >
+        <div style={{ 
+          padding: '24px',
+          borderBottom: '3px solid black',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: collectionColor,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <IconFolder size={24} />
+            <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>
+              Question Details
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'white',
+              border: '3px solid black',
+              borderRadius: '6px',
+              padding: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Close"
+          >
+            <IconX size={20} />
+          </button>
+        </div>
+
+        <div style={{ padding: '24px' }}>
+          {/* Collection Info */}
+          <div style={{ 
+            marginBottom: '20px',
+            padding: '12px',
+            backgroundColor: '#F3F4F6',
+            border: '2px solid black',
+            borderRadius: '8px',
+          }}>
+            <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '0.875rem' }}>Collection</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div 
+                style={{ 
+                  width: '12px', 
+                  height: '12px', 
+                  backgroundColor: collectionColor,
+                  border: '2px solid black',
+                  borderRadius: '3px',
+                }} 
+              />
+              <span style={{ fontWeight: 900 }}>{collection?.title || 'Uncategorized'}</span>
+            </div>
+          </div>
+
+          {/* Question Content */}
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Question</h3>
+            <div style={{ 
+              padding: '16px',
+              backgroundColor: '#FEFCE8',
+              border: '3px solid black',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              lineHeight: '1.6',
+            }}>
+              {question.content}
+            </div>
+          </div>
+
+          {/* Full Content (if available) */}
+          {question.full_content && question.full_content !== question.content && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Full Content</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#F0FDF4',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
+              }}>
+                {question.full_content}
+              </div>
+            </div>
+          )}
+
+          {/* Options (if available) */}
+          {question.options && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Options</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#EFF6FF',
+                border: '3px solid black',
+                borderRadius: '8px',
+              }}>
+                <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                  {typeof question.options === 'string' 
+                    ? question.options 
+                    : JSON.stringify(question.options, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {/* Correct Answer (if available) */}
+          {question.correct_answer && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Correct Answer</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#DCFCE7',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontWeight: 700,
+              }}>
+                {question.correct_answer}
+              </div>
+            </div>
+          )}
+
+          {/* Explanation (if available) */}
+          {question.explanation && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Explanation</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#FEF3C7',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
+              }}>
+                {question.explanation}
+              </div>
+            </div>
+          )}
+
+          {/* Metadata Grid */}
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '12px',
+            marginTop: '24px',
+            paddingTop: '24px',
+            borderTop: '2px dashed black',
+          }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Type</div>
+              <div style={{ fontWeight: 900 }}>{question.question_type || 'N/A'}</div>
+            </div>
+            
+            {question.difficulty_level && (
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Difficulty</div>
+                <div style={{ fontWeight: 900 }}>{question.difficulty_level}</div>
+              </div>
+            )}
+            
+            {question.subject && (
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Subject</div>
+                <div style={{ fontWeight: 900 }}>{question.subject}</div>
+              </div>
+            )}
+            
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Created</div>
+              <div style={{ fontWeight: 900 }}>{new Date(question.created_at).toLocaleDateString()}</div>
+            </div>
+            
+            {question.topic_tags && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>Tags</div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {(typeof question.topic_tags === 'string' 
+                    ? question.topic_tags.split(',') 
+                    : Array.isArray(question.topic_tags) 
+                      ? question.topic_tags 
+                      : []
+                  ).map((tag: string, idx: number) => (
+                    <span 
+                      key={idx}
+                      style={{
+                        padding: '4px 12px',
+                        backgroundColor: '#E5E7EB',
+                        border: '2px solid black',
+                        borderRadius: '6px',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const QuestionCard = ({
+  question,
+  collection,
+  onAction,
+  onClick,
+  draggable,
+}: {
+  question: any
+  collection: any
+  onAction: (action: string, payload: any) => void
+  onClick?: () => void
+  draggable?: boolean
+}) => {
+  const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+
+  return (
+    <div
+      className="unified-question-card"
+      style={{ borderLeftColor: collectionColor }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (!onClick) return
+        if (e.key === 'Enter' || e.key === ' ') onClick()
+      }}
+      draggable={!!draggable}
+      onDragStart={(e) => {
+        if (!draggable) return
+        e.dataTransfer.setData('application/x-question-id', String(question.id))
+        e.dataTransfer.effectAllowed = 'move'
+      }}
+    >
       <div className="card-header">
         <div className="collection-tag">
-          <Folder size={14} style={{ marginRight: '6px' }} />
+          <IconFolder size={14} style={{ marginRight: '6px' }} />
           {collection?.title || 'Uncategorized'}
         </div>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button className="card-action-btn" aria-label="Question Actions">
-              <MoreHorizontal size={20} />
+            <button
+              className="card-action-btn"
+              aria-label="Question Actions"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <IconMore size={20} />
             </button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
-              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => onAction('edit', question)}>
-                <Edit size={14} />
+              <DropdownMenu.Item
+                className="card-dropdown-item"
+                onSelect={() => onAction('edit', question)}
+              >
+                <IconEdit />
                 <span>Edit Question</span>
               </DropdownMenu.Item>
-              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => onAction('tags', question)}>
-                <Tag size={14} />
+              <DropdownMenu.Item
+                className="card-dropdown-item"
+                onSelect={() => onAction('tags', question)}
+              >
+                <IconTag size={14} />
                 <span>Manage Tags</span>
               </DropdownMenu.Item>
-              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => onAction('move', question)}>
-                <ChevronsUpDown size={14} />
+              <DropdownMenu.Item
+                className="card-dropdown-item"
+                onSelect={() => onAction('move', question)}
+              >
+                <IconMove size={14} />
                 <span>Change Collection</span>
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="card-dropdown-separator" />
@@ -64,21 +376,17 @@ const QuestionCard = ({ question, collection, onAction }: { question: any, colle
                 className="card-dropdown-item danger"
                 onSelect={() => onAction('delete', question)}
               >
-                <Trash2 size={14} />
+                <IconTrash size={14} />
                 <span>Delete</span>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
       </div>
-      <div className="card-content">
-        {question.content}
-      </div>
+      <div className="card-content">{question.content}</div>
       <div className="card-footer">
         <span className="card-meta-tag">{question.question_type}</span>
-        <span className="card-meta-date">
-          {new Date(question.created_at).toLocaleDateString()}
-        </span>
+        <span className="card-meta-date">{new Date(question.created_at).toLocaleDateString()}</span>
       </div>
     </div>
   )
@@ -86,27 +394,54 @@ const QuestionCard = ({ question, collection, onAction }: { question: any, colle
 
 const QuestionsContent = () => {
   const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
+
   const collections = useSelector(selectCollections)
   const isLoading = useSelector(selectCollectionLoading)
 
   const [allQuestions, setAllQuestions] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [pageError, setPageError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  // View mode state - card is default
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
+
+  // Modal state for question details
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null)
+  const [selectedQuestionCollection, setSelectedQuestionCollection] = useState<any>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Holds authoritative collection->questions mapping from backend unified endpoint
+  const [collectionsWithQuestions, setCollectionsWithQuestions] = useState<any[] | null>(null)
+
+  // Track UI drag state (optional feedback)
+  const [dragOverCollectionId, setDragOverCollectionId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadInitialData = async () => {
       setIsProcessing(true)
       setPageError(null)
       try {
-        // Fetch all collections to map questions to them
+        // 1) Load collections into redux (used elsewhere + for create actions)
         await dispatch(fetchCollections()).unwrap()
-        
-        // Fetch all questions
-        const questionsResponse = await getQuestions({ limit: 1000 }) // Fetch a large number
-        if (Array.isArray(questionsResponse.questions)) {
-          setAllQuestions(questionsResponse.questions)
-        }
 
+        // 2) Load unified data for this page (collections + questions)
+        const data = await getCollectionsWithQuestions()
+        if (Array.isArray(data)) {
+          setCollectionsWithQuestions(data)
+
+          // Flatten questions so empty-state logic still works.
+          const flattened = data.flatMap((c: any) => (Array.isArray(c.questions) ? c.questions : []))
+          setAllQuestions(flattened)
+        } else {
+          setCollectionsWithQuestions([])
+          setAllQuestions([])
+        }
       } catch (err: any) {
         console.error(err)
         setPageError(err?.message || 'Failed to load data.')
@@ -118,22 +453,102 @@ const QuestionsContent = () => {
     loadInitialData()
   }, [dispatch])
 
+  const defaultCollectionBlock = useMemo(() => {
+    // We treat "default" collection as the one coming back with a falsy id or title "Uncategorized" or "默认错题本".
+    // If backend does not provide it, we fall back to an empty block.
+    const cols = collectionsWithQuestions
+    if (!Array.isArray(cols) || !cols.length) return null
+
+    const found = cols.find((c: any) => 
+      !c?.id || 
+      c?.title === 'Uncategorized' || 
+      c?.title === '默认错题本' || 
+      c?.title === 'Default'
+    )
+    return found || null
+  }, [collectionsWithQuestions])
+
+  const defaultQuestions = useMemo(() => {
+    const q = defaultCollectionBlock?.questions
+    return Array.isArray(q) ? q : []
+  }, [defaultCollectionBlock])
+
+  // For the unified card view, we only show:
+  // 1) collections (cards) - excluding the default collection
+  // 2) questions from all collections (including default)
+  const collectionCards = useMemo(() => {
+    // Prefer redux collections for canonical list (and for new collections created).
+    // If redux isn't loaded yet, fall back to unified endpoint collections.
+    const allCols = Array.isArray(collections) && collections.length 
+      ? collections 
+      : Array.isArray(collectionsWithQuestions) 
+        ? collectionsWithQuestions.filter((c: any) => !!c?.id) 
+        : []
+    
+    // Deduplicate by ID and filter out the default collection
+    const collectionMap = new Map()
+    const isDefault = (c: any) => 
+      !c?.id || 
+      c?.title === 'Uncategorized' || 
+      c?.title === '默认错题本' || 
+      c?.title === 'Default'
+    
+    allCols.forEach((c: any) => {
+      if (!isDefault(c) && c?.id) {
+        collectionMap.set(c.id, c)
+      }
+    })
+    
+    return Array.from(collectionMap.values())
+  }, [collections, collectionsWithQuestions])
+
+  const nonDefaultCollectionCards = useMemo(() => {
+    // This is now the same as collectionCards since we already filter default
+    return collectionCards
+  }, [collectionCards])
+
+  const allQuestionsWithCollection = useMemo(() => {
+    if (!collectionsWithQuestions) return [];
+    const questionMap = new Map();
+    
+    collectionsWithQuestions.forEach((collection: any) => {
+      if (!collection || !Array.isArray(collection.questions)) return;
+      collection.questions.forEach((question: any) => {
+        // Ensure we use string ID as key for proper deduplication
+        const questionId = String(question.id);
+        if (!questionMap.has(questionId)) {
+          // Check if this is a default collection
+          const isDefaultCol = !collection.id || 
+            collection.title === 'Uncategorized' || 
+            collection.title === '默认错题本' || 
+            collection.title === 'Default';
+          
+          questionMap.set(questionId, {
+            ...question,
+            // Keep the actual collection info for all questions
+            collection: isDefaultCol 
+              ? { id: 'default', title: 'Uncategorized' }
+              : collection,
+          });
+        }
+      });
+    });
+    
+    return Array.from(questionMap.values());
+  }, [collectionsWithQuestions]);
+
   const handleAction = (action: string, payload: any) => {
     console.log('Action:', action, 'Payload:', payload)
-    // Implement action handlers here (e.g., open modals, dispatch updates)
     switch (action) {
       case 'edit':
-        // Open edit modal for payload (question)
         window.alert(`Editing: ${payload.content}`)
         break
       case 'delete':
-        // Show confirmation and then delete
         if (window.confirm(`Are you sure you want to delete this question?`)) {
           // dispatch(deleteQuestion(payload.id))
         }
         break
       case 'move':
-        // Show collection selection modal
         window.alert('Move to another collection...')
         break
       case 'tags':
@@ -143,7 +558,7 @@ const QuestionsContent = () => {
         break
     }
   }
-  
+
   const handleCreate = (type: 'question' | 'collection') => {
     if (type === 'collection') {
       const title = window.prompt('Enter new collection name:')
@@ -151,45 +566,126 @@ const QuestionsContent = () => {
         dispatch(addCollection({ title, description: '' }))
       }
     } else {
-      // Open create question modal/page
       window.alert('Creating a new question...')
     }
   }
 
-  const questionsWithCollection = useMemo(() => {
-    if (!collections.length) return allQuestions.map(q => ({ ...q, collection: null }))
+  const handleDropQuestionToCollection = async (collectionId: string, questionId: string) => {
+    try {
+      setIsProcessing(true)
+      await dispatch(addQuestionsToCol({ collectionId, questionIds: [questionId] })).unwrap()
 
-    const collectionMap = new Map(collections.map((c: any) => [c.id, c]))
-
-    // This is a simplified mapping. In a real scenario, you'd fetch questions per collection
-    // or have collection_id on the question object. Here, we simulate it.
-    // Let's assume `source_document_id` can act as a grouping key similar to collection_id for now.
-    return allQuestions.map(q => {
-      const collection = collectionMap.get(q.source_document_id) || collections.find((c:any) => c.title === 'Default') || collections[0]
-      return { ...q, collection }
-    })
-  }, [allQuestions, collections])
+      // Refresh unified data so UI reflects changes.
+      const data = await getCollectionsWithQuestions()
+      if (Array.isArray(data)) {
+        setCollectionsWithQuestions(data)
+        const flattened = data.flatMap((c: any) => (Array.isArray(c.questions) ? c.questions : []))
+        setAllQuestions(flattened)
+      }
+    } catch (e: any) {
+      setPageError(e?.message || 'Failed to move question.')
+    } finally {
+      setIsProcessing(false)
+      setDragOverCollectionId(null)
+    }
+  }
 
   return (
     <div className="unified-questions-page">
       <header className="unified-header">
-        <h1>All Questions</h1>
-        <p>A unified view of all questions across your collections.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
+          <div>
+            <h1>Question Management</h1>
+            <p>Collections + default questions. Click into a collection or a question for details.</p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }} suppressHydrationWarning>
+            <button
+              className="neo-btn neo-btn-white"
+              aria-pressed={viewMode === 'card'}
+              onClick={() => setViewMode('card')}
+              style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
+            >
+              <IconGrid size={16} style={{ marginRight: 6 }} />
+            </button>
+            <button
+              className="neo-btn neo-btn-white"
+              aria-pressed={viewMode === 'list'}
+              onClick={() => setViewMode('list')}
+              style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
+            >
+              <IconList size={16} style={{ marginRight: 6 }} />
+            </button>
+          </div>
+        </div>
       </header>
 
       {pageError && <div className="questions-error">{pageError}</div>}
 
-      <main className="unified-main-grid">
-        {questionsWithCollection.map(q => (
+      {/* Unified view: collections + default questions */}
+      <main className={viewMode === 'card' ? 'unified-main-grid' : 'unified-main-list'}>
+        {/* Collection cards */}
+        {nonDefaultCollectionCards.map((c: any, idx: number) => {
+          const cId = String(c.id)
+          const isDragOver = dragOverCollectionId === cId
+          return (
+            <div key={`collection-${cId}-${idx}`} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div
+                className={`unified-question-card${isDragOver ? ' drag-over' : ''}`}
+                style={{
+                  borderLeft: `6px solid ${generateColorFromString(cId)}`,
+                }}
+                role="button"
+                tabIndex={0}
+                onClick={() => router.push(`/app/collections/${cId}`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') router.push(`/app/collections/${cId}`)
+                }}
+                onDragOver={(e) => {
+                  // allow drop
+                  e.preventDefault()
+                  setDragOverCollectionId(cId)
+                }}
+                onDragLeave={() => {
+                  setDragOverCollectionId((prev) => (prev === cId ? null : prev))
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const qId = e.dataTransfer.getData('application/x-question-id')
+                  if (!qId) return
+                  handleDropQuestionToCollection(cId, qId)
+                }}
+              >
+                <div className="card-content" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <IconFolder size={22} />
+                  <div style={{ fontWeight: 900 }}>{c.title}</div>
+                </div>
+                <div className="card-footer">
+                  <span className="card-meta-tag">Collection</span>
+                  <span className="card-meta-date">{new Date(c.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+
+        {/* All questions */}
+        {allQuestionsWithCollection.map((q: any) => (
           <QuestionCard
-            key={q.id}
+            key={`question-${String(q.id)}`}
             question={q}
             collection={q.collection}
             onAction={handleAction}
+            onClick={() => {
+              setSelectedQuestion(q)
+              setSelectedQuestionCollection(q.collection)
+              setIsModalOpen(true)
+            }}
+            draggable
           />
         ))}
       </main>
-      
+
       {(!allQuestions.length && !isProcessing) && (
         <div className="questions-empty">
           <p style={{ fontWeight: 900, fontSize: '1.25rem' }}>No questions found.</p>
@@ -206,22 +702,34 @@ const QuestionsContent = () => {
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
           <button className="fab" aria-label="Create new">
-            <Plus size={24} />
+            <IconPlus size={24} />
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content className="card-dropdown-content" sideOffset={15} align="end">
             <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('question')}>
-              <Edit size={14} />
+              <IconEdit />
               <span>New Question</span>
             </DropdownMenu.Item>
             <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('collection')}>
-              <Folder size={14} />
+              <IconFolder size={14} />
               <span>New Collection</span>
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
+
+      {/* Question Detail Modal */}
+      <QuestionDetailModal
+        question={selectedQuestion}
+        collection={selectedQuestionCollection}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedQuestion(null)
+          setSelectedQuestionCollection(null)
+        }}
+      />
     </div>
   )
 }

@@ -14,7 +14,74 @@ import {
   selectCollectionLoading
 } from '@/lib/slices/collectionSlice'
 import { getCollection } from '@/lib/api'
-import { FileText, Folder, FolderPlus, Plus, ChevronRight, LayoutGrid, List } from 'lucide-react'
+
+function IconFileText({ size = 16, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M8 13h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 17h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function IconFolder({ size = 16, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M3 7a2 2 0 0 1 2-2h5l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function IconFolderPlus({ size = 16, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M3 7a2 2 0 0 1 2-2h5l2 2h8a2 2 0 0 1 2 2v4" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M3 11v6a2 2 0 0 0 2 2h7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M19 14v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M16 17h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function IconPlus({ size = 16, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M12 5v14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function IconChevronRight({ size = 16, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function IconGrid({ size = 16, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M3 3h8v8H3V3z" stroke="currentColor" strokeWidth="2" />
+      <path d="M13 3h8v8h-8V3z" stroke="currentColor" strokeWidth="2" />
+      <path d="M3 13h8v8H3v-8z" stroke="currentColor" strokeWidth="2" />
+      <path d="M13 13h8v8h-8v-8z" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  )
+}
+
+function IconList({ size = 16, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M4 6h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 12h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
 
 // Separate component for the content to use useSearchParams
 const OrganizeContent = () => {
@@ -163,7 +230,7 @@ const OrganizeContent = () => {
                   onDragLeave={onDragLeave}
                   onDrop={(e) => onDrop(e, col.id)}
                 >
-                  <Folder className="collection-icon" fill={dropOverId === col.id ? "#000" : "none"} />
+                  <IconFolder className="collection-icon" fill={dropOverId === col.id ? "#000" : "none"} />
                   <span>{col.title}</span>
                   <span className="collection-count">{col.question_count}</span>
                 </div>
@@ -177,7 +244,7 @@ const OrganizeContent = () => {
             onDragLeave={onDragLeave}
             onDrop={(e) => onDrop(e, 'new')}
           >
-            <FolderPlus size={32} style={{ marginBottom: '0.5rem' }} />
+            <IconFolderPlus size={32} style={{ marginBottom: '0.5rem' }} />
             <div>拖拽至此新建错题本</div>
           </div>
         </aside>
@@ -186,8 +253,8 @@ const OrganizeContent = () => {
           <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>待整理题目 ({questions.length})</span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <LayoutGrid size={20} />
-              <List size={20} color="#ccc" />
+              <IconGrid size={20} />
+              <IconList size={20} color="#ccc" />
             </div>
           </div>
 
@@ -200,7 +267,7 @@ const OrganizeContent = () => {
                 onDragStart={(e) => onDragStart(e, q.id)}
               >
                 <div className="question-card-icon">
-                  <FileText size={40} strokeWidth={2.5} />
+                  <IconFileText size={40} strokeWidth={2.5} />
                 </div>
                 <div className="question-card-title">
                   {q.content || `题目 #${idx + 1}`}

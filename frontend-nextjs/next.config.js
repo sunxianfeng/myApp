@@ -30,6 +30,7 @@ const nextConfig = {
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+    styledComponents: true,
   },
   experimental: {
     optimizeCss: true,
@@ -63,6 +64,7 @@ const nextConfig = {
       ],
     },
   ],
+  transpilePackages: ['antd'],
 };
 
 module.exports = nextConfig;

@@ -4,6 +4,8 @@ from sqlalchemy import func, desc
 from typing import List
 from uuid import UUID
 
+import logging
+
 from app.database import get_db
 from app.models import User, Collection, Category, Question, question_collection
 from app.schemas.collection import (
@@ -15,6 +17,8 @@ from app.schemas.collection import (
     CollectionStatsResponse
 )
 from app.utils.auth import get_current_user
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -525,4 +529,66 @@ async def get_collection_stats(
         by_category=category_stats,
         recent_collections=recent_collections
     )
+
+
+# ==================== 联合视图（题目管理） ====================
+
+@router.get("/collections-with-questions", response_model=List[CollectionWithQuestionsResponse])
+async def get_collections_with_questions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Return all collections for current user, each including its questions.
+
+    This is optimized for the "Question Management" unified view.
+    """
+    try:
+        collections = db.query(Collection).filter(
+            Collection.user_id == current_user.id,
+            Collection.is_active == True
+        ).order_by(Collection.sort_order, desc(Collection.updated_at)).all()
+
+        results: List[CollectionWithQuestionsResponse] = []
+        for collection in collections:
+            result = CollectionWithQuestionsResponse(
+                **{k: v for k, v in collection.__dict__.items() if not k.startswith('_')},
+                questions=[]
+            )
+
+            questions_data = db.query(
+                Question,
+                question_collection.c.added_at,
+                question_collection.c.notes,
+                question_collection.c.mastery_level,
+                question_collection.c.times_practiced,
+                question_collection.c.last_practiced_at
+            ).join(
+                question_collection,
+                Question.id == question_collection.c.question_id
+            ).filter(
+                question_collection.c.collection_id == collection.id
+            ).all()
+
+            result.questions = [
+                {
+                    **q.to_dict(),
+                    'added_at': added_at.isoformat() if added_at else None,
+                    'notes': notes,
+                    'mastery_level': mastery_level,
+                    'times_practiced': times_practiced,
+                    'last_practiced_at': last_practiced_at.isoformat() if last_practiced_at else None,
+                }
+                for q, added_at, notes, mastery_level, times_practiced, last_practiced_at in questions_data
+            ]
+
+            results.append(result)
+
+        return results
+
+    except Exception as e:
+        logger.error(f"Failed to get collections with questions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get collections with questions: {str(e)}"
+        )
 

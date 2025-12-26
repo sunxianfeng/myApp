@@ -3,15 +3,66 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  LayoutDashboard,
-  FileText,
-  LayoutTemplate,
-  Upload,
-  Settings,
-  Search,
-  ChevronDown,
-} from 'lucide-react'
+
+function Icon({ name, className }: { name: 'dashboard' | 'file' | 'template' | 'upload' | 'settings' | 'search' | 'chevronDown'; className?: string }) {
+  const common = { className, fill: 'none', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', 'aria-hidden': true }
+  switch (name) {
+    case 'dashboard':
+      return (
+        <svg {...common}>
+          <path d="M3 13h8V3H3v10z" stroke="currentColor" strokeWidth="2" />
+          <path d="M13 21h8V11h-8v10z" stroke="currentColor" strokeWidth="2" />
+          <path d="M13 3h8v6h-8V3z" stroke="currentColor" strokeWidth="2" />
+          <path d="M3 21h8v-6H3v6z" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      )
+    case 'file':
+      return (
+        <svg {...common}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+          <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'template':
+      return (
+        <svg {...common}>
+          <path d="M4 4h16v16H4V4z" stroke="currentColor" strokeWidth="2" />
+          <path d="M8 4v16" stroke="currentColor" strokeWidth="2" />
+          <path d="M4 10h16" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      )
+    case 'upload':
+      return (
+        <svg {...common}>
+          <path d="M12 16V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path d="M8 11l4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'settings':
+      return (
+        <svg {...common}>
+          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" stroke="currentColor" strokeWidth="2" />
+          <path d="M19.4 15a7.9 7.9 0 0 0 .1-2l2-1.5-2-3.5-2.4.8a8 8 0 0 0-1.7-1L15 4h-6l-.4 2.8a8 8 0 0 0-1.7 1L4.5 7 2.5 10.5 4.5 12a7.9 7.9 0 0 0 .1 2l-2 1.5 2 3.5 2.4-.8a8 8 0 0 0 1.7 1L9 20h6l.4-2.8a8 8 0 0 0 1.7-1l2.4.8 2-3.5-2-1.5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'search':
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+          <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      )
+    case 'chevronDown':
+      return (
+        <svg {...common}>
+          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    default:
+      return null
+  }
+}
 
 interface LayoutProps {
   children: React.ReactNode
@@ -46,12 +97,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Link
               href="/app"
               className={`sidebar-item flex items-center p-3 ${
-                isActive('/app') && pathname === '/app'
-                  ? 'active'
-                  : 'rounded-lg text-gray-600'
+                isActive('/app') && pathname === '/app' ? 'active' : 'rounded-lg text-gray-600'
               }`}
             >
-              <LayoutDashboard className="w-4 h-4 mr-3" />
+              <Icon name="dashboard" className="w-4 h-4 mr-3" />
               仪表板
             </Link>
 
@@ -62,7 +111,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 isActive('/app/questions') ? 'active' : 'rounded-lg text-gray-600'
               }`}
             >
-              <FileText className="w-4 h-4 mr-3" />
+              <Icon name="file" className="w-4 h-4 mr-3" />
               题目管理
             </Link>
 
@@ -73,7 +122,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 isActive('/app/templates') ? 'active' : 'rounded-lg text-gray-600'
               }`}
             >
-              <LayoutTemplate className="w-4 h-4 mr-3" />
+              <Icon name="template" className="w-4 h-4 mr-3" />
               模版管理
             </Link>
 
@@ -84,7 +133,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 isActive('/app/upload') ? 'active' : 'rounded-lg text-gray-600'
               }`}
             >
-              <Upload className="w-4 h-4 mr-3" />
+              <Icon name="upload" className="w-4 h-4 mr-3" />
               文档上传
             </Link>
           </nav>
@@ -98,7 +147,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               isActive('/app/settings') ? 'active' : 'text-gray-600'
             }`}
           >
-            <Settings className="w-4 h-4 mr-3" />
+            <Icon name="settings" className="w-4 h-4 mr-3" />
             设置
           </Link>
         </div>
@@ -115,9 +164,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex items-center gap-20">
             {/* Search Bar */}
             <div className="relative w-80">
-              <Search
-                className="absolute left-5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-              />
+              <Icon name="search" className="absolute left-5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="搜索..."
@@ -145,7 +192,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <p className="font-semibold text-gray-800">Username</p>
                 <p className="text-xs text-gray-500">高级会员</p>
               </div>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <Icon name="chevronDown" className="w-4 h-4 text-gray-500" />
             </div>
           </div>
         </header>
