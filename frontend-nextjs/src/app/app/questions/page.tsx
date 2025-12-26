@@ -181,8 +181,8 @@ const QuestionDetailModal = ({
             </div>
           )}
 
-          {/* Options (if available) */}
-          {question.options && (
+          {/* Options (if available) - only show for multiple choice questions */}
+          {question.options && question.question_type !== 'fill_blank' && question.question_type !== 'fill-blank' && (
             <div style={{ marginBottom: '20px' }}>
               <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Options</h3>
               <div style={{ 
@@ -191,11 +191,65 @@ const QuestionDetailModal = ({
                 border: '3px solid black',
                 borderRadius: '8px',
               }}>
-                <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
-                  {typeof question.options === 'string' 
-                    ? question.options 
-                    : JSON.stringify(question.options, null, 2)}
-                </pre>
+                {(() => {
+                  // Helper function to format options
+                  const formatOptions = () => {
+                    let options = question.options
+                    
+                    // Parse options if it's a string
+                    if (typeof options === 'string') {
+                      try {
+                        options = JSON.parse(options)
+                      } catch {
+                        // If it fails to parse, treat as plain text
+                        return <div style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>{options}</div>
+                      }
+                    }
+                    
+                    // If it's an array, format as A, B, C, D...
+                    if (Array.isArray(options)) {
+                      const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+                      return (
+                        <div style={{ fontSize: '0.9rem', lineHeight: '1.8' }}>
+                          {options.map((option, index) => (
+                            <div key={index} style={{ marginBottom: '8px' }}>
+                              <strong>{optionLabels[index] || index + 1}. </strong>
+                              {typeof option === 'object' ? option.text || option.content || JSON.stringify(option) : option}
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    }
+                    
+                    // If it's an object, try to extract options
+                    if (typeof options === 'object' && options !== null) {
+                      const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+                      const optionEntries = Object.entries(options)
+                      
+                      if (optionEntries.length > 0) {
+                        return (
+                          <div style={{ fontSize: '0.9rem', lineHeight: '1.8' }}>
+                            {optionEntries.map(([key, value], index) => (
+                              <div key={key} style={{ marginBottom: '8px' }}>
+                                <strong>{optionLabels[index] || key}. </strong>
+                                {typeof value === 'object' ? JSON.stringify(value) : String(value || '')}
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      }
+                    }
+                    
+                    // Fallback to original display
+                    return (
+                      <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                        {JSON.stringify(options, null, 2)}
+                      </pre>
+                    )
+                  }
+                  
+                  return formatOptions()
+                })()}
               </div>
             </div>
           )}
