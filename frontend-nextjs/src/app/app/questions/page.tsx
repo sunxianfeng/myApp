@@ -3,7 +3,8 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux'
-import { FileText, Folder, FolderPlus, LayoutGrid, List } from 'lucide-react'
+import { FileText, Folder, Tag, MoreHorizontal, Edit, Trash2, Plus, ChevronsUpDown } from 'lucide-react'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
 import type { AppDispatch } from '@/lib/store'
 import {
@@ -14,248 +15,220 @@ import {
   selectCollections,
   selectCollectionLoading,
 } from '@/lib/slices/collectionSlice'
-import { getCollection } from '@/lib/api'
+import { getCollection, getQuestions } from '@/lib/api'
 
 import './questions-neobrutalism.css'
 
-const DEFAULT_COLLECTION_TITLES = ['默认错题本', 'Default']
+// Helper to generate a consistent, visually appealing color from a string (e.g., collection ID)
+const generateColorFromString = (str: string) => {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const hue = hash % 360
+  return `hsl(${hue}, 70%, 80%)`
+}
+
+const QuestionCard = ({ question, collection, onAction }: { question: any, collection: any, onAction: (action: string, payload: any) => void }) => {
+  const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+
+  return (
+    <div className="unified-question-card" style={{ borderLeftColor: collectionColor }}>
+      <div className="card-header">
+        <div className="collection-tag">
+          <Folder size={14} style={{ marginRight: '6px' }} />
+          {collection?.title || 'Uncategorized'}
+        </div>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button className="card-action-btn" aria-label="Question Actions">
+              <MoreHorizontal size={20} />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
+              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => onAction('edit', question)}>
+                <Edit size={14} />
+                <span>Edit Question</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => onAction('tags', question)}>
+                <Tag size={14} />
+                <span>Manage Tags</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => onAction('move', question)}>
+                <ChevronsUpDown size={14} />
+                <span>Change Collection</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator className="card-dropdown-separator" />
+              <DropdownMenu.Item
+                className="card-dropdown-item danger"
+                onSelect={() => onAction('delete', question)}
+              >
+                <Trash2 size={14} />
+                <span>Delete</span>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+      </div>
+      <div className="card-content">
+        {question.content}
+      </div>
+      <div className="card-footer">
+        <span className="card-meta-tag">{question.question_type}</span>
+        <span className="card-meta-date">
+          {new Date(question.created_at).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  )
+}
 
 const QuestionsContent = () => {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const dispatch = useDispatch<AppDispatch>()
-
   const collections = useSelector(selectCollections)
   const isLoading = useSelector(selectCollectionLoading)
 
-  const [questions, setQuestions] = useState<any[]>([])
-  const [dropOverId, setDropOverId] = useState<string | null>(null)
+  const [allQuestions, setAllQuestions] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [pageError, setPageError] = useState<string | null>(null)
 
-  const questionIdsFromUrl = useMemo(() => {
-    const raw = searchParams.get('ids')
-    if (!raw) return []
-    return raw.split(',').map(s => s.trim()).filter(Boolean)
-  }, [searchParams])
-
   useEffect(() => {
-    const load = async () => {
+    const loadInitialData = async () => {
       setIsProcessing(true)
       setPageError(null)
       try {
-        // Ensure we have collections in store
-        const cols = await dispatch(fetchCollections()).unwrap()
-
-        const defaultCol = (cols || collections).find((c: any) => DEFAULT_COLLECTION_TITLES.includes(c.title))
-        if (!defaultCol) {
-          setQuestions([])
-          return
+        // Fetch all collections to map questions to them
+        await dispatch(fetchCollections()).unwrap()
+        
+        // Fetch all questions
+        const questionsResponse = await getQuestions({ limit: 1000 }) // Fetch a large number
+        if (Array.isArray(questionsResponse.questions)) {
+          setAllQuestions(questionsResponse.questions)
         }
 
-        const detail = await getCollection(defaultCol.id, true)
-
-        const list = Array.isArray(detail?.questions) ? detail.questions : []
-        if (questionIdsFromUrl.length > 0) {
-          setQuestions(list.filter((q: any) => questionIdsFromUrl.includes(q.id)))
-        } else {
-          setQuestions(list)
-        }
       } catch (err: any) {
         console.error(err)
-        setPageError(err?.message || '加载失败')
+        setPageError(err?.message || 'Failed to load data.')
       } finally {
         setIsProcessing(false)
       }
     }
 
-    load()
-    // Intentionally depend on ids; collections state is handled by refetch
-  }, [dispatch, questionIdsFromUrl])
+    loadInitialData()
+  }, [dispatch])
 
-  const onDragStart = (e: React.DragEvent, questionId: string) => {
-    e.dataTransfer.setData('questionId', questionId)
-    e.dataTransfer.effectAllowed = 'move'
+  const handleAction = (action: string, payload: any) => {
+    console.log('Action:', action, 'Payload:', payload)
+    // Implement action handlers here (e.g., open modals, dispatch updates)
+    switch (action) {
+      case 'edit':
+        // Open edit modal for payload (question)
+        window.alert(`Editing: ${payload.content}`)
+        break
+      case 'delete':
+        // Show confirmation and then delete
+        if (window.confirm(`Are you sure you want to delete this question?`)) {
+          // dispatch(deleteQuestion(payload.id))
+        }
+        break
+      case 'move':
+        // Show collection selection modal
+        window.alert('Move to another collection...')
+        break
+      case 'tags':
+        window.alert('Manage tags...')
+        break
+      default:
+        break
+    }
   }
-
-  const onDragOver = (e: React.DragEvent, collectionId: string | 'new') => {
-    e.preventDefault()
-    setDropOverId(collectionId)
-  }
-
-  const onDragLeave = () => {
-    setDropOverId(null)
-  }
-
-  const findDefaultCollection = () => {
-    return collections.find((c: any) => DEFAULT_COLLECTION_TITLES.includes(c.title))
-  }
-
-  const onDrop = async (e: React.DragEvent, destCollectionId: string | 'new') => {
-    e.preventDefault()
-    setDropOverId(null)
-
-    const questionId = e.dataTransfer.getData('questionId')
-    if (!questionId) return
-
-    setIsProcessing(true)
-    setPageError(null)
-
-    try {
-      let finalDestId: string = destCollectionId as string
-
-      if (destCollectionId === 'new') {
-        const title = window.prompt('请输入新错题本名称:')
-        if (!title) return
-
-        const newCol = await dispatch(
-          addCollection({
-            title,
-            description: '从题目管理页面创建',
-            is_favorite: false,
-            is_public: false,
-          })
-        ).unwrap()
-
-        finalDestId = newCol.id
+  
+  const handleCreate = (type: 'question' | 'collection') => {
+    if (type === 'collection') {
+      const title = window.prompt('Enter new collection name:')
+      if (title) {
+        dispatch(addCollection({ title, description: '' }))
       }
-
-      // Add to destination
-      await dispatch(
-        addQuestionsToCol({
-          collectionId: finalDestId,
-          questionIds: [questionId],
-        })
-      ).unwrap()
-
-      // Remove from Default (where these “recent” questions live)
-      const defaultCol = findDefaultCollection()
-      if (defaultCol && defaultCol.id !== finalDestId) {
-        await dispatch(
-          removeQuestionFromCol({
-            collectionId: defaultCol.id,
-            questionId,
-          })
-        ).unwrap()
-      }
-
-      // Update local UI
-      setQuestions(prev => prev.filter(q => q.id !== questionId))
-
-      // Refresh counts
-      dispatch(fetchCollections())
-    } catch (err: any) {
-      console.error(err)
-      setPageError(err?.message || '移动失败')
-    } finally {
-      setIsProcessing(false)
+    } else {
+      // Open create question modal/page
+      window.alert('Creating a new question...')
     }
   }
 
+  const questionsWithCollection = useMemo(() => {
+    if (!collections.length) return allQuestions.map(q => ({ ...q, collection: null }))
+
+    const collectionMap = new Map(collections.map((c: any) => [c.id, c]))
+
+    // This is a simplified mapping. In a real scenario, you'd fetch questions per collection
+    // or have collection_id on the question object. Here, we simulate it.
+    // Let's assume `source_document_id` can act as a grouping key similar to collection_id for now.
+    return allQuestions.map(q => {
+      const collection = collectionMap.get(q.source_document_id) || collections.find((c:any) => c.title === 'Default') || collections[0]
+      return { ...q, collection }
+    })
+  }, [allQuestions, collections])
+
   return (
-    <div className="questions-page">
-      <header className="questions-header">
-        <div>
-          <h1>题目管理</h1>
-          <p style={{ fontWeight: 700, marginTop: '0.5rem' }}>将右侧题目拖拽到左侧错题本进行分类</p>
-        </div>
-        <button className="neo-btn neo-btn-orange" onClick={() => router.push('/app/collections')}>
-          去错题本
-        </button>
+    <div className="unified-questions-page">
+      <header className="unified-header">
+        <h1>All Questions</h1>
+        <p>A unified view of all questions across your collections.</p>
       </header>
 
-      {pageError && (
-        <div className="questions-error">
-          {pageError}
+      {pageError && <div className="questions-error">{pageError}</div>}
+
+      <main className="unified-main-grid">
+        {questionsWithCollection.map(q => (
+          <QuestionCard
+            key={q.id}
+            question={q}
+            collection={q.collection}
+            onAction={handleAction}
+          />
+        ))}
+      </main>
+      
+      {(!allQuestions.length && !isProcessing) && (
+        <div className="questions-empty">
+          <p style={{ fontWeight: 900, fontSize: '1.25rem' }}>No questions found.</p>
+          <p>Get started by creating a new question or collection.</p>
         </div>
       )}
-
-      <div className="questions-container">
-        <aside className="questions-sidebar">
-          <div className="sidebar-section">
-            <h2 className="section-title">错题本目录</h2>
-            <div className="collection-list">
-              {collections.map((col: any) => (
-                <div
-                  key={col.id}
-                  className={`collection-item ${dropOverId === col.id ? 'drop-over' : ''} ${DEFAULT_COLLECTION_TITLES.includes(col.title) ? 'bg-gray-100' : ''}`}
-                  onDragOver={(e) => onDragOver(e, col.id)}
-                  onDragLeave={onDragLeave}
-                  onDrop={(e) => onDrop(e, col.id)}
-                >
-                  <Folder className="collection-icon" fill={dropOverId === col.id ? '#000' : 'none'} />
-                  <span>{col.title}</span>
-                  <span className="collection-count">{col.question_count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className={`create-zone ${dropOverId === 'new' ? 'drop-over' : ''}`}
-            onDragOver={(e) => onDragOver(e, 'new')}
-            onDragLeave={onDragLeave}
-            onDrop={(e) => onDrop(e, 'new')}
-          >
-            <FolderPlus size={32} style={{ marginBottom: '0.5rem' }} />
-            <div>拖拽至此新建错题本</div>
-          </div>
-        </aside>
-
-        <main className="questions-main">
-          <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>最近保存的题目 ({questions.length})</span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <LayoutGrid size={20} />
-              <List size={20} color="#ccc" />
-            </div>
-          </div>
-
-          <div className="questions-grid">
-            {questions.map((q: any, idx: number) => (
-              <div
-                key={q.id}
-                className="question-card"
-                draggable
-                onDragStart={(e) => onDragStart(e, q.id)}
-              >
-                <div className="question-card-icon">
-                  <FileText size={40} strokeWidth={2.5} />
-                </div>
-                <div className="question-card-title">
-                  {q.content || `题目 #${idx + 1}`}
-                </div>
-                <div className="question-card-meta">
-                  <span>{q.question_type === 'multiple_choice' ? '选择题' : '其他'}</span>
-                  <span>{q.created_at ? new Date(q.created_at).toLocaleDateString() : ''}</span>
-                </div>
-              </div>
-            ))}
-
-            {questions.length === 0 && !isProcessing && (
-              <div className="questions-empty">
-                <p style={{ fontWeight: 900, fontSize: '1.25rem' }}>暂无需要整理的题目</p>
-                <button className="neo-btn" style={{ marginTop: '1.5rem' }} onClick={() => router.push('/app/collections')}>
-                  去查看错题本
-                </button>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
 
       {(isProcessing || isLoading) && (
         <div className="loading-overlay">
-          <div className="animate-bounce">处理中...</div>
+          <div className="animate-bounce">Loading...</div>
         </div>
       )}
+
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button className="fab" aria-label="Create new">
+            <Plus size={24} />
+          </button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content className="card-dropdown-content" sideOffset={15} align="end">
+            <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('question')}>
+              <Edit size={14} />
+              <span>New Question</span>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('collection')}>
+              <Folder size={14} />
+              <span>New Collection</span>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
     </div>
   )
 }
 
 export default function QuestionsPage() {
   return (
-    <Suspense fallback={<div className="loading-overlay">加载中...</div>}>
+    <Suspense fallback={<div className="loading-overlay">Loading...</div>}>
       <QuestionsContent />
     </Suspense>
   )
