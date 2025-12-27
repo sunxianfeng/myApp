@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 
-function Icon({ name, className }: { name: 'db' | 'file' | 'template' | 'fileplus' | 'upload' | 'zap' | 'fileup' | 'plus'; className?: string }) {
+function Icon({ name, className }: { name: 'db' | 'file' | 'fileplus' | 'upload' | 'zap' | 'fileup' | 'plus'; className?: string }) {
   // Minimal inline icons to avoid lucide-react (Turbopack HMR instability)
   const common = { className, fill: 'none', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', 'aria-hidden': true }
   switch (name) {
@@ -19,14 +19,6 @@ function Icon({ name, className }: { name: 'db' | 'file' | 'template' | 'fileplu
         <svg {...common}>
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
           <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'template':
-      return (
-        <svg {...common}>
-          <path d="M4 4h16v16H4V4z" stroke="currentColor" strokeWidth="2" />
-          <path d="M8 4v16" stroke="currentColor" strokeWidth="2" />
-          <path d="M4 10h16" stroke="currentColor" strokeWidth="2" />
         </svg>
       )
     case 'fileplus':
@@ -82,7 +74,7 @@ export default function Dashboard() {
           <Icon name="db" className="w-4 h-4 mr-2" />
           核心数据
         </h3>
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 gap-6">
           {/* Metric 1: 总题目数 */}
           <div className="flex items-center space-x-3">
             <Icon name="file" className="w-8 h-8 text-gray-400" />
@@ -92,16 +84,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Metric 2: 模板数量 */}
-          <div className="flex items-center space-x-3">
-            <Icon name="template" className="w-8 h-8 text-gray-400" />
-            <div>
-              <p className="text-xs text-gray-500 mb-1">模板数量</p>
-              <p className="text-2xl font-bold text-gray-800">12</p>
-            </div>
-          </div>
-
-          {/* Metric 3: 生成试卷 */}
+          {/* Metric 2: 生成试卷 */}
           <div className="flex items-center space-x-3">
             <Icon name="fileplus" className="w-8 h-8 text-gray-400" />
             <div>
@@ -110,7 +93,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Metric 4: 上传文档 */}
+          {/* Metric 3: 上传文档 */}
           <div className="flex items-center space-x-3">
             <Icon name="upload" className="w-8 h-8 text-gray-400" />
             <div>
@@ -137,16 +120,7 @@ export default function Dashboard() {
             <span className="font-semibold text-sm">上传新文档</span>
           </Link>
 
-          {/* Action 2: Create Template */}
-          <Link
-            href="/app/templates"
-            className="btn-action border-2 border-solid border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-500 hover:border-gray-400 hover:shadow-md transition-all duration-200"
-          >
-            <Icon name="plus" className="w-10 h-10 mb-3" />
-            <span className="font-semibold text-sm">创建新模板</span>
-          </Link>
-
-          {/* Action 3: Generate Exam */}
+          {/* Action 2: Generate Exam */}
           <Link
             href="/app/papers"
             className="btn-action border-2 border-solid border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-500 hover:border-gray-400 hover:shadow-md transition-all duration-200"

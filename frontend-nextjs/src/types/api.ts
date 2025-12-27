@@ -88,61 +88,12 @@ export interface QuestionFilters {
   tags?: string[]
 }
 
-// 模板相关类型
-export interface Template {
-  id: string
-  name: string
-  description: string
-  type: 'exam' | 'quiz' | 'assignment'
-  subject: string
-  grade?: string
-  duration?: number
-  totalMarks?: number
-  instructions?: string
-  sections: TemplateSection[]
-  createdAt: string
-  updatedAt: string
-  createdBy: string
-}
-
-export interface TemplateSection {
-  id: string
-  name: string
-  description?: string
-  questions: string[]
-  marks: number
-  timeLimit?: number
-}
-
-export interface CreateTemplateData {
-  name: string
-  description: string
-  type: Template['type']
-  subject: string
-  grade?: string
-  duration?: number
-  totalMarks?: number
-  instructions?: string
-  sections: Omit<TemplateSection, 'id'>[]
-}
-
-export interface UpdateTemplateData extends Partial<CreateTemplateData> {}
-
-export interface TemplateFilters {
-  page?: number
-  limit?: number
-  search?: string
-  type?: Template['type']
-  subject?: string
-}
-
 // 文档相关类型
 export interface Document {
   id: string
   title: string
   description?: string
   type: 'exam_paper' | 'worksheet' | 'study_material'
-  templateId?: string
   questions: string[]
   content?: string
   fileUrl?: string
@@ -158,7 +109,6 @@ export interface CreateDocumentData {
   title: string
   description?: string
   type: Document['type']
-  templateId?: string
   questions: string[]
   content?: string
 }
@@ -211,7 +161,6 @@ export interface SupportedFormatsResponse {
 // 统计相关类型
 export interface DashboardStats {
   totalQuestions: number
-  totalTemplates: number
   totalDocuments: number
   recentUploads: number
   questionsByCategory: CategoryStats[]
@@ -284,7 +233,6 @@ export interface FileUrlResponse {
 export interface ExportQuestionsParams {
   format: 'excel' | 'pdf' | 'word'
   questionIds?: string[]
-  templateId?: string
   options?: ExportOptions
 }
 
@@ -378,7 +326,7 @@ export interface BatchOperationResult {
 // 搜索相关类型
 export interface SearchParams {
   query: string
-  type?: 'questions' | 'templates' | 'documents'
+  type?: 'questions' | 'documents'
   filters?: Record<string, any>
   sortBy?: string
   sortOrder?: 'asc' | 'desc'

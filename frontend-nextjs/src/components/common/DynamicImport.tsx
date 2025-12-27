@@ -29,10 +29,6 @@ export const DynamicQuestions = createDynamicComponent(
   () => import('@/app/app/questions/page'),
 )
 
-export const DynamicTemplates = createDynamicComponent(
-  () => import('@/app/app/templates/page'),
-)
-
 export const DynamicPapers = createDynamicComponent(
   () => import('@/app/app/papers/page'),
 )

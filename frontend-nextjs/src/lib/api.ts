@@ -183,35 +183,6 @@ export const bulkCreateQuestions = async (payload: {
   return await api.post('/v1/questions/bulk-create?skip_document=true', payload)
 }
 
-// 模板管理相关 API
-export const getTemplates = async (params?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-}): Promise<any> => {
-  return await api.get('/v1/templates', { params })
-}
-
-export const getTemplate = async (id: string): Promise<any> => {
-  return await api.get(`/v1/templates/${id}`)
-}
-
-export const createTemplate = async (templateData: any): Promise<any> => {
-  return await api.post('/v1/templates', templateData)
-}
-
-export const updateTemplate = async (id: string, templateData: any): Promise<any> => {
-  return await api.put(`/v1/templates/${id}`, templateData)
-}
-
-export const deleteTemplate = async (id: string): Promise<any> => {
-  return await api.delete(`/v1/templates/${id}`)
-}
-
-export const applyTemplate = async (templateId: string, questionIds: string[]): Promise<any> => {
-  return await api.post(`/v1/templates/${templateId}/apply`, { questionIds })
-}
-
 // 文档管理相关 API
 export const getDocuments = async (params?: {
   page?: number;
@@ -237,8 +208,8 @@ export const deleteDocument = async (id: string): Promise<any> => {
   return await api.delete(`/v1/documents/${id}`)
 }
 
-export const generateDocument = async (templateId: string, questionIds: string[]): Promise<any> => {
-  return await api.post('/v1/documents/generate', { templateId, questionIds })
+export const generateDocument = async (questionIds: string[]): Promise<any> => {
+  return await api.post('/v1/documents/generate', { questionIds })
 }
 
 // 统计相关 API
@@ -283,7 +254,6 @@ export const getFileUrl = async (fileId: string): Promise<any> => {
 export const exportQuestions = async (params: {
   format: 'excel' | 'pdf' | 'word';
   questionIds?: string[];
-  templateId?: string;
 }): Promise<any> => {
   return await api.post('/v1/export/questions', params, {
     responseType: 'blob',

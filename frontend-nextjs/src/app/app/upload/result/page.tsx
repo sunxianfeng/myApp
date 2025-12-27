@@ -282,7 +282,7 @@ const UploadResultPage = () => {
       {/* Compact Header */}
       <header className="result-hero" style={{ padding: '1.5rem 2rem', marginBottom: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>确认题目</h1>
+          <h1 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>确认题目</h1>
           <p className="font-bold">找到 {totalQuestions} 道题目，点击"纠正"可修改文字内容</p>
         </div>
         <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>重新上传</button>

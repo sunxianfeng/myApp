@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-function Icon({ name, className }: { name: 'dashboard' | 'file' | 'template' | 'upload' | 'settings' | 'search' | 'chevronDown'; className?: string }) {
+function Icon({ name, className }: { name: 'dashboard' | 'file' | 'upload' | 'settings' | 'search' | 'chevronDown'; className?: string }) {
   const common = { className, fill: 'none', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', 'aria-hidden': true }
   switch (name) {
     case 'dashboard':
@@ -21,14 +21,6 @@ function Icon({ name, className }: { name: 'dashboard' | 'file' | 'template' | '
         <svg {...common}>
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
           <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'template':
-      return (
-        <svg {...common}>
-          <path d="M4 4h16v16H4V4z" stroke="currentColor" strokeWidth="2" />
-          <path d="M8 4v16" stroke="currentColor" strokeWidth="2" />
-          <path d="M4 10h16" stroke="currentColor" strokeWidth="2" />
         </svg>
       )
     case 'upload':
@@ -88,7 +80,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (pathname === '/app') return '仪表板'
     if (pathname.startsWith('/app/questions')) return '题目管理'
     if (pathname.startsWith('/app/collections')) return '题目管理' // Collections are part of questions
-    if (pathname.startsWith('/app/templates')) return '模版管理'
     if (pathname.startsWith('/app/upload')) return '文档上传'
     if (pathname.startsWith('/app/settings')) return '设置'
     return '仪表板' // fallback
@@ -142,15 +133,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             >
               <Icon name="file" className="w-4 h-4 mr-3" />
               题目管理
-            </Link>
-
-            {/* 模版管理 */}
-            <Link
-              href="/app/templates"
-              className={getNavItemClassName('/app/templates')}
-            >
-              <Icon name="template" className="w-4 h-4 mr-3" />
-              模版管理
             </Link>
 
             {/* 文档上传 */}
