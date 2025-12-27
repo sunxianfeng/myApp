@@ -268,8 +268,7 @@ const Upload = () => {
         {/* Improved Header with Breadcrumb */}
         <div className="upload-header">
           {/* Breadcrumb removed */}
-          <h1 style={{ fontSize: '2rem' }}>OCR题目识别</h1>
-          <p>上传图片和文档以提取题目内容</p>
+          <p style={{ fontSize: '1.1rem', fontWeight: 500, margin: 0 }}>上传图片和文档以提取题目内容</p>
         </div>
 
         {/* Mode Selection */}

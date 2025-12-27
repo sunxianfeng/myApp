@@ -1234,7 +1234,7 @@ body {
   margin: 0 0 0.75rem 0 !important;
   border: 3px solid transparent !important;
   font-weight: 700 !important;
-  font-size: 0.875rem !important;
+  font-size: 1.1rem !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   position: relative !important;
@@ -1267,6 +1267,9 @@ body {
 
 /* Sidebar icon styling - 加粗线条 */
 .sidebar-item svg {
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  margin-right: 0.75rem !important;
   transition: transform 0.2s ease !important;
   stroke-width: 3 !important;
 }
