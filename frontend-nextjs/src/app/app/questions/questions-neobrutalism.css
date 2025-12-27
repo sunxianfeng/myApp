@@ -1,6 +1,5 @@
 /* ========================================
    UNIFIED QUESTIONS PAGE STYLES
-   Updated: 2025-12-26 - List View Redesign
    ======================================== */
 
 :root {
@@ -51,8 +50,8 @@
 
 .unified-main-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
   padding: 16px;
   /* Ensure grid items maintain aspect ratio */
   grid-auto-rows: 1fr;
@@ -88,14 +87,14 @@
 .list-view-row {
   display: grid;
   grid-template-columns: 32px 2fr 100px 1fr 120px 50px;
-  gap: 16px;
-  padding: 8px 16px;
+  gap: 12px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--neo-border-color-light);
   align-items: center;
   transition: background-color 0.15s ease;
   cursor: pointer;
-  font-size: 0.875rem;
-  min-height: 36px;
+  font-size: 0.85rem;
+  min-height: 32px;
 }
 
 .list-view-row:hover {
@@ -228,20 +227,20 @@
   background-color: var(--neo-bg-color);
   border: 2px solid var(--neo-border-color);
   border-radius: 8px;
-  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
+  box-shadow: 3px 3px 0 0 var(--neo-shadow-color);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transition: all 0.2s ease-in-out;
-  /* Make cards approximately square */
+  /* Make cards approximately square but more compact */
   aspect-ratio: 1 / 1;
-  min-height: 280px;
-  max-height: 320px;
+  min-height: 165px;
+  max-height: 200px;
 }
 
 .unified-question-card:hover {
-  transform: translateY(-2px) translateX(-2px);
-  box-shadow: 6px 6px 0 0 var(--neo-shadow-color);
+  transform: translateY(-1px) translateX(-1px);
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color);
   cursor: pointer;
 }
 
@@ -249,10 +248,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-bottom: 2px solid var(--neo-border-color);
   background-color: var(--neo-bg-offset);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 .collection-tag {
@@ -277,9 +276,9 @@
 }
 
 .card-content {
-  padding: 16px;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  padding: 10px;
+  font-size: 0.8rem;
+  line-height: 1.35;
   color: var(--neo-text-primary);
   flex-grow: 1;
   display: flex;
@@ -296,8 +295,8 @@
   text-align: left;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 6;
-  line-clamp: 6;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
 }
 
@@ -305,9 +304,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-top: 2px solid var(--neo-border-color);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--neo-text-secondary);
   background-color: var(--neo-bg-offset);
 }
@@ -320,7 +319,7 @@
 }
 
 .card-meta-date {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 /* Dropdown Menu (Radix) */

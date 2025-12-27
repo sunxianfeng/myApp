@@ -1054,23 +1054,27 @@ const QuestionsContent = () => {
                     handleDropQuestionToCollection(cId, qId)
                   }}
                 >
+                  <div className="card-header" style={{ backgroundColor: generateColorFromString(cId), opacity: 0.7 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <IconFolder size={16} />
+                      <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{c.title}</span>
+                    </div>
+                  </div>
                   <div className="card-content">
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, textAlign: 'center', height: '100%' }}>
-                      <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{c.title}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, textAlign: 'center', height: '100%' }}>
                       <div style={{
-                        fontSize: '3rem',
-                        fontWeight: 900,
+                        fontSize: '2rem',
+                        fontWeight: 400,
                         color: '#333',
                         textShadow: '0 0 3px white, 0 0 5px white',
                         lineHeight: 1,
-                        margin: '12px 0',
+                        margin: '8px 0',
                       }}>
                         {Array.isArray(c.questions) ? c.questions.length : 0}
                       </div>
-                      <div style={{ fontSize: '0.875rem', color: '#6B7280', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: 600 }}>
                         {Array.isArray(c.questions) && c.questions.length === 1 ? 'question' : 'questions'}
                       </div>
-                      <IconFolder size={24} style={{ marginTop: '8px', opacity: 0.6 }} />
                     </div>
                   </div>
                   <div className="card-footer">
