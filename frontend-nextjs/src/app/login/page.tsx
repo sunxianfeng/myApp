@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { loginUser } from '@/lib/slices/authSlice'
 import { AppDispatch, RootState } from '@/lib/store'
 import Link from 'next/link'
+import { AppLogo } from '@/components/common/Icons'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -402,11 +403,7 @@ export default function LoginPage() {
       <div className="main-container">
         <div className="left-panel">
           <div className="logo-container">
-            <svg className="logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <AppLogo className="w-16 h-16 logo" />
           </div>
           <h1>Welcome back</h1>
           <p>Enter your credentials to access your account and continue your journey.</p>
