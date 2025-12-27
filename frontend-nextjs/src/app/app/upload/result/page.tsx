@@ -15,6 +15,7 @@ import {
   selectCollectionSaving
 } from '@/lib/slices/collectionSlice'
 import type { CollectionCreate } from '@/types/api'
+import MathRenderer from '@/components/common/MathRenderer'
 
 const questionTypeMap: Record<string, string> = {
   multiple_choice: '选择题',
@@ -363,16 +364,16 @@ const UploadResultPage = () => {
               <>
                 {item.expanded ? (
                   <div className="question-content-section" style={{ marginTop: '1rem' }}>
-                    <p className="question-text">{item.content}</p>
+                    <MathRenderer content={item.content} className="question-text" />
                     {item.full_content && item.full_content !== item.content && (
-                      <p className="question-full-text">{item.full_content}</p>
+                      <MathRenderer content={item.full_content} className="question-full-text" />
                     )}
                     {Array.isArray(item.options) && item.options.length > 0 && (
                       <div className="question-options-list">
                         {item.options.map((opt: any, idx: number) => (
                           <div key={idx} className="question-option-item">
                             <span className="option-label">{opt.label || String.fromCharCode(65 + idx)}</span>
-                            <p className="option-text">{opt.content}</p>
+                            <MathRenderer content={opt.content} className="option-text" />
                           </div>
                         ))}
                       </div>
@@ -381,7 +382,7 @@ const UploadResultPage = () => {
                 ) : (
                   <div className="question-collapsed-view">
                     <span className="collapsed-number">#{item.number}</span>
-                    <span className="collapsed-text">{item.content}</span>
+                    <MathRenderer content={item.content} className="collapsed-text" />
                   </div>
                 )}
               </>

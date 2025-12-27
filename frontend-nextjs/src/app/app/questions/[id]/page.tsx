@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getQuestion } from '@/lib/api'
+import MathRenderer from '@/components/common/MathRenderer'
 
 export default function QuestionDetailPage() {
   const router = useRouter()
@@ -62,7 +63,9 @@ export default function QuestionDetailPage() {
 
       <div style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: 16, background: 'white' }}>
         <div style={{ fontWeight: 800, marginBottom: 8 }}>Content</div>
-        <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{question.content}</div>
+        <div style={{ lineHeight: 1.6 }}>
+          <MathRenderer content={question.content} />
+        </div>
 
         <hr style={{ margin: '16px 0', borderColor: '#E5E7EB' }} />
 
@@ -83,7 +86,7 @@ export default function QuestionDetailPage() {
             <ul style={{ marginLeft: 18 }}>
               {question.options.map((o: any, idx: number) => (
                 <li key={idx} style={{ marginBottom: 6 }}>
-                  <strong>{o.label}.</strong> {o.content}
+                  <strong>{o.label}.</strong> <MathRenderer content={o.content} />
                 </li>
               ))}
             </ul>

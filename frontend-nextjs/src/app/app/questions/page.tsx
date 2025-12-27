@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import MathRenderer from '@/components/common/MathRenderer'
 
 import {
   Folder as IconFolder,
@@ -160,7 +161,7 @@ const QuestionDetailModal = ({
               fontSize: '1rem',
               lineHeight: '1.6',
             }}>
-              {question.content}
+              <MathRenderer content={question.content} />
             </div>
           </div>
 
@@ -176,7 +177,7 @@ const QuestionDetailModal = ({
                 fontSize: '0.95rem',
                 lineHeight: '1.6',
               }}>
-                {question.full_content}
+                <MathRenderer content={question.full_content} />
               </div>
             </div>
           )}
@@ -211,12 +212,15 @@ const QuestionDetailModal = ({
                       const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
                       return (
                         <div style={{ fontSize: '0.9rem', lineHeight: '1.8' }}>
-                          {options.map((option, index) => (
-                            <div key={index} style={{ marginBottom: '8px' }}>
-                              <strong>{optionLabels[index] || index + 1}. </strong>
-                              {typeof option === 'object' ? option.text || option.content || JSON.stringify(option) : option}
-                            </div>
-                          ))}
+                          {options.map((option, index) => {
+                            const optionText = typeof option === 'object' ? option.text || option.content || JSON.stringify(option) : option
+                            return (
+                              <div key={index} style={{ marginBottom: '8px' }}>
+                                <strong>{optionLabels[index] || index + 1}. </strong>
+                                <MathRenderer content={String(optionText)} />
+                              </div>
+                            )
+                          })}
                         </div>
                       )
                     }
@@ -229,12 +233,15 @@ const QuestionDetailModal = ({
                       if (optionEntries.length > 0) {
                         return (
                           <div style={{ fontSize: '0.9rem', lineHeight: '1.8' }}>
-                            {optionEntries.map(([key, value], index) => (
-                              <div key={key} style={{ marginBottom: '8px' }}>
-                                <strong>{optionLabels[index] || key}. </strong>
-                                {typeof value === 'object' ? JSON.stringify(value) : String(value || '')}
-                              </div>
-                            ))}
+                            {optionEntries.map(([key, value], index) => {
+                              const optionText = typeof value === 'object' ? JSON.stringify(value) : String(value || '')
+                              return (
+                                <div key={key} style={{ marginBottom: '8px' }}>
+                                  <strong>{optionLabels[index] || key}. </strong>
+                                  <MathRenderer content={optionText} />
+                                </div>
+                              )
+                            })}
                           </div>
                         )
                       }
@@ -683,7 +690,9 @@ const QuestionCard = ({
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
       </div>
-      <div className="card-content">{question.content}</div>
+      <div className="card-content">
+        <MathRenderer content={question.content} />
+      </div>
       <div className="card-footer">
         <span className="card-meta-tag">{question.question_type}</span>
         <span className="card-meta-date">{new Date(question.created_at).toLocaleDateString()}</span>
