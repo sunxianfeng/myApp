@@ -12,6 +12,7 @@ import {
   Edit as IconEdit,
   Star as IconStar,
   ArrowLeft as IconArrowLeft,
+  X as IconX,
 } from 'lucide-react'
 
 import type { AppDispatch } from '@/lib/store'
@@ -36,6 +37,346 @@ const generateColorFromString = (str: string) => {
   }
   const hue = hash % 360
   return `hsl(${hue}, 70%, 80%)`
+}
+
+// Question Detail Modal Component
+const QuestionDetailModal = ({ 
+  question, 
+  collection, 
+  isOpen, 
+  onClose 
+}: { 
+  question: any
+  collection: any
+  isOpen: boolean
+  onClose: () => void 
+}) => {
+  if (!isOpen || !question) return null
+
+  const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+
+  return (
+    <div 
+      className="modal-overlay" 
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px',
+      }}
+    >
+      <div 
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          maxWidth: '800px',
+          width: '100%',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          border: '4px solid black',
+          boxShadow: '8px 8px 0 rgba(0, 0, 0, 1)',
+        }}
+      >
+        <div style={{ 
+          padding: '24px',
+          borderBottom: '3px solid black',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: collectionColor,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <IconFolder size={24} />
+            <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>
+              Question Details
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'white',
+              border: '3px solid black',
+              borderRadius: '6px',
+              padding: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Close"
+          >
+            <IconX size={20} />
+          </button>
+        </div>
+
+        <div style={{ padding: '24px' }}>
+          {/* Collection Info */}
+          <div style={{ 
+            marginBottom: '20px',
+            padding: '12px',
+            backgroundColor: '#F3F4F6',
+            border: '2px solid black',
+            borderRadius: '8px',
+          }}>
+            <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '0.875rem' }}>Collection</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div 
+                style={{ 
+                  width: '12px', 
+                  height: '12px', 
+                  backgroundColor: collectionColor,
+                  border: '2px solid black',
+                  borderRadius: '3px',
+                }} 
+              />
+              <span style={{ fontWeight: 900 }}>{collection?.title || 'Uncategorized'}</span>
+            </div>
+          </div>
+
+          {/* Question Content */}
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Question</h3>
+            <div style={{ 
+              padding: '16px',
+              backgroundColor: '#FEFCE8',
+              border: '3px solid black',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              lineHeight: '1.6',
+            }}>
+              {question.content}
+            </div>
+          </div>
+
+          {/* Full Content (if available) */}
+          {question.full_content && question.full_content !== question.content && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Full Content</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#F0FDF4',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
+              }}>
+                {question.full_content}
+              </div>
+            </div>
+          )}
+
+          {/* Options (if available) - only show for multiple choice questions */}
+          {question.options && question.question_type !== 'fill_blank' && question.question_type !== 'fill-blank' && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Options</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#EFF6FF',
+                border: '3px solid black',
+                borderRadius: '8px',
+              }}>
+                {(() => {
+                  // Helper function to format options
+                  const formatOptions = () => {
+                    let options = question.options
+                    
+                    // Parse options if it's a string
+                    if (typeof options === 'string') {
+                      try {
+                        options = JSON.parse(options)
+                      } catch {
+                        // If it fails to parse, treat as plain text
+                        return <div style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>{options}</div>
+                      }
+                    }
+                    
+                    // If it's an array, format as A, B, C, D...
+                    if (Array.isArray(options)) {
+                      const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+                      return (
+                        <div style={{ fontSize: '0.9rem', lineHeight: '1.8' }}>
+                          {options.map((option, index) => (
+                            <div key={index} style={{ marginBottom: '8px' }}>
+                              <strong>{optionLabels[index] || index + 1}. </strong>
+                              {typeof option === 'object' ? option.text || option.content || JSON.stringify(option) : option}
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    }
+                    
+                    // If it's an object, try to extract options
+                    if (typeof options === 'object' && options !== null) {
+                      const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+                      const optionEntries = Object.entries(options)
+                      
+                      if (optionEntries.length > 0) {
+                        return (
+                          <div style={{ fontSize: '0.9rem', lineHeight: '1.8' }}>
+                            {optionEntries.map(([key, value], index) => (
+                              <div key={key} style={{ marginBottom: '8px' }}>
+                                <strong>{optionLabels[index] || key}. </strong>
+                                {typeof value === 'object' ? JSON.stringify(value) : String(value || '')}
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      }
+                    }
+                    
+                    // Fallback to original display
+                    return (
+                      <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                        {JSON.stringify(options, null, 2)}
+                      </pre>
+                    )
+                  }
+                  
+                  return formatOptions()
+                })()}
+              </div>
+            </div>
+          )}
+
+          {/* Correct Answer (if available) */}
+          {question.correct_answer && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Correct Answer</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#DCFCE7',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontWeight: 700,
+              }}>
+                {question.correct_answer}
+              </div>
+            </div>
+          )}
+
+          {/* Explanation (if available) */}
+          {question.explanation && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Explanation</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#FEF3C7',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
+              }}>
+                {question.explanation}
+              </div>
+            </div>
+          )}
+
+          {/* Metadata Grid */}
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '12px',
+            marginTop: '24px',
+            paddingTop: '24px',
+            borderTop: '2px dashed black',
+          }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Type</div>
+              <div style={{ fontWeight: 900 }}>{question.question_type || 'N/A'}</div>
+            </div>
+            
+            {question.difficulty_level && (
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Difficulty</div>
+                <div style={{ fontWeight: 900 }}>{question.difficulty_level}</div>
+              </div>
+            )}
+            
+            {question.subject && (
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Subject</div>
+                <div style={{ fontWeight: 900 }}>{question.subject}</div>
+              </div>
+            )}
+            
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Created</div>
+              <div style={{ fontWeight: 900 }}>{new Date(question.created_at || question.added_at).toLocaleDateString()}</div>
+            </div>
+            
+            {/* Collection-specific fields */}
+            {question.mastery_level !== undefined && (
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Mastery Level</div>
+                <div style={{ fontWeight: 900 }}>{question.mastery_level}/5</div>
+              </div>
+            )}
+            
+            {question.times_practiced !== undefined && (
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Times Practiced</div>
+                <div style={{ fontWeight: 900 }}>{question.times_practiced}</div>
+              </div>
+            )}
+            
+            {question.notes && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>Notes</div>
+                <div style={{ 
+                  padding: '12px',
+                  backgroundColor: '#F8FAFC',
+                  border: '2px solid #E2E8F0',
+                  borderRadius: '6px',
+                  fontSize: '0.9rem',
+                  lineHeight: '1.5',
+                }}>
+                  {question.notes}
+                </div>
+              </div>
+            )}
+            
+            {question.topic_tags && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>Tags</div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {(typeof question.topic_tags === 'string' 
+                    ? question.topic_tags.split(',') 
+                    : Array.isArray(question.topic_tags) 
+                      ? question.topic_tags 
+                      : []
+                  ).map((tag: string, idx: number) => (
+                    <span 
+                      key={idx}
+                      style={{
+                        padding: '4px 12px',
+                        backgroundColor: '#E5E7EB',
+                        border: '2px solid black',
+                        borderRadius: '6px',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // Question Card Component (matching questions page style)
@@ -134,6 +475,10 @@ export default function CollectionDetailPage() {
   const [noteText, setNoteText] = useState('')
   const [masteryLevel, setMasteryLevel] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
+  
+  // Modal state for question details
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null)
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false)
   
   useEffect(() => {
     if (collectionId) {
@@ -495,8 +840,8 @@ export default function CollectionDetailPage() {
               collection={collection}
               onAction={handleAction}
               onClick={() => {
-                // Open question detail modal or navigate
-                console.log('Question clicked:', question.id)
+                setSelectedQuestion(question)
+                setIsQuestionModalOpen(true)
               }}
             />
           ))}
@@ -734,6 +1079,17 @@ export default function CollectionDetailPage() {
           </div>
         </div>
       )}
+      
+      {/* Question Detail Modal */}
+      <QuestionDetailModal
+        question={selectedQuestion}
+        collection={collection}
+        isOpen={isQuestionModalOpen}
+        onClose={() => {
+          setSelectedQuestion(null)
+          setIsQuestionModalOpen(false)
+        }}
+      />
       
       {/* Loading Overlay */}
       {(isProcessing || isLoading) && (
