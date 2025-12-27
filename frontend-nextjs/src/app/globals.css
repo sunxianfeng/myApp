@@ -1118,41 +1118,109 @@ body {
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* ============== SIDEBAR STYLES ============== */
+/* ============== SIDEBAR STYLES - NEOBRUTALISM (真实风格) ============== */
 .sidebar {
-  background-color: #ffffff !important;
-  color: #403f3d !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  font-family: var(--font-sans) !important;
+  border-right: 3px solid #000000 !important;
+  box-shadow: none !important;
+  position: relative !important;
 }
 
 .sidebar h1 {
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  color: #1f1d1b !important;
+  font-family: var(--font-sans) !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.05em !important;
+  font-style: italic !important;
+  text-transform: uppercase !important;
+}
+
+/* Sidebar logo container - Neobrutalism 硬边框+硬阴影 */
+.sidebar .w-9 {
+  border: 3px solid #000000 !important;
+  border-radius: 0 !important;
+  background: #FFD100 !important;
+  box-shadow: 3px 3px 0px 0px #000000 !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar .w-9:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 5px 5px 0px 0px #000000 !important;
+}
+
+.sidebar .w-9 .rounded-full {
+  background: #000000 !important;
+  border-radius: 0 !important;
 }
 
 .sidebar-item {
-  transition: all 0.2s ease !important;
-  color: #555452 !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  color: #4B5563 !important;
+  font-family: var(--font-sans) !important;
   text-decoration: none !important;
-  border-radius: 0.75rem !important;
+  border-radius: 0 !important;
   cursor: pointer !important;
-  padding: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
   display: flex !important;
   align-items: center !important;
-  margin: 0 !important;
+  margin: 0 0 0.75rem 0 !important;
+  border: 3px solid transparent !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  position: relative !important;
+  user-select: none !important;
 }
 
 .sidebar-item:hover {
-  background-color: #f0ede8 !important;
-  color: #403f3d !important;
+  background: #A3E635 !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+  transform: none !important;
 }
 
 .sidebar-item.active {
-  background-color: oklch(0.45 0.18 280) !important;
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  border-radius: 0.75rem !important;
+  background: #6366F1 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border-radius: 0 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+.sidebar-item.active:hover {
+  background: #4F46E5 !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+}
+
+/* Sidebar icon styling - 加粗线条 */
+.sidebar-item svg {
+  transition: transform 0.2s ease !important;
+  stroke-width: 3 !important;
+}
+
+.sidebar-item:hover svg {
+  transform: scale(1.05) !important;
+}
+
+.sidebar-item.active svg {
+  filter: none !important;
+}
+
+/* 移除软性分割线 */
+.sidebar nav {
+  position: relative !important;
+}
+
+.sidebar nav::after {
+  display: none !important;
 }
 
 /* ============== MAIN CONTENT AREA ============== */
