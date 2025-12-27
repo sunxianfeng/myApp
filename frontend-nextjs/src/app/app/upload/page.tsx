@@ -447,11 +447,6 @@ const Upload = () => {
 
         {/* Action Bar */}
         <div className="action-bar" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {files.length > 0 && (
-            <div className="neo-badge" style={{ alignSelf: 'center' }}>
-              已准备好 {files.length} 个文件
-            </div>
-          )}
           {isAnalyzing ? (
             <button 
               onClick={handleCancelUpload}

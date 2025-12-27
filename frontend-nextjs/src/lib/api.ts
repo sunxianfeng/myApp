@@ -43,6 +43,12 @@ api.interceptors.response.use(
       }
     }
     
+    // 处理取消请求的错误
+    if (error.name === 'AbortError' || error.message === 'canceled') {
+      console.log('Request cancelled by user')
+      return Promise.reject(error) // 原样抛出，让调用方处理
+    }
+    
     // 处理网络错误
     if (!error.response) {
       console.error('Network Error:', error.message)
