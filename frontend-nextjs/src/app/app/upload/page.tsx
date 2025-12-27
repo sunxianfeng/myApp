@@ -47,6 +47,7 @@ const Upload = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('auto')
   const [originalFiles, setOriginalFiles] = useState<{ [key: string]: File }>({})
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [cancelRequested, setCancelRequested] = useState(false)
 
   useEffect(() => {
     dispatch(clearUploadResult())
@@ -121,6 +122,16 @@ const Upload = () => {
     }
   }
 
+  const handleCancelUpload = () => {
+    setCancelRequested(true)
+    setIsAnalyzing(false)
+    dispatch(clearFiles())
+    setOriginalFiles({})
+    dispatch(clearError())
+    // Reset cancel flag after a brief moment
+    setTimeout(() => setCancelRequested(false), 100)
+  }
+
   const removeFileFromList = (index: number) => {
     const fileToRemove = files[index]
     dispatch(removeFile(fileToRemove.id))
@@ -141,6 +152,7 @@ const Upload = () => {
     }
 
     setIsAnalyzing(true)
+    setCancelRequested(false)
 
     try {
       // Build array of actual File objects (kept in local `originalFiles`) matching Redux metadata order
@@ -159,6 +171,11 @@ const Upload = () => {
       let result: any = null
 
       if (uploadMode === 'single') {
+        // Check if cancel was requested
+        if (cancelRequested) {
+          throw new Error('上传已取消')
+        }
+        
         // uploadImageForOCR expects a single File
         const file = filesToUpload[0]
         const response = await uploadImageForOCR(file)
@@ -170,6 +187,11 @@ const Upload = () => {
           dispatch(updateFileStatus({ id: meta.id, status: 'processing', progress: 100 }))
         })
       } else {
+        // Check if cancel was requested
+        if (cancelRequested) {
+          throw new Error('上传已取消')
+        }
+        
         // batch mode
         const response = await batchUploadImagesForOCR(filesToUpload)
         result = response
@@ -180,20 +202,33 @@ const Upload = () => {
         })
       }
 
+      // Check one final time before redirecting
+      if (cancelRequested) {
+        throw new Error('上传已取消')
+      }
+
       // Save result into Redux for result page and clear queue
       dispatch(setUploadResult(result))
       dispatch(clearFiles())
       setOriginalFiles({})
       router.push('/app/upload/result')
     } catch (err: any) {
-      // Try to set file-level error if possible
-      const msg = err?.message || '上传失败'
-      alert(msg)
-      files.forEach(meta => {
-        dispatch(setFileError({ id: meta.id, error: msg }))
-      })
+      if (cancelRequested) {
+        // Don't show error alert for user-initiated cancellation
+        files.forEach(meta => {
+          dispatch(updateFileStatus({ id: meta.id, status: 'pending', progress: 0 }))
+        })
+      } else {
+        // Try to set file-level error if possible
+        const msg = err?.message || '上传失败'
+        alert(msg)
+        files.forEach(meta => {
+          dispatch(setFileError({ id: meta.id, error: msg }))
+        })
+      }
     } finally {
       setIsAnalyzing(false)
+      setCancelRequested(false)
     }
   }
 
@@ -309,6 +344,13 @@ const Upload = () => {
               <p className="ocr-processing-label">
                 图片解析中...
               </p>
+              <button 
+                onClick={handleCancelUpload}
+                className="neo-btn neo-btn-white cancel-upload-btn"
+                style={{ marginTop: '1rem' }}
+              >
+                取消上传
+              </button>
             </div>
           ) : files.length > 0 ? (
             /* File Queue Section */

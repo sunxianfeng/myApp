@@ -568,6 +568,28 @@
   margin: 0 0 2.5rem 0 !important;
 }
 
+.cancel-upload-btn {
+  padding: 0.875rem 2rem !important;
+  font-size: 0.95rem !important;
+  background-color: var(--neo-white) !important;
+  border: 3px solid var(--neo-black) !important;
+  color: var(--neo-black) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  transition: all 0.15s ease !important;
+}
+
+.cancel-upload-btn:hover {
+  background-color: var(--neo-error) !important;
+  color: var(--neo-white) !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.cancel-upload-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+}
+
 .ocr-processing-subtext {
   display: none !important;
 }
