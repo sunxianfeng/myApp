@@ -103,87 +103,76 @@ export default function CollectionsPage() {
     : collections
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-[#F3F4F6] p-4 md:p-8"> {/* 稍微加深背景色对比 */}
       <div className="max-w-7xl mx-auto">
-        {/* 头部 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">我的错题本</h1>
-          <p className="text-gray-600">系统化管理和复习你的错题</p>
+        {/* 头部 - 增强排版 */}
+        <div className="mb-10">
+          <h1 className="text-5xl font-black text-gray-900 mb-3 tracking-tight">我的错题本</h1>
+          <p className="text-lg font-bold text-gray-600">系统化管理和复习你的错题</p>
         </div>
         
-        {/* 统计卡片 */}
+        {/* 统计卡片 - 新布鲁塔主义风格 */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">错题本总数</div>
-              <div className="text-3xl font-bold text-blue-600">{stats.total_collections}</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">题目总数</div>
-              <div className="text-3xl font-bold text-green-600">{stats.total_questions}</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">练习次数</div>
-              <div className="text-3xl font-bold text-purple-600">{stats.total_practiced}</div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {[
+              { label: '错题本总数', value: stats.total_collections, color: '#3B82F6', icon: '📚' },
+              { label: '题目总数', value: stats.total_questions, color: '#22C55E', icon: '🎯' },
+              { label: '练习次数', value: stats.total_practiced, color: '#A855F7', icon: '🔥' }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white border-[3px] border-black p-6 rounded-xl shadow-[6px_6px_0_0_#000]">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-sm font-black text-gray-500 uppercase tracking-wider">{stat.label}</span>
+                  <span className="text-2xl">{stat.icon}</span>
+                </div>
+                <div className="text-4xl font-black" style={{ color: stat.color }}>{stat.value}</div>
+              </div>
+            ))}
           </div>
         )}
         
-        {/* 工具栏 */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        {/* 工具栏 - 更加紧凑且风格统一 */}
+        <div className="bg-[#FEF3C7] border-[3px] border-black rounded-xl p-4 mb-8 shadow-[4px_4px_0_0_#000]">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              {/* 分类筛选 */}
+            <div className="flex items-center gap-4">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border-[2px] border-black rounded-lg font-bold bg-white focus:ring-0"
               >
                 <option value="">全部分类</option>
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.name}
-                  </option>
+                  <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
                 ))}
               </select>
               
-              {/* 视图切换 */}
-              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+              <div className="flex border-[2px] border-black rounded-lg overflow-hidden bg-white">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-4 py-2 ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}
-                >
-                  卡片
-                </button>
+                  className={`px-6 py-2 font-bold transition ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}
+                >卡片</button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}
-                >
-                  列表
-                </button>
+                  className={`px-6 py-2 font-bold border-l-[2px] border-black transition ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}
+                >列表</button>
               </div>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 onClick={() => setShowCategoryModal(true)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-              >
-                新建分类
-              </button>
+                className="px-6 py-2 bg-white border-[2px] border-black rounded-lg font-bold shadow-[3px_3px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+              >新建分类</button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-              >
-                + 新建错题本
-              </button>
+                className="px-6 py-2 bg-[#22C55E] text-white border-[2px] border-black rounded-lg font-bold shadow-[3px_3px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+              >+ 新建错题本</button>
             </div>
           </div>
         </div>
         
         {/* 错误提示 */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 border-[3px] border-red-500 text-red-700 px-4 py-3 rounded-lg mb-6 font-bold">
             {error}
           </div>
         )}
@@ -192,45 +181,37 @@ export default function CollectionsPage() {
         {isLoading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-gray-600">加载中...</p>
+            <p className="mt-4 text-gray-600 font-bold">加载中...</p>
           </div>
         )}
         
         {/* 错题本列表 - 卡片视图 */}
         {!isLoading && viewMode === 'grid' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCollections.map(collection => (
               <div
                 key={collection.id}
                 onClick={() => handleCollectionClick(collection.id)}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition cursor-pointer overflow-hidden"
+                className="group bg-white border-[3px] border-black rounded-2xl overflow-hidden shadow-[8px_8px_0_0_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000] transition-all cursor-pointer"
               >
-                {/* 封面 */}
-                <div className="h-32 bg-gradient-to-br from-blue-400 to-purple-500 relative">
+                <div className="h-24 bg-gradient-to-br from-blue-300 to-purple-400 border-b-[3px] border-black relative">
                   {collection.is_favorite && (
-                    <div className="absolute top-3 right-3 text-yellow-400 text-2xl">⭐</div>
+                    <div className="absolute top-3 right-3 bg-white border-2 border-black rounded-full p-1 leading-none text-xl shadow-[2px_2px_0_0_#000]">⭐</div>
                   )}
                 </div>
-                
-                {/* 内容 */}
-                <div className="p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
-                    {collection.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {collection.description || '暂无描述'}
-                  </p>
-                  
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{collection.question_count} 道题目</span>
-                    <span>{new Date(collection.updated_at).toLocaleDateString()}</span>
+                <div className="p-6">
+                  <h3 className="text-xl font-black mb-2 group-hover:text-blue-600 transition-colors">{collection.title}</h3>
+                  <p className="text-gray-600 font-bold text-sm mb-6 line-clamp-2">{collection.description || '暂无描述'}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 bg-gray-100 border-2 border-black rounded-full text-xs font-black">📝 {collection.question_count} Questions</span>
+                    <span className="text-xs font-bold text-gray-500 uppercase">{new Date(collection.updated_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
             ))}
             
             {filteredCollections.length === 0 && (
-              <div className="col-span-full text-center py-12 text-gray-500">
+              <div className="col-span-full text-center py-12 text-gray-500 font-bold">
                 暂无错题本，点击右上角创建一个吧
               </div>
             )}
@@ -239,38 +220,40 @@ export default function CollectionsPage() {
         
         {/* 错题本列表 - 列表视图 */}
         {!isLoading && viewMode === 'list' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-white border-[3px] border-black rounded-xl shadow-[6px_6px_0_0_#000] overflow-hidden">
+            <table className="min-w-full">
+              <thead className="bg-[#F9FAFB] border-b-[3px] border-black">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">名称</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分类</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">题目数</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">更新时间</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                  <th className="px-6 py-3 text-left text-xs font-black text-gray-700 uppercase tracking-wider">名称</th>
+                  <th className="px-6 py-3 text-left text-xs font-black text-gray-700 uppercase tracking-wider">分类</th>
+                  <th className="px-6 py-3 text-left text-xs font-black text-gray-700 uppercase tracking-wider">题目数</th>
+                  <th className="px-6 py-3 text-left text-xs font-black text-gray-700 uppercase tracking-wider">更新时间</th>
+                  <th className="px-6 py-3 text-left text-xs font-black text-gray-700 uppercase tracking-wider">操作</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCollections.map(collection => {
+              <tbody className="bg-white">
+                {filteredCollections.map((collection, index) => {
                   const category = categories.find(c => c.id === collection.category_id)
                   return (
-                    <tr key={collection.id} className="hover:bg-gray-50 cursor-pointer">
-                      <td 
-                        className="px-6 py-4"
-                        onClick={() => handleCollectionClick(collection.id)}
-                      >
+                    <tr
+                      key={collection.id}
+                      className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b-[2px] border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer`}
+                      onClick={() => handleCollectionClick(collection.id)}
+                    >
+                      <td className="px-6 py-4">
                         <div className="flex items-center">
-                          {collection.is_favorite && <span className="mr-2">⭐</span>}
-                          <span className="font-medium text-gray-900">{collection.title}</span>
+                          <div className="text-sm font-black text-gray-900">{collection.title}</div>
+                          {collection.is_favorite && <span className="ml-2 text-yellow-500">⭐</span>}
                         </div>
+                        <div className="text-sm text-gray-600 font-bold">{collection.description || '暂无描述'}</div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-500">
                         {category ? `${category.icon} ${category.name}` : '-'}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-500">
                         {collection.question_count}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-500">
                         {new Date(collection.updated_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
@@ -279,7 +262,7 @@ export default function CollectionsPage() {
                             e.stopPropagation()
                             handleCollectionClick(collection.id)
                           }}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="bg-blue-500 text-white px-4 py-2 border-[2px] border-black rounded-lg font-bold hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[2px_2px_0_0_#000]"
                         >
                           查看详情
                         </button>
@@ -290,7 +273,7 @@ export default function CollectionsPage() {
                 
                 {filteredCollections.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500 font-bold">
                       暂无错题本
                     </td>
                   </tr>

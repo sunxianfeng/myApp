@@ -262,259 +262,228 @@ export default function CollectionDetailPage() {
       {/* Header - Responsive */}
       <header className="unified-header">
         <div style={{ marginBottom: '2rem' }}>
-          <button
-            onClick={() => router.push('/app/questions')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              color: '#3B82F6',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 700,
-              marginBottom: '1rem',
-              fontSize: '0.9rem',
-              padding: 0,
-            }}
-          >
-            <IconArrowLeft size={16} />
-            Back to Questions
-          </button>
-          
-          {/* Title section with favorite button - aligned at same height */}
-          <div style={{ 
+          {/* 改进面包屑导航 */}
+          <nav style={{ 
+            marginBottom: '1.5rem', 
             display: 'flex', 
+            gap: '8px', 
             alignItems: 'center', 
-            justifyContent: 'space-between', 
-            gap: '16px', 
-            marginBottom: '12px',
-            flexWrap: 'wrap',
+            fontSize: '0.875rem', 
+            fontWeight: 700 
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <h1 style={{ 
-                fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', // reduced from 1.75rem-2.5rem
-                fontWeight: 900, 
-                margin: 0,
-                lineHeight: 1,
-              }}>
-                {collection.title}
-              </h1>
-              {collection.is_favorite && <span style={{ fontSize: '2rem', lineHeight: 1 }}>⭐</span>}
-            </div>
-            
-            {/* Favorite button - aligned with title */}
             <button
-              onClick={handleToggleFavorite}
+              onClick={() => router.push('/app/questions')}
               style={{
-                padding: '12px 24px',
-                border: '3px solid black',
-                borderRadius: '8px',
-                backgroundColor: collection.is_favorite ? '#FEF3C7' : 'white',
-                fontWeight: 700,
+                color: '#9CA3AF',
+                background: 'none',
+                border: 'none',
                 cursor: 'pointer',
-                boxShadow: '4px 4px 0 rgba(0,0,0,1)',
-                transition: 'all 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                flexShrink: 0,
-                height: 'fit-content',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                padding: 0,
               }}
             >
-              {collection.is_favorite ? (
-                <>
-                  <IconStar size={16} fill="currentColor" />
-                  <span>Unfavorite</span>
-                </>
-              ) : (
-                <>
-                  <IconStar size={16} />
-                  <span>Add to Favorites</span>
-                </>
-              )}
+              我的错题本
             </button>
-          </div>
+            <span style={{ color: '#9CA3AF' }}>/</span>
+            <span style={{ color: '#000' }}>{collection.title}</span>
+          </nav>
           
+          {/* 紧凑型 Header 布局 */}
+          <div
+            style={{
+              backgroundColor: 'white',
+              border: '3px solid black',
+              borderRadius: '16px',
+              padding: '0',
+              marginBottom: '20px',
+              boxShadow: '6px 6px 0 rgba(0,0,0,1)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* 顶栏：标题与操作 */}
+            <div style={{
+              padding: '16px 24px',
+              borderBottom: '3px solid black',
+              backgroundColor: '#F9FAFB',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <h1 style={{
+                  fontSize: '1.75rem',
+                  fontWeight: 900,
+                  margin: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {collection.title}
+                </h1>
+                {collection.is_favorite && (
+                  <span style={{ 
+                    fontSize: '1.5rem', 
+                    lineHeight: 1,
+                    flexShrink: 0,
+                  }}>
+                    ⭐
+                  </span>
+                )}
+                <span style={{ 
+                  padding: '4px 12px', 
+                  backgroundColor: '#E5E7EB', 
+                  border: '2px solid black', 
+                  borderRadius: '20px', 
+                  fontSize: '0.75rem', 
+                  fontWeight: 900 
+                }}>
+                  {filteredQuestions.length} ITEMS
+                </span>
+              </div>
+              
+              <button
+                onClick={handleToggleFavorite}
+                style={{
+                  padding: '8px 16px',
+                  border: '2px solid black',
+                  borderRadius: '8px',
+                  backgroundColor: collection.is_favorite ? '#FEF3C7' : 'white',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0 rgba(0,0,0,1)',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  flexShrink: 0,
+                  fontSize: '0.875rem',
+                }}
+              >
+                {collection.is_favorite ? (
+                  <>
+                    <IconStar size={16} fill="currentColor" />
+                    <span>Unfavorite</span>
+                  </>
+                ) : (
+                  <>
+                    <IconStar size={16} />
+                    <span>Favorite</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* 底栏：紧凑型控制器 */}
+            <div style={{
+              padding: '12px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              backgroundColor: 'white',
+              flexWrap: 'wrap',
+              gap: '16px'
+            }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  style={{
+                    padding: '6px 10px',
+                    border: '2px solid black',
+                    borderRadius: '6px',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    backgroundColor: 'white',
+                  }}
+                >
+                  <option value="added">Recently Added</option>
+                  <option value="mastery">Mastery Level</option>
+                  <option value="practiced">Practice Count</option>
+                </select>
+
+                <select
+                  value={filterMastery}
+                  onChange={(e) => setFilterMastery(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                  style={{
+                    padding: '6px 10px',
+                    border: '2px solid black',
+                    borderRadius: '6px',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    backgroundColor: 'white',
+                  }}
+                >
+                  <option value="all">All Mastery</option>
+                  <option value="0">Level 0</option>
+                  <option value="1">Level 1</option>
+                  <option value="2">Level 2</option>
+                  <option value="3">Level 3</option>
+                  <option value="4">Level 4</option>
+                  <option value="5">Level 5</option>
+                </select>
+              </div>
+
+              <div style={{ 
+                display: 'flex', 
+                border: '2px solid black', 
+                borderRadius: '6px', 
+                overflow: 'hidden',
+              }}>
+                <button
+                  onClick={() => setViewMode('card')}
+                  style={{
+                    padding: '6px 16px',
+                    backgroundColor: viewMode === 'card' ? '#3B82F6' : 'white',
+                    color: viewMode === 'card' ? 'white' : 'black',
+                    border: 'none',
+                    fontWeight: 800,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Card
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  style={{
+                    padding: '6px 16px',
+                    backgroundColor: viewMode === 'list' ? '#3B82F6' : 'white',
+                    color: viewMode === 'list' ? 'white' : 'black',
+                    border: 'none',
+                    borderLeft: '2px solid black',
+                    fontWeight: 800,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  List
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Description - only if exists and not the default Chinese text */}
           {collection.description && collection.description !== '从题目管理页面创建' && (
-            <p style={{ 
-              fontSize: '1rem', 
-              color: '#6B7280', 
-              marginTop: '12px',
-              lineHeight: 1.6,
-              maxWidth: '800px',
-            }}>
-              {collection.description}
-            </p>
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{
+                fontSize: '1rem',
+                color: '#6B7280',
+                lineHeight: 1.6,
+                maxWidth: '800px',
+              }}>
+                {collection.description}
+              </p>
+            </div>
           )}
         </div>
       </header>
-      
-      {/* Toolbar - Fully Responsive */}
-      <div style={{
-        backgroundColor: 'white',
-        border: '3px solid black',
-        borderRadius: '12px',
-        padding: '20px',
-        marginBottom: '24px',
-        boxShadow: '4px 4px 0 rgba(0,0,0,1)',
-      }}>
-        <div style={{ 
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: '16px',
-          alignItems: 'end',
-        }}>
-          {/* Sort */}
-          <div>
-            <label style={{ 
-              display: 'block', 
-              fontSize: '0.75rem', 
-              fontWeight: 700, 
-              color: '#6B7280', 
-              marginBottom: '8px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              Sort By
-            </label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '2px solid black',
-                borderRadius: '6px',
-                fontWeight: 600,
-                fontSize: '0.875rem',
-                cursor: 'pointer',
-                backgroundColor: 'white',
-              }}
-            >
-              <option value="added">By Added Time</option>
-              <option value="mastery">By Mastery Level</option>
-              <option value="practiced">By Practice Count</option>
-            </select>
-          </div>
-          
-          {/* Filter by mastery */}
-          <div>
-            <label style={{ 
-              display: 'block', 
-              fontSize: '0.75rem', 
-              fontWeight: 700, 
-              color: '#6B7280', 
-              marginBottom: '8px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              Filter Mastery
-            </label>
-            <select
-              value={filterMastery}
-              onChange={(e) => setFilterMastery(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '2px solid black',
-                borderRadius: '6px',
-                fontWeight: 600,
-                fontSize: '0.875rem',
-                cursor: 'pointer',
-                backgroundColor: 'white',
-              }}
-            >
-              <option value="all">All Levels</option>
-              <option value="0">Not Mastered (0)</option>
-              <option value="1">Poor (1)</option>
-              <option value="2">Fair (2)</option>
-              <option value="3">Good (3)</option>
-              <option value="4">Excellent (4)</option>
-              <option value="5">Perfect (5)</option>
-            </select>
-          </div>
-          
-          {/* View toggle */}
-          <div>
-            <label style={{ 
-              display: 'block', 
-              fontSize: '0.75rem', 
-              fontWeight: 700, 
-              color: '#6B7280', 
-              marginBottom: '8px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              View Mode
-            </label>
-            <div style={{ 
-              display: 'flex', 
-              border: '2px solid black', 
-              borderRadius: '6px', 
-              overflow: 'hidden',
-              height: '42px',
-            }}>
-              <button
-                onClick={() => setViewMode('card')}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  backgroundColor: viewMode === 'card' ? '#3B82F6' : 'white',
-                  color: viewMode === 'card' ? 'white' : 'black',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                Cards
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  backgroundColor: viewMode === 'list' ? '#3B82F6' : 'white',
-                  color: viewMode === 'list' ? 'white' : 'black',
-                  border: 'none',
-                  borderLeft: '2px solid black',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                List
-              </button>
-            </div>
-          </div>
-          
-          {/* Question count summary - compact, responsive */}
-          <div style={{ 
-            gridColumn: 'span 1',
-            padding: '12px 16px',
-            backgroundColor: '#F3F4F6',
-            border: '2px solid #E5E7EB',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '42px',
-          }}>
-            <span style={{ 
-              fontSize: '0.875rem', 
-              fontWeight: 700, 
-              color: '#374151',
-              textAlign: 'center',
-            }}>
-              📊 {filteredQuestions.length} / {sortedQuestions.length}
-            </span>
-          </div>
-        </div>
-      </div>
       
       {/* Questions Grid - Card View */}
       {viewMode === 'card' && (
@@ -669,7 +638,7 @@ export default function CollectionDetailPage() {
             style={{
               backgroundColor: 'white',
               borderRadius: '12px',
-              maxWidth: '500px',
+              maxWidth: '450px',
               width: '100%',
               border: '4px solid black',
               boxShadow: '8px 8px 0 rgba(0, 0, 0, 1)',
@@ -677,7 +646,40 @@ export default function CollectionDetailPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: '20px' }}>Edit Question Notes</h2>
+            <h2 style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: '1.5rem' }}>Update Progress</h2>
+            
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', fontWeight: 800, marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                Mastery Level
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[0, 1, 2, 3, 4, 5].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setMasteryLevel(level)}
+                    style={{
+                      flex: 1,
+                      height: '40px',
+                      border: '2px solid black',
+                      borderRadius: '6px',
+                      backgroundColor: masteryLevel === level ? '#22C55E' : 'white',
+                      color: masteryLevel === level ? 'white' : 'black',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      boxShadow: masteryLevel === level ? 'none' : '2px 2px 0 black',
+                      transition: 'all 0.2s',
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6B7280', marginTop: '8px' }}>
+                <span>Not Mastered</span>
+                <span>Perfect</span>
+              </div>
+            </div>
             
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontWeight: 700, marginBottom: '8px', fontSize: '0.875rem' }}>Notes</label>
@@ -696,24 +698,6 @@ export default function CollectionDetailPage() {
                 rows={4}
                 placeholder="Add your notes here..."
               />
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontWeight: 700, marginBottom: '8px', fontSize: '0.875rem' }}>
-                Mastery Level: {masteryLevel}
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="5"
-                value={masteryLevel}
-                onChange={(e) => setMasteryLevel(parseInt(e.target.value))}
-                style={{ width: '100%' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6B7280', marginTop: '4px' }}>
-                <span>0 - Not Mastered</span>
-                <span>5 - Perfect</span>
-              </div>
             </div>
             
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
