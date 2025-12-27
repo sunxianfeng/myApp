@@ -222,6 +222,22 @@ const Upload = () => {
 
   return (
     <div className="upload-page">
+      <style jsx>{`
+        @keyframes scanMove {
+          0% {
+            top: 30%;
+            opacity: 0.5;
+          }
+          50% {
+            top: 50%;
+            opacity: 1;
+          }
+          100% {
+            top: 70%;
+            opacity: 0.5;
+          }
+        }
+      `}</style>
       <div className="upload-container">
         {/* Improved Header with Breadcrumb */}
         <div className="upload-header">
@@ -247,48 +263,232 @@ const Upload = () => {
             </button>
           </div>
 
-          {/* Drop Zone */}
-          <div 
-            className={`drop-zone ${dragActive ? 'drag-over' : ''}`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-          >
-            <div className="drop-zone-icon">
-              <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-            <p>Drag & drop files here, or click to select</p>
-            <div>
-              <button
-                className="select-btn"
-                data-clicked={imageClicked}
-                onClick={() => {
-                  setImageClicked(true)
-                  imageInputRef.current?.click()
+          {/* Conditionally render Drop Zone or Processing Indicator */}
+          {showProcessingIndicator ? (
+            <div 
+              className="ocr-processing-indicator" 
+              role="status" 
+              aria-live="polite"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '1.5rem',
+                padding: '4rem 2rem',
+                width: '100%',
+                margin: '0 auto',
+                textAlign: 'center',
+                minHeight: '500px',
+                backgroundColor: '#F9FAFB',
+                border: '4px solid #000000',
+              }}
+            >
+              <div 
+                className="ocr-processing-visual"
+                style={{
+                  position: 'relative',
+                  width: '280px',
+                  height: '280px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto',
+                  backgroundColor: '#FFE000',
+                  borderRadius: '20px',
+                  border: '4px solid #000000',
+                  boxShadow: '8px 8px 0 rgba(0, 0, 0, 1)',
+                  padding: '20px',
                 }}
               >
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg 
+                  viewBox="0 0 180 180" 
+                  className="ocr-processing-svg" 
+                  aria-hidden="true"
+                  style={{
+                    width: '240px',
+                    height: '240px',
+                    display: 'block',
+                    borderRadius: '16px',
+                    boxShadow: '10px 10px 0 rgba(0, 0, 0, 1)',
+                    background: '#FFFFFF',
+                    position: 'relative',
+                    zIndex: 10,
+                  }}
+                >
+                  <defs>
+                    <linearGradient id="scanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="rgba(99, 102, 241, 0.15)" />
+                      <stop offset="100%" stopColor="rgba(99, 102, 241, 0.45)" />
+                    </linearGradient>
+                  </defs>
+                  {/* Card background */}
+                  <rect x="30" y="30" width="120" height="120" rx="18" fill="#FFFFFF" stroke="#000000" strokeWidth="2" />
+                  
+                  {/* Text lines representing document content */}
+                  <rect x="50" y="55" width="60" height="8" rx="4" fill="#6B7280" opacity="0.35" />
+                  <rect x="50" y="75" width="40" height="8" rx="4" fill="#6B7280" opacity="0.2" />
+                  <rect x="50" y="95" width="70" height="8" rx="4" fill="#6B7280" opacity="0.35" />
+                  
+                  {/* OCR detection indicator (arrow/pointer) */}
+                  <path d="M65 120 L85 120 L75 135 Z" fill="rgba(14, 165, 233, 0.35)" />
+                  
+                  {/* Question marks or detected elements */}
+                  <rect x="50" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.35)" />
+                  <rect x="90" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.25)" />
+                  
+                  {/* Scanning overlay gradient */}
+                  <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.35" />
                 </svg>
-                Select Images
-              </button>
-              <button
-                className="select-btn"
-                data-clicked={docsClicked}
-                onClick={() => {
-                  setDocsClicked(true)
-                  docsInputRef.current?.click()
+                <div 
+                  className="ocr-scan-line"
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    width: '50%',
+                    height: '4px',
+                    background: 'linear-gradient(90deg, rgba(99, 102, 241, 0) 0%, rgba(99, 102, 241, 1) 50%, rgba(99, 102, 241, 0) 100%)',
+                    borderRadius: '999px',
+                    boxShadow: '0 0 16px rgba(99, 102, 241, 0.6), 0 0 8px rgba(99, 102, 241, 0.8)',
+                    zIndex: 25,
+                    pointerEvents: 'none',
+                    transform: 'translateX(-50%)',
+                    animation: 'scanMove 2.5s ease-in-out infinite',
+                  }}
+                />
+                <span 
+                  className="ocr-scan-corner corner-top-left"
+                  style={{
+                    position: 'absolute',
+                    width: '28px',
+                    height: '28px',
+                    border: '5px solid #000000',
+                    boxSizing: 'border-box',
+                    background: 'transparent',
+                    zIndex: 20,
+                    top: '8px',
+                    left: '8px',
+                    borderRight: 'none',
+                    borderBottom: 'none',
+                  }}
+                />
+                <span 
+                  className="ocr-scan-corner corner-top-right"
+                  style={{
+                    position: 'absolute',
+                    width: '28px',
+                    height: '28px',
+                    border: '5px solid #000000',
+                    boxSizing: 'border-box',
+                    background: 'transparent',
+                    zIndex: 20,
+                    top: '8px',
+                    right: '8px',
+                    borderLeft: 'none',
+                    borderBottom: 'none',
+                  }}
+                />
+                <span 
+                  className="ocr-scan-corner corner-bottom-left"
+                  style={{
+                    position: 'absolute',
+                    width: '28px',
+                    height: '28px',
+                    border: '5px solid #000000',
+                    boxSizing: 'border-box',
+                    background: 'transparent',
+                    zIndex: 20,
+                    bottom: '8px',
+                    left: '8px',
+                    borderRight: 'none',
+                    borderTop: 'none',
+                  }}
+                />
+                <span 
+                  className="ocr-scan-corner corner-bottom-right"
+                  style={{
+                    position: 'absolute',
+                    width: '28px',
+                    height: '28px',
+                    border: '5px solid #000000',
+                    boxSizing: 'border-box',
+                    background: 'transparent',
+                    zIndex: 20,
+                    bottom: '8px',
+                    right: '8px',
+                    borderLeft: 'none',
+                    borderTop: 'none',
+                  }}
+                />
+              </div>
+              <p 
+                className="ocr-processing-label"
+                style={{
+                  fontWeight: 900,
+                  fontSize: '1.75rem',
+                  letterSpacing: '-0.02em',
+                  color: '#000000',
+                  textTransform: 'uppercase',
+                  margin: '1rem 0 0.5rem 0',
                 }}
               >
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Select Documents
-              </button>
+                图片解析中...
+              </p>
+              <p 
+                className="ocr-processing-subtext"
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: '#4B5563',
+                  margin: 0,
+                }}
+              >
+                我们正在为您解析图片内容，请稍候
+              </p>
             </div>
-          </div>
+          ) : (
+            <div 
+              className={`drop-zone ${dragActive ? 'drag-over' : ''}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+            >
+              <div className="drop-zone-icon">
+                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <p>Drag & drop files here, or click to select</p>
+              <div>
+                <button
+                  className="select-btn"
+                  data-clicked={imageClicked}
+                  onClick={() => {
+                    setImageClicked(true)
+                    imageInputRef.current?.click()
+                  }}
+                >
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Select Images
+                </button>
+                <button
+                  className="select-btn"
+                  data-clicked={docsClicked}
+                  onClick={() => {
+                    setDocsClicked(true)
+                    docsInputRef.current?.click()
+                  }}
+                >
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Select Documents
+                </button>
+              </div>
+            </div>
+          )}
           
           <input
             ref={imageInputRef}
@@ -309,7 +509,7 @@ const Upload = () => {
         </div>
 
         {/* File Queue */}
-        {files.length > 0 && (
+        {files.length > 0 && !showProcessingIndicator && (
           <div className="file-queue">
             <h3>File Queue</h3>
             {files.map((file, index) => (
@@ -353,36 +553,6 @@ const Upload = () => {
             {isUploading || isAnalyzing ? '🚀 处理中...' : '开始识别题目'}
           </button>
         </div>
-
-        {showProcessingIndicator && (
-          <div className="ocr-processing-indicator" role="status" aria-live="polite">
-            <div className="ocr-processing-visual">
-              <svg viewBox="0 0 180 180" className="ocr-processing-svg" aria-hidden="true">
-                <defs>
-                  <linearGradient id="scanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(99, 102, 241, 0.15)" />
-                    <stop offset="100%" stopColor="rgba(99, 102, 241, 0.45)" />
-                  </linearGradient>
-                </defs>
-                <rect x="30" y="30" width="120" height="120" rx="18" fill="var(--card)" stroke="var(--border)" strokeWidth="2" />
-                <rect x="50" y="55" width="60" height="8" rx="4" fill="var(--muted-foreground)" opacity="0.35" />
-                <rect x="50" y="75" width="40" height="8" rx="4" fill="var(--muted-foreground)" opacity="0.2" />
-                <rect x="50" y="95" width="70" height="8" rx="4" fill="var(--muted-foreground)" opacity="0.35" />
-                <path d="M65 120 L85 120 L75 135 Z" fill="rgba(14, 165, 233, 0.35)" />
-                <rect x="50" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.35)" />
-                <rect x="90" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.25)" />
-                <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.35" />
-              </svg>
-              <div className="ocr-scan-line" />
-              <span className="ocr-scan-corner corner-top-left" />
-              <span className="ocr-scan-corner corner-top-right" />
-              <span className="ocr-scan-corner corner-bottom-left" />
-              <span className="ocr-scan-corner corner-bottom-right" />
-            </div>
-            <p className="ocr-processing-label">图片解析中...</p>
-            <p className="ocr-processing-subtext">我们正在为您解析图片内容，请稍候</p>
-          </div>
-        )}
 
         {/* Error Message */}
         {error && (
