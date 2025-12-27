@@ -279,59 +279,28 @@ const UploadResultPage = () => {
 
   return (
     <div className="result-page" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Hero Section */}
-      <div className="result-hero">
-        <div className="hero-left">
-          <p className="hero-label">OCR 解析完成 (NEO)</p>
-          <h1>识别结果确认</h1>
-          <p>
-            共识别 <span className="highlight">{totalQuestions}</span> 道题目。请选择需要保存的题目并纠正识别错误。
-          </p>
+      {/* Compact Header */}
+      <header className="result-hero" style={{ padding: '1.5rem 2rem', marginBottom: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>确认题目</h1>
+          <p className="font-bold">找到 {totalQuestions} 道题目，点击"纠正"可修改文字内容</p>
         </div>
-        <div className="result-hero-buttons">
-          <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>
-            继续上传
-          </button>
-        </div>
-      </div>
+        <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>重新上传</button>
+      </header>
 
-      {/* Bulk Actions */}
-      <div className="bulk-actions-bar">
-        <div className="bulk-select-buttons">
-          <button
-            className="neo-btn neo-btn-white"
-            onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: true })))}
-          >
-            全选题目
-          </button>
-          <button
-            className="neo-btn neo-btn-white"
-            onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: false })))}
-          >
-            取消全选
-          </button>
-        </div>
-        <div className="bulk-save-section">
-          {saveError && <span className="save-error-message">{saveError}</span>}
-          <button
-            className="neo-btn neo-btn-orange"
-            disabled={saving || items.filter((i: EditableQuestion) => i.selected).length === 0}
-            onClick={handleSaveSelected}
-          >
-            {saving ? '正在保存...' : `保存已选 (${items.filter((i: EditableQuestion) => i.selected).length})`}
-          </button>
-        </div>
-      </div>
-
-      <div className="questions-grid">
+      {/* Questions List */}
+      <main className="questions-grid">
         {items.map(item => (
           <article 
             key={item.id} 
             className={`question-card ${item.selected ? 'selected' : ''}`}
           >
             <header className="question-card-header">
-              <div className="question-info">
+              <div className="question-info" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <p className="question-number">第 {item.number} 题</p>
+                <button onClick={() => startEdit(item.id)} className="correction-btn" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>
+                  快速修改
+                </button>
                 {renderQuestionType(item.question_type) !== '其他' && (
                   <span className="question-type-badge">
                     {renderQuestionType(item.question_type)}
@@ -393,7 +362,7 @@ const UploadResultPage = () => {
             ) : (
               <>
                 {item.expanded ? (
-                  <div className="question-content-section">
+                  <div className="question-content-section" style={{ marginTop: '1rem' }}>
                     <p className="question-text">{item.content}</p>
                     {item.full_content && item.full_content !== item.content && (
                       <p className="question-full-text">{item.full_content}</p>
@@ -415,18 +384,6 @@ const UploadResultPage = () => {
                     <span className="collapsed-text">{item.content}</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button 
-                    onClick={() => startEdit(item.id)} 
-                    className="correction-btn"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square">
-                      <path d="M12 20h9" />
-                      <path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
-                    </svg>
-                    纠正题目
-                  </button>
-                </div>
               </>
             )}
           </article>
@@ -437,6 +394,47 @@ const UploadResultPage = () => {
             <p>未识别到题目内容。</p>
           </div>
         )}
+      </main>
+
+      {/* Sticky Bottom Action Bar */}
+      <div style={{
+        position: 'sticky',
+        bottom: '20px',
+        zIndex: 100,
+        marginTop: '2rem',
+        backgroundColor: '#A3E635',
+        border: '4px solid black',
+        boxShadow: '8px 8px 0px black',
+        padding: '1rem 2rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            className="neo-btn neo-btn-white" 
+            onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: true })))}
+          >
+            全选
+          </button>
+          <button 
+            className="neo-btn neo-btn-white" 
+            onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: false })))}
+          >
+            清空
+          </button>
+        </div>
+        
+        {saveError && <span style={{ color: '#EF4444', fontWeight: '700' }}>{saveError}</span>}
+        
+        <button 
+          className="neo-btn neo-btn-orange" 
+          onClick={handleSaveSelected}
+          disabled={saving || items.filter(i => i.selected).length === 0}
+          style={{ fontSize: '1.2rem' }}
+        >
+          {saving ? '保存中...' : `保存勾选的 ${items.filter(i => i.selected).length} 题`}
+        </button>
       </div>
 
       {fileResults.length > 0 && (

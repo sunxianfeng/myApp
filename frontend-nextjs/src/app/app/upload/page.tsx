@@ -223,9 +223,11 @@ const Upload = () => {
   return (
     <div className="upload-page">
       <div className="upload-container">
+        {/* Improved Header with Breadcrumb */}
         <div className="upload-header">
-          <h1>OCR File Upload</h1>
-          <p>Upload images and documents to extract text.</p>
+          {/* Breadcrumb removed */}
+          <h1 style={{ fontSize: '2rem' }}>OCR题目识别</h1>
+          <p>上传图片和文档以提取题目内容</p>
         </div>
 
         {/* Mode Selection */}
@@ -268,7 +270,7 @@ const Upload = () => {
                 }}
               >
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Select Images
               </button>
@@ -281,7 +283,7 @@ const Upload = () => {
                 }}
               >
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Select Documents
               </button>
@@ -336,17 +338,19 @@ const Upload = () => {
         )}
 
         {/* Action Bar */}
-        <div className="action-bar">
+        <div className="action-bar" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {files.length > 0 && (
+            <div className="neo-badge" style={{ alignSelf: 'center' }}>
+              已准备好 {files.length} 个文件
+            </div>
+          )}
           <button 
             onClick={handleUpload}
             disabled={isUploading || files.length === 0}
-            className="btn btn-primary"
-            style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', border: '1px solid var(--primary)', width: '33.33%', maxWidth: '200px'}}
+            className="neo-btn neo-btn-orange" 
+            style={{ width: '100%', maxWidth: '400px', fontSize: '1.5rem', padding: '1.5rem' }}
           >
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            {isUploading ? 'Processing...' : 'Upload and Process'}
+            {isUploading || isAnalyzing ? '🚀 处理中...' : '开始识别题目'}
           </button>
         </div>
 

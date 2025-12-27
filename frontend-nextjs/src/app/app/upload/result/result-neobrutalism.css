@@ -85,13 +85,13 @@ body .result-page .result-hero-buttons {
 }
 
 /* ========================================
-   BULK ACTIONS BAR
+   BULK ACTIONS BAR - REDUCED VISUAL WEIGHT
    ======================================== */
 body .result-page .bulk-actions-bar {
-  background-color: #A3E635 !important;
-  border: 4px solid #000000 !important;
+  background-color: #F3F4F6 !important;
+  border: 3px solid #000000 !important;
   border-radius: 0px !important;
-  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
   padding: 1.5rem !important;
   margin-bottom: 2rem !important;
   display: flex !important;
@@ -162,6 +162,58 @@ body .result-page .neo-btn-orange:hover {
 body .result-page .neo-btn-white {
   background-color: #FFFFFF !important;
   color: #000000 !important;
+}
+
+/* ========================================
+   NEO BUTTON SYSTEM FOR RESULT PAGE
+   ======================================== */
+
+body .result-page .neo-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem 2rem !important;
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  border: 4px solid #000000 !important;
+  cursor: pointer !important;
+  transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  text-decoration: none !important;
+  gap: 0.5rem !important;
+}
+
+body .result-page .neo-btn:active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1) !important;
+}
+
+body .result-page .neo-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+body .result-page .neo-btn-orange {
+  background-color: #FF7A00 !important;
+  color: #FFFFFF !important;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1) !important;
+}
+
+body .result-page .neo-btn-orange:hover:not(:disabled) {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 1) !important;
+}
+
+body .result-page .neo-btn-white {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1) !important;
+}
+
+body .result-page .neo-btn-white:hover:not(:disabled) {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 1) !important;
 }
 
 /* ========================================
@@ -347,24 +399,24 @@ body .result-page .collapsed-text {
 body .result-page .correction-btn {
   background-color: #FF7A00 !important;
   color: #FFFFFF !important;
-  border: 4px solid #000000 !important;
-  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
-  font-weight: 900 !important;
-  border-radius: 0px !important;
-  padding: 0.75rem 1.5rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-  cursor: pointer !important;
-  font-size: 0.875rem !important;
+  border: 2px solid #000000 !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-  transition: all 0.2s !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  border-radius: 4px !important;
 }
 
 body .result-page .correction-btn:hover {
-  transform: translate(2px, 2px) !important;
-  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 2px 2px 0px rgba(0,0,0,1) !important;
+}
+
+body .result-page .correction-btn:active {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px rgba(0,0,0,1) !important;
 }
 
 /* ========================================

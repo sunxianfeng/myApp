@@ -13,9 +13,13 @@
   --neo-black: #000000;
   --neo-white: #FFFFFF;
   --neo-gray: #F8F7F5;
+  --neo-light-gray: #ECECEC;
+  --neo-error: #FF4444;
   --neo-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
   --neo-shadow-sm: 4px 4px 0px 0px rgba(0, 0, 0, 1);
   --neo-shadow-lg: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+  --neo-shadow-pressed: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  --neo-transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --neo-border: 4px solid var(--neo-black);
 }
 
@@ -52,7 +56,7 @@
 }
 
 .upload-header h1 {
-  font-size: 3rem !important;
+  font-size: 2rem !important;
   font-weight: 900 !important;
   color: var(--neo-black) !important;
   margin-bottom: 0.75rem !important;
@@ -91,18 +95,23 @@
   background-color: var(--neo-white) !important;
   color: var(--neo-black) !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: var(--neo-transition) !important;
   box-shadow: var(--neo-shadow-sm) !important;
 }
 
 .mode-btn:hover {
-  transform: translate(2px, 2px) !important;
-  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translate(4px, 4px) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+}
+
+.mode-btn:active {
+  transform: translate(6px, 6px) !important;
+  box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1) !important;
 }
 
 .mode-btn.active {
-  background-color: var(--neo-purple) !important;
-  color: var(--neo-white) !important;
+  background-color: var(--neo-lime) !important;
+  color: var(--neo-black) !important;
   transform: translate(4px, 4px) !important;
   box-shadow: none !important;
 }
@@ -114,6 +123,9 @@
 .drop-zone {
   border: 4px dashed var(--neo-black) !important;
   background-color: var(--neo-white) !important;
+  /* Dot pattern removed for minimalism */
+  /* background-image: radial-gradient(var(--neo-black) 1.5px, transparent 0) !important; */
+  /* background-size: 32px 32px !important; */
   padding: 4rem 2rem !important;
   text-align: center !important;
   transition: all 0.2s ease !important;
@@ -121,17 +133,7 @@
 }
 
 .drop-zone::before {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 10px,
-    rgba(0, 0, 0, 0.02) 10px,
-    rgba(0, 0, 0, 0.02) 20px
-  ) !important;
-  pointer-events: none !important;
+  display: none !important;
 }
 
 .drop-zone.drag-over {
@@ -188,21 +190,29 @@
   color: var(--neo-black) !important;
   cursor: pointer !important;
   box-shadow: var(--neo-shadow-sm) !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.1s ease !important;
   white-space: nowrap !important;
 }
 
 .select-btn:hover {
   transform: translate(-2px, -2px) !important;
   box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+  background-color: var(--neo-lime) !important;
+  filter: brightness(1.05) !important;
+}
+
+.select-btn:active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
 }
 
 .select-btn:active,
 .select-btn[data-clicked="true"] {
   transform: translate(4px, 4px) !important;
   box-shadow: none !important;
-  background-color: var(--neo-purple) !important;
-  color: var(--neo-white) !important;
+  background-color: var(--neo-lime) !important;
+  color: var(--neo-black) !important;
+  filter: brightness(0.95) !important;
 }
 
 .select-btn svg {
@@ -242,19 +252,21 @@
 }
 
 .file-item:hover {
-  transform: translate(-2px, -2px) !important;
-  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translate(-4px, -4px) !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
 }
 
 .file-preview {
-  width: 64px !important;
-  height: 64px !important;
+  width: 80px !important;
+  height: 80px !important;
   border: 3px solid var(--neo-black) !important;
   background-color: var(--neo-gray) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
 }
 
 .file-preview img {
@@ -266,6 +278,16 @@
 .file-preview svg {
   stroke: var(--neo-black) !important;
   stroke-width: 3 !important;
+}
+
+/* Thumbnail overlay for better visibility */
+.file-preview::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border: 2px solid var(--neo-black) !important;
+  background: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.1) 100%) !important;
+  pointer-events: none !important;
 }
 
 .file-details {
@@ -351,8 +373,19 @@
   background-color: var(--neo-gray) !important;
   border-top: var(--neo-border) !important;
   display: flex !important;
+  flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
+  gap: 1rem !important;
+}
+
+.action-bar .neo-btn-orange {
+  padding: 1.5rem 3rem !important;
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  min-width: 300px !important;
+  max-width: 400px !important;
 }
 
 .action-bar .btn-primary {
@@ -360,33 +393,51 @@
   font-size: 1.25rem !important;
   font-weight: 900 !important;
   text-transform: uppercase !important;
+  letter-spacing: -0.01em !important;
   border: 4px solid var(--neo-black) !important;
   background-color: var(--neo-orange) !important;
   color: var(--neo-white) !important;
   cursor: pointer !important;
   box-shadow: var(--neo-shadow) !important;
-  transition: all 0.15s ease !important;
+  transition: var(--neo-transition) !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 1rem !important;
-  width: auto !important;
-  max-width: none !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  position: relative !important;
+}
+
+.action-bar .btn-primary::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%) !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
 }
 
 .action-bar .btn-primary:hover:not(:disabled) {
-  transform: translate(-3px, -3px) !important;
-  box-shadow: 11px 11px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translate(-4px, -4px) !important;
+  box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.action-bar .btn-primary:hover:not(:disabled)::before {
+  opacity: 1 !important;
 }
 
 .action-bar .btn-primary:active:not(:disabled) {
   transform: translate(4px, 4px) !important;
-  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
 }
 
 .action-bar .btn-primary:disabled {
-  background-color: #CCCCCC !important;
+  background-color: var(--neo-light-gray) !important;
+  color: #999999 !important;
   cursor: not-allowed !important;
-  opacity: 0.5 !important;
+  opacity: 0.6 !important;
+  border-color: #CCCCCC !important;
 }
 
 .action-bar .btn-primary svg {
@@ -499,13 +550,34 @@
 
 .error-message {
   padding: 1.5rem !important;
-  background-color: var(--neo-orange) !important;
+  background-color: var(--neo-error) !important;
   border: var(--neo-border) !important;
   color: var(--neo-white) !important;
   font-weight: 900 !important;
   font-size: 1.1rem !important;
   margin: 2rem 3rem !important;
   box-shadow: var(--neo-shadow-sm) !important;
+  position: relative !important;
+}
+
+.error-message::before {
+  content: '⚠' !important;
+  position: absolute !important;
+  left: 1rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 1.5rem !important;
+}
+
+/* Error state for file items */
+.file-item.error {
+  border-color: var(--neo-error) !important;
+  background-color: rgba(255, 68, 68, 0.1) !important;
+}
+
+.file-item.error .file-preview {
+  border-color: var(--neo-error) !important;
+  background-color: rgba(255, 68, 68, 0.2) !important;
 }
 
 /* ========================================
@@ -632,24 +704,212 @@
 }
 
 /* ========================================
-   UTILITY CLASSES
+   NEO BUTTON SYSTEM
    ======================================== */
 
-.neo-badge {
-  display: inline-block !important;
-  padding: 0.5rem 1rem !important;
-  font-size: 0.9rem !important;
+.neo-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem 2rem !important;
+  font-size: 1rem !important;
   font-weight: 900 !important;
   text-transform: uppercase !important;
-  border: 3px solid var(--neo-black) !important;
-  background-color: var(--neo-yellow) !important;
-  color: var(--neo-black) !important;
-  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+  border: 4px solid var(--neo-black) !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  text-decoration: none !important;
+  gap: 0.5rem !important;
 }
+
+.neo-btn:active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+}
+
+.neo-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.neo-btn-orange {
+  background-color: var(--neo-orange) !important;
+  color: var(--neo-white) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+.neo-btn-orange:hover:not(:disabled) {
+  transform: translate(-4px, -4px) !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.neo-btn-white {
+  background-color: var(--neo-white) !important;
+  color: var(--neo-black) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+.neo-btn-white:hover:not(:disabled) {
+  transform: translate(-4px, -4px) !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.neo-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.5rem 1rem !important;
+  background-color: var(--neo-lime) !important;
+  border: 2px solid var(--neo-black) !important;
+  font-weight: 800 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
 
 .neo-divider {
   height: 4px !important;
   background-color: var(--neo-black) !important;
   margin: 2rem 0 !important;
+}
+
+/* Card header optimizations for better hierarchy */
+.card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1.5rem 2rem !important;
+  background-color: var(--neo-white) !important;
+  border-bottom: var(--neo-border) !important;
+}
+
+.card-title {
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  color: var(--neo-black) !important;
+  text-transform: uppercase !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 !important;
+}
+
+.card-subtitle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  margin-left: auto !important;
+  margin-right: 1rem !important;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem !important;
+  background-color: var(--neo-lime) !important;
+  border: 2px solid var(--neo-black) !important;
+  font-weight: 800 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+}
+
+.quick-edit-btn {
+  padding: 0.75rem 1.5rem !important;
+  background-color: var(--neo-cyan) !important;
+  color: var(--neo-white) !important;
+  border: 3px solid var(--neo-black) !important;
+  font-weight: 800 !important;
+  font-size: 0.9rem !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+.quick-edit-btn:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.quick-edit-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+}
+
+/* Enhanced checkbox styling */
+.neo-checkbox {
+  width: 32px !important;
+  height: 32px !important;
+  border: 4px solid var(--neo-black) !important;
+  background-color: var(--neo-white) !important;
+  position: relative !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.neo-checkbox:hover {
+  transform: scale(1.1) !important;
+}
+
+.neo-checkbox.checked {
+  background-color: var(--neo-purple) !important;
+  border-color: var(--neo-black) !important;
+}
+
+.neo-checkbox.checked::after {
+  content: '✓' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: var(--neo-white) !important;
+  font-size: 1.2rem !important;
+  font-weight: 900 !important;
+}
+
+/* Improved sticky bar */
+.sticky-bottom-bar {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background-color: var(--neo-lime) !important;
+  border-top: var(--neo-border) !important;
+  padding: 1.25rem 2rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  box-shadow: 0 -8px 0px 0px rgba(0, 0, 0, 0.1) !important;
+  z-index: 1000 !important;
+}
+
+.save-selected-btn {
+  padding: 1rem 2.5rem !important;
+  background-color: var(--neo-white) !important;
+  color: var(--neo-black) !important;
+  border: 4px solid var(--neo-black) !important;
+  font-weight: 900 !important;
+  font-size: 1.1rem !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  opacity: 0.6 !important;
+}
+
+.save-selected-btn.active {
+  background-color: var(--neo-orange) !important;
+  color: var(--neo-white) !important;
+  opacity: 1 !important;
+}
+
+.save-selected-btn.active:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 7px 7px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.save-selected-btn.active:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
 }
 
