@@ -47,7 +47,7 @@ const Upload = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('auto')
   const [originalFiles, setOriginalFiles] = useState<{ [key: string]: File }>({})
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [cancelRequested, setCancelRequested] = useState(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     dispatch(clearUploadResult())
@@ -123,13 +123,15 @@ const Upload = () => {
   }
 
   const handleCancelUpload = () => {
-    setCancelRequested(true)
+    // Abort the ongoing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
     setIsAnalyzing(false)
     dispatch(clearFiles())
     setOriginalFiles({})
     dispatch(clearError())
-    // Reset cancel flag after a brief moment
-    setTimeout(() => setCancelRequested(false), 100)
   }
 
   const removeFileFromList = (index: number) => {
@@ -152,7 +154,9 @@ const Upload = () => {
     }
 
     setIsAnalyzing(true)
-    setCancelRequested(false)
+    
+    // Create new AbortController for this upload
+    abortControllerRef.current = new AbortController()
 
     try {
       // Build array of actual File objects (kept in local `originalFiles`) matching Redux metadata order
@@ -171,14 +175,9 @@ const Upload = () => {
       let result: any = null
 
       if (uploadMode === 'single') {
-        // Check if cancel was requested
-        if (cancelRequested) {
-          throw new Error('上传已取消')
-        }
-        
         // uploadImageForOCR expects a single File
         const file = filesToUpload[0]
-        const response = await uploadImageForOCR(file)
+        const response = await uploadImageForOCR(file, abortControllerRef.current.signal)
         // response already returns parsed data via api interceptor
         result = response
 
@@ -187,13 +186,8 @@ const Upload = () => {
           dispatch(updateFileStatus({ id: meta.id, status: 'processing', progress: 100 }))
         })
       } else {
-        // Check if cancel was requested
-        if (cancelRequested) {
-          throw new Error('上传已取消')
-        }
-        
         // batch mode
-        const response = await batchUploadImagesForOCR(filesToUpload)
+        const response = await batchUploadImagesForOCR(filesToUpload, abortControllerRef.current.signal)
         result = response
 
         // mark processed
@@ -202,19 +196,16 @@ const Upload = () => {
         })
       }
 
-      // Check one final time before redirecting
-      if (cancelRequested) {
-        throw new Error('上传已取消')
-      }
-
       // Save result into Redux for result page and clear queue
       dispatch(setUploadResult(result))
       dispatch(clearFiles())
       setOriginalFiles({})
       router.push('/app/upload/result')
     } catch (err: any) {
-      if (cancelRequested) {
+      // Check if error is from abort
+      if (err.name === 'AbortError' || err.message === 'canceled') {
         // Don't show error alert for user-initiated cancellation
+        console.log('Upload cancelled by user')
         files.forEach(meta => {
           dispatch(updateFileStatus({ id: meta.id, status: 'pending', progress: 0 }))
         })
@@ -228,7 +219,7 @@ const Upload = () => {
       }
     } finally {
       setIsAnalyzing(false)
-      setCancelRequested(false)
+      abortControllerRef.current = null
     }
   }
 
@@ -301,56 +292,51 @@ const Upload = () => {
           {/* Conditionally render Drop Zone, File Queue, or Processing Indicator */}
           {showProcessingIndicator ? (
             <div 
-              className="ocr-processing-indicator" 
+              className="ocr-processing-container" 
               role="status" 
               aria-live="polite"
             >
-              <div className="ocr-processing-visual">
-                <svg 
-                  viewBox="0 0 180 180" 
-                  className="ocr-processing-svg" 
-                  aria-hidden="true"
-                >
-                  <defs>
-                    <linearGradient id="scanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="rgba(99, 102, 241, 0.15)" />
-                      <stop offset="100%" stopColor="rgba(99, 102, 241, 0.45)" />
-                    </linearGradient>
-                  </defs>
-                  {/* Card background */}
-                  <rect x="30" y="30" width="120" height="120" rx="18" fill="#FFFFFF" stroke="#000000" strokeWidth="2" />
-                  
-                  {/* Text lines representing document content */}
-                  <rect x="50" y="55" width="60" height="8" rx="4" fill="#6B7280" opacity="0.35" />
-                  <rect x="50" y="75" width="40" height="8" rx="4" fill="#6B7280" opacity="0.2" />
-                  <rect x="50" y="95" width="70" height="8" rx="4" fill="#6B7280" opacity="0.35" />
-                  
-                  {/* OCR detection indicator (arrow/pointer) */}
-                  <path d="M65 120 L85 120 L75 135 Z" fill="rgba(14, 165, 233, 0.35)" />
-                  
-                  {/* Question marks or detected elements */}
-                  <rect x="50" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.35)" />
-                  <rect x="90" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.25)" />
-                  
-                  {/* Scanning overlay gradient */}
-                  <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.35" />
-                </svg>
-                <div className="ocr-scan-line" />
-                <span className="ocr-scan-corner corner-top-left" />
-                <span className="ocr-scan-corner corner-top-right" />
-                <span className="ocr-scan-corner corner-bottom-left" />
-                <span className="ocr-scan-corner corner-bottom-right" />
+              <div className="ocr-processing-content">
+                <div className="ocr-processing-visual">
+                  <svg 
+                    viewBox="0 0 180 180" 
+                    className="ocr-processing-svg" 
+                    aria-hidden="true"
+                  >
+                    <defs>
+                      <linearGradient id="scanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(99, 102, 241, 0.15)" />
+                        <stop offset="100%" stopColor="rgba(99, 102, 241, 0.45)" />
+                      </linearGradient>
+                    </defs>
+                    {/* Card background */}
+                    <rect x="30" y="30" width="120" height="120" rx="18" fill="#FFFFFF" stroke="#000000" strokeWidth="2" />
+                    
+                    {/* Text lines representing document content */}
+                    <rect x="50" y="55" width="60" height="8" rx="4" fill="#6B7280" opacity="0.35" />
+                    <rect x="50" y="75" width="40" height="8" rx="4" fill="#6B7280" opacity="0.2" />
+                    <rect x="50" y="95" width="70" height="8" rx="4" fill="#6B7280" opacity="0.35" />
+                    
+                    {/* OCR detection indicator (arrow/pointer) */}
+                    <path d="M65 120 L85 120 L75 135 Z" fill="rgba(14, 165, 233, 0.35)" />
+                    
+                    {/* Question marks or detected elements */}
+                    <rect x="50" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.35)" />
+                    <rect x="90" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.25)" />
+                    
+                    {/* Scanning overlay gradient */}
+                    <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.35" />
+                  </svg>
+                  <div className="ocr-scan-line" />
+                  <span className="ocr-scan-corner corner-top-left" />
+                  <span className="ocr-scan-corner corner-top-right" />
+                  <span className="ocr-scan-corner corner-bottom-left" />
+                  <span className="ocr-scan-corner corner-bottom-right" />
+                </div>
+                <p className="ocr-processing-label">
+                  图片解析中...
+                </p>
               </div>
-              <p className="ocr-processing-label">
-                图片解析中...
-              </p>
-              <button 
-                onClick={handleCancelUpload}
-                className="neo-btn neo-btn-white cancel-upload-btn"
-                style={{ marginTop: '1rem' }}
-              >
-                取消上传
-              </button>
             </div>
           ) : files.length > 0 ? (
             /* File Queue Section */
@@ -466,14 +452,40 @@ const Upload = () => {
               已准备好 {files.length} 个文件
             </div>
           )}
-          <button 
-            onClick={handleUpload}
-            disabled={isUploading || files.length === 0}
-            className="neo-btn neo-btn-orange" 
-            style={{ width: '100%', maxWidth: '400px', fontSize: '1.5rem', padding: '1.5rem' }}
-          >
-            {isUploading || isAnalyzing ? '🚀 处理中...' : '开始识别题目'}
-          </button>
+          {isAnalyzing ? (
+            <button 
+              onClick={handleCancelUpload}
+              className="neo-btn"
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                fontSize: '1.5rem',
+                padding: '1.5rem',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                border: '2px solid #000',
+                boxShadow: '4px 4px 0 #000',
+                alignSelf: 'center'
+              }}
+            >
+              取消任务
+            </button>
+          ) : (
+            <button 
+              onClick={handleUpload}
+              disabled={isUploading || files.length === 0}
+              className="neo-btn neo-btn-orange" 
+              style={{ 
+                width: '100%', 
+                maxWidth: '400px', 
+                fontSize: '1.5rem', 
+                padding: '1.5rem',
+                alignSelf: 'center'
+              }}
+            >
+              开始识别题目
+            </button>
+          )}
         </div>
 
         {/* Error Message */}

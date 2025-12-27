@@ -57,7 +57,7 @@ api.interceptors.response.use(
 )
 
 // OCR 相关 API
-export const uploadImageForOCR = async (file: File): Promise<any> => {
+export const uploadImageForOCR = async (file: File, signal?: AbortSignal): Promise<any> => {
   const formData = new FormData()
   formData.append('file', file)
   
@@ -65,10 +65,11 @@ export const uploadImageForOCR = async (file: File): Promise<any> => {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    signal,
   })
 }
 
-export const batchUploadImagesForOCR = async (files: File[]): Promise<any> => {
+export const batchUploadImagesForOCR = async (files: File[], signal?: AbortSignal): Promise<any> => {
   const formData = new FormData()
   files.forEach(file => {
     formData.append('files', file)
@@ -78,6 +79,7 @@ export const batchUploadImagesForOCR = async (files: File[]): Promise<any> => {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    signal,
   })
 }
 
