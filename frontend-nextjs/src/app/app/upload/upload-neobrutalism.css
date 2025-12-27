@@ -453,32 +453,31 @@
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 1.5rem !important;
+  gap: 0 !important;
   padding: 4rem 2rem !important;
   width: 100% !important;
   margin: 0 auto !important;
   text-align: center !important;
-  min-height: 500px !important;
   background-color: #F9FAFB !important;
-  border: 4px solid #000000 !important;
+  border: 4px dashed #000000 !important;
 }
 
 .ocr-processing-visual {
   position: relative !important;
-  width: 260px !important;
-  height: 260px !important;
+  width: 80px !important;
+  height: 80px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin: 0 auto !important;
+  margin: 0 auto 2rem auto !important;
 }
 
 .ocr-processing-svg {
-  width: 240px !important;
-  height: 240px !important;
+  width: 80px !important;
+  height: 80px !important;
   display: block !important;
-  border-radius: 16px !important;
-  box-shadow: 10px 10px 0 rgba(0, 0, 0, 1) !important;
+  border-radius: 8px !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1) !important;
   background: #FFFFFF !important;
   position: relative !important;
   z-index: 10 !important;
@@ -487,15 +486,15 @@
 .ocr-scan-line {
   position: absolute !important;
   left: 50% !important;
-  width: 65% !important;
-  height: 8px !important;
+  width: 70% !important;
+  height: 3px !important;
   background: linear-gradient(90deg, 
     rgba(99, 102, 241, 0) 0%, 
     rgba(99, 102, 241, 0.8) 50%, 
     rgba(99, 102, 241, 0) 100%) !important;
   border-radius: 999px !important;
-  box-shadow: 0 0 24px rgba(99, 102, 241, 0.4), 
-              0 0 12px rgba(99, 102, 241, 0.6) !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4), 
+              0 0 6px rgba(99, 102, 241, 0.6) !important;
   z-index: 25 !important;
   pointer-events: none !important;
   transform: translateX(-50%) !important;
@@ -519,56 +518,53 @@
 
 .ocr-scan-corner {
   position: absolute !important;
-  width: 28px !important;
-  height: 28px !important;
-  border: 5px solid #000000 !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 3px solid #000000 !important;
   box-sizing: border-box !important;
   background: transparent !important;
   z-index: 20 !important;
 }
 
 .corner-top-left {
-  top: 8px !important;
-  left: 8px !important;
+  top: 4px !important;
+  left: 4px !important;
   border-right: none !important;
   border-bottom: none !important;
 }
 
 .corner-top-right {
-  top: 8px !important;
-  right: 8px !important;
+  top: 4px !important;
+  right: 4px !important;
   border-left: none !important;
   border-bottom: none !important;
 }
 
 .corner-bottom-left {
-  bottom: 8px !important;
-  left: 8px !important;
+  bottom: 4px !important;
+  left: 4px !important;
   border-right: none !important;
   border-top: none !important;
 }
 
 .corner-bottom-right {
-  bottom: 8px !important;
-  right: 8px !important;
+  bottom: 4px !important;
+  right: 4px !important;
   border-left: none !important;
   border-top: none !important;
 }
 
 .ocr-processing-label {
   font-weight: 900 !important;
-  font-size: 1.75rem !important;
-  letter-spacing: -0.02em !important;
+  font-size: 1.5rem !important;
+  letter-spacing: 0.5px !important;
   color: #000000 !important;
   text-transform: uppercase !important;
-  margin: 1rem 0 0.5rem 0 !important;
+  margin: 0 0 2.5rem 0 !important;
 }
 
 .ocr-processing-subtext {
-  font-size: 1.1rem !important;
-  font-weight: 600 !important;
-  color: #4B5563 !important;
-  margin: 0 !important;
+  display: none !important;
 }
 
 /* Respect reduced motion preference */

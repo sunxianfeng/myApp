@@ -269,52 +269,12 @@ const Upload = () => {
               className="ocr-processing-indicator" 
               role="status" 
               aria-live="polite"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '1.5rem',
-                padding: '4rem 2rem',
-                width: '100%',
-                margin: '0 auto',
-                textAlign: 'center',
-                minHeight: '500px',
-                backgroundColor: '#F9FAFB',
-                border: '4px solid #000000',
-              }}
             >
-              <div 
-                className="ocr-processing-visual"
-                style={{
-                  position: 'relative',
-                  width: '280px',
-                  height: '280px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto',
-                  backgroundColor: '#FFE000',
-                  borderRadius: '20px',
-                  border: '4px solid #000000',
-                  boxShadow: '8px 8px 0 rgba(0, 0, 0, 1)',
-                  padding: '20px',
-                }}
-              >
+              <div className="ocr-processing-visual">
                 <svg 
                   viewBox="0 0 180 180" 
                   className="ocr-processing-svg" 
                   aria-hidden="true"
-                  style={{
-                    width: '240px',
-                    height: '240px',
-                    display: 'block',
-                    borderRadius: '16px',
-                    boxShadow: '10px 10px 0 rgba(0, 0, 0, 1)',
-                    background: '#FFFFFF',
-                    position: 'relative',
-                    zIndex: 10,
-                  }}
                 >
                   <defs>
                     <linearGradient id="scanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -340,110 +300,14 @@ const Upload = () => {
                   {/* Scanning overlay gradient */}
                   <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.35" />
                 </svg>
-                <div 
-                  className="ocr-scan-line"
-                  style={{
-                    position: 'absolute',
-                    left: '50%',
-                    width: '50%',
-                    height: '4px',
-                    background: 'linear-gradient(90deg, rgba(99, 102, 241, 0) 0%, rgba(99, 102, 241, 1) 50%, rgba(99, 102, 241, 0) 100%)',
-                    borderRadius: '999px',
-                    boxShadow: '0 0 16px rgba(99, 102, 241, 0.6), 0 0 8px rgba(99, 102, 241, 0.8)',
-                    zIndex: 25,
-                    pointerEvents: 'none',
-                    transform: 'translateX(-50%)',
-                    animation: 'scanMove 2.5s ease-in-out infinite',
-                  }}
-                />
-                <span 
-                  className="ocr-scan-corner corner-top-left"
-                  style={{
-                    position: 'absolute',
-                    width: '28px',
-                    height: '28px',
-                    border: '5px solid #000000',
-                    boxSizing: 'border-box',
-                    background: 'transparent',
-                    zIndex: 20,
-                    top: '8px',
-                    left: '8px',
-                    borderRight: 'none',
-                    borderBottom: 'none',
-                  }}
-                />
-                <span 
-                  className="ocr-scan-corner corner-top-right"
-                  style={{
-                    position: 'absolute',
-                    width: '28px',
-                    height: '28px',
-                    border: '5px solid #000000',
-                    boxSizing: 'border-box',
-                    background: 'transparent',
-                    zIndex: 20,
-                    top: '8px',
-                    right: '8px',
-                    borderLeft: 'none',
-                    borderBottom: 'none',
-                  }}
-                />
-                <span 
-                  className="ocr-scan-corner corner-bottom-left"
-                  style={{
-                    position: 'absolute',
-                    width: '28px',
-                    height: '28px',
-                    border: '5px solid #000000',
-                    boxSizing: 'border-box',
-                    background: 'transparent',
-                    zIndex: 20,
-                    bottom: '8px',
-                    left: '8px',
-                    borderRight: 'none',
-                    borderTop: 'none',
-                  }}
-                />
-                <span 
-                  className="ocr-scan-corner corner-bottom-right"
-                  style={{
-                    position: 'absolute',
-                    width: '28px',
-                    height: '28px',
-                    border: '5px solid #000000',
-                    boxSizing: 'border-box',
-                    background: 'transparent',
-                    zIndex: 20,
-                    bottom: '8px',
-                    right: '8px',
-                    borderLeft: 'none',
-                    borderTop: 'none',
-                  }}
-                />
+                <div className="ocr-scan-line" />
+                <span className="ocr-scan-corner corner-top-left" />
+                <span className="ocr-scan-corner corner-top-right" />
+                <span className="ocr-scan-corner corner-bottom-left" />
+                <span className="ocr-scan-corner corner-bottom-right" />
               </div>
-              <p 
-                className="ocr-processing-label"
-                style={{
-                  fontWeight: 900,
-                  fontSize: '1.75rem',
-                  letterSpacing: '-0.02em',
-                  color: '#000000',
-                  textTransform: 'uppercase',
-                  margin: '1rem 0 0.5rem 0',
-                }}
-              >
+              <p className="ocr-processing-label">
                 图片解析中...
-              </p>
-              <p 
-                className="ocr-processing-subtext"
-                style={{
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: '#4B5563',
-                  margin: 0,
-                }}
-              >
-                我们正在为您解析图片内容，请稍候
               </p>
             </div>
           ) : files.length > 0 ? (
