@@ -979,9 +979,8 @@ const QuestionsContent = () => {
       <header className="unified-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
           <div>
-            <h1>Question Management</h1>
-            <p>
-              All collections and unassigned questions. Drag questions into collections to organize them.
+            <p style={{ fontSize: '1.125rem', fontWeight: 500, color: '#374151', margin: 0 }}>
+              Drag questions into collections to organize them.
             </p>
           </div>
 

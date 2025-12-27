@@ -83,6 +83,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return pathname.startsWith(path)
   }
 
+  // Get page title based on current pathname
+  const getPageTitle = (): string => {
+    if (pathname === '/app') return '仪表板'
+    if (pathname.startsWith('/app/questions')) return '题目管理'
+    if (pathname.startsWith('/app/collections')) return '题目管理' // Collections are part of questions
+    if (pathname.startsWith('/app/templates')) return '模版管理'
+    if (pathname.startsWith('/app/upload')) return '文档上传'
+    if (pathname.startsWith('/app/settings')) return '设置'
+    return '仪表板' // fallback
+  }
+
   // Prevent hydration mismatch by not rendering active states until mounted
   const getNavItemClassName = (path: string): string => {
     const baseClasses = 'sidebar-item flex items-center p-3 rounded-lg'
@@ -170,7 +181,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">仪表板</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{getPageTitle()}</h2>
             <p className="text-gray-500">欢迎回来, Username!</p>
           </div>
           <div className="flex items-center gap-20">

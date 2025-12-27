@@ -110,8 +110,8 @@ const QuestionCard = ({
       </div>
       <div className="card-content">{question.content}</div>
       <div className="card-footer">
-        <span className="card-meta-tag">{(question as any).question_type || (question as any).type || 'N/A'}</span>
-        <span className="card-meta-date">{new Date((question as any).created_at || question.added_at).toLocaleDateString()}</span>
+        <span className="card-meta-tag">{question.question_type || 'N/A'}</span>
+        <span className="card-meta-date">{new Date(question.created_at || question.added_at).toLocaleDateString()}</span>
       </div>
     </div>
   )
@@ -259,174 +259,108 @@ export default function CollectionDetailPage() {
 
   return (
     <div className="unified-questions-page">
-      {/* Header - Responsive */}
+      {/* Header */}
       <header className="unified-header">
-        <div style={{ marginBottom: '2rem' }}>
-          <button
-            onClick={() => router.push('/app/questions')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              color: '#3B82F6',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 700,
-              marginBottom: '1rem',
-              fontSize: '0.9rem',
-              padding: 0,
-            }}
-          >
-            <IconArrowLeft size={16} />
-            Back to Questions
-          </button>
-          
-          {/* Title section with favorite button - aligned at same height */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between', 
-            gap: '16px', 
-            marginBottom: '12px',
-            flexWrap: 'wrap',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <h1 style={{ 
-                fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', // reduced from 1.75rem-2.5rem
-                fontWeight: 900, 
-                margin: 0,
-                lineHeight: 1,
-              }}>
-                {collection.title}
-              </h1>
-              {collection.is_favorite && <span style={{ fontSize: '2rem', lineHeight: 1 }}>⭐</span>}
-            </div>
-            
-            {/* Favorite button - aligned with title */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+          <div style={{ textAlign: 'left', flex: 1 }}>
             <button
-              onClick={handleToggleFavorite}
+              onClick={() => router.push('/app/questions')}
               style={{
-                padding: '12px 24px',
-                border: '3px solid black',
-                borderRadius: '8px',
-                backgroundColor: collection.is_favorite ? '#FEF3C7' : 'white',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '4px 4px 0 rgba(0,0,0,1)',
-                transition: 'all 0.2s',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                flexShrink: 0,
-                height: 'fit-content',
+                color: '#3B82F6',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: 700,
+                marginBottom: '1rem',
+                fontSize: '0.9rem',
               }}
             >
-              {collection.is_favorite ? (
-                <>
-                  <IconStar size={16} fill="currentColor" />
-                  <span>Unfavorite</span>
-                </>
-              ) : (
-                <>
-                  <IconStar size={16} />
-                  <span>Add to Favorites</span>
-                </>
-              )}
+              <IconArrowLeft size={16} />
+              Back to Questions
             </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0 }}>
+                {collection.title}
+              </h1>
+              {collection.is_favorite && <span style={{ fontSize: '2rem' }}>⭐</span>}
+            </div>
+            
+            <p style={{ fontSize: '1rem', color: '#6B7280', marginBottom: '1rem' }}>
+              {collection.description || 'No description'}
+            </p>
+            
+            <div style={{ display: 'flex', gap: '16px', fontSize: '0.875rem', color: '#6B7280' }}>
+              <span style={{ fontWeight: 600 }}>📚 {collection.question_count} questions</span>
+              <span style={{ fontWeight: 600 }}>🎯 {collection.total_practiced} practices</span>
+              <span style={{ fontWeight: 600 }}>📅 {new Date(collection.created_at).toLocaleDateString()}</span>
+            </div>
           </div>
           
-          {/* Description - only if exists and not the default Chinese text */}
-          {collection.description && collection.description !== '从题目管理页面创建' && (
-            <p style={{ 
-              fontSize: '1rem', 
-              color: '#6B7280', 
-              marginTop: '12px',
-              lineHeight: 1.6,
-              maxWidth: '800px',
-            }}>
-              {collection.description}
-            </p>
-          )}
+          <button
+            onClick={handleToggleFavorite}
+            style={{
+              padding: '12px 24px',
+              border: '3px solid black',
+              borderRadius: '8px',
+              backgroundColor: collection.is_favorite ? '#FEF3C7' : 'white',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+              transition: 'all 0.2s',
+            }}
+          >
+            {collection.is_favorite ? <><IconStar size={16} style={{ display: 'inline', marginRight: '6px' }} /> Unfavorite</> : 'Add to Favorites'}
+          </button>
         </div>
       </header>
       
-      {/* Toolbar - Fully Responsive */}
+      {/* Toolbar */}
       <div style={{
         backgroundColor: 'white',
         border: '3px solid black',
         borderRadius: '12px',
-        padding: '20px',
+        padding: '16px',
         marginBottom: '24px',
         boxShadow: '4px 4px 0 rgba(0,0,0,1)',
       }}>
-        <div style={{ 
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: '16px',
-          alignItems: 'end',
-        }}>
-          {/* Sort */}
-          <div>
-            <label style={{ 
-              display: 'block', 
-              fontSize: '0.75rem', 
-              fontWeight: 700, 
-              color: '#6B7280', 
-              marginBottom: '8px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              Sort By
-            </label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Sort */}
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
               style={{
-                width: '100%',
-                padding: '10px 12px',
+                padding: '8px 12px',
                 border: '2px solid black',
                 borderRadius: '6px',
                 fontWeight: 600,
                 fontSize: '0.875rem',
                 cursor: 'pointer',
-                backgroundColor: 'white',
               }}
             >
               <option value="added">By Added Time</option>
               <option value="mastery">By Mastery Level</option>
               <option value="practiced">By Practice Count</option>
             </select>
-          </div>
-          
-          {/* Filter by mastery */}
-          <div>
-            <label style={{ 
-              display: 'block', 
-              fontSize: '0.75rem', 
-              fontWeight: 700, 
-              color: '#6B7280', 
-              marginBottom: '8px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              Filter Mastery
-            </label>
+            
+            {/* Filter by mastery */}
             <select
               value={filterMastery}
               onChange={(e) => setFilterMastery(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
               style={{
-                width: '100%',
-                padding: '10px 12px',
+                padding: '8px 12px',
                 border: '2px solid black',
                 borderRadius: '6px',
                 fontWeight: 600,
                 fontSize: '0.875rem',
                 cursor: 'pointer',
-                backgroundColor: 'white',
               }}
             >
-              <option value="all">All Levels</option>
+              <option value="all">All Mastery Levels</option>
               <option value="0">Not Mastered (0)</option>
               <option value="1">Poor (1)</option>
               <option value="2">Fair (2)</option>
@@ -434,40 +368,19 @@ export default function CollectionDetailPage() {
               <option value="4">Excellent (4)</option>
               <option value="5">Perfect (5)</option>
             </select>
-          </div>
-          
-          {/* View toggle */}
-          <div>
-            <label style={{ 
-              display: 'block', 
-              fontSize: '0.75rem', 
-              fontWeight: 700, 
-              color: '#6B7280', 
-              marginBottom: '8px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              View Mode
-            </label>
-            <div style={{ 
-              display: 'flex', 
-              border: '2px solid black', 
-              borderRadius: '6px', 
-              overflow: 'hidden',
-              height: '42px',
-            }}>
+            
+            {/* View toggle */}
+            <div style={{ display: 'flex', border: '2px solid black', borderRadius: '6px', overflow: 'hidden' }}>
               <button
                 onClick={() => setViewMode('card')}
                 style={{
-                  flex: 1,
-                  padding: '10px 16px',
+                  padding: '8px 16px',
                   backgroundColor: viewMode === 'card' ? '#3B82F6' : 'white',
                   color: viewMode === 'card' ? 'white' : 'black',
                   border: 'none',
                   fontWeight: 700,
                   fontSize: '0.875rem',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
                 }}
               >
                 Cards
@@ -475,8 +388,7 @@ export default function CollectionDetailPage() {
               <button
                 onClick={() => setViewMode('list')}
                 style={{
-                  flex: 1,
-                  padding: '10px 16px',
+                  padding: '8px 16px',
                   backgroundColor: viewMode === 'list' ? '#3B82F6' : 'white',
                   color: viewMode === 'list' ? 'white' : 'black',
                   border: 'none',
@@ -484,7 +396,6 @@ export default function CollectionDetailPage() {
                   fontWeight: 700,
                   fontSize: '0.875rem',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
                 }}
               >
                 List
@@ -492,26 +403,8 @@ export default function CollectionDetailPage() {
             </div>
           </div>
           
-          {/* Question count summary - compact, responsive */}
-          <div style={{ 
-            gridColumn: 'span 1',
-            padding: '12px 16px',
-            backgroundColor: '#F3F4F6',
-            border: '2px solid #E5E7EB',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '42px',
-          }}>
-            <span style={{ 
-              fontSize: '0.875rem', 
-              fontWeight: 700, 
-              color: '#374151',
-              textAlign: 'center',
-            }}>
-              📊 {filteredQuestions.length} / {sortedQuestions.length}
-            </span>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#6B7280' }}>
+            {filteredQuestions.length} question{filteredQuestions.length !== 1 ? 's' : ''}
           </div>
         </div>
       </div>
@@ -580,7 +473,7 @@ export default function CollectionDetailPage() {
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '0.875rem' }}>
                     <span style={{ padding: '4px 8px', backgroundColor: '#DBEAFE', color: '#1E40AF', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
-                      {(question as any).question_type || (question as any).type || 'N/A'}
+                      {question.question_type || 'N/A'}
                     </span>
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '0.875rem' }}>
