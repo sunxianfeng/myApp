@@ -163,7 +163,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <header className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">{getPageTitle()}</h2>
-            <p className="text-gray-500">欢迎回来, Username!</p>
+            {pathname === '/app' && (
+              <p className="text-gray-700 text-3xl font-semibold mt-1">欢迎回来, Username!</p>
+            )}
           </div>
           <div className="flex items-center gap-20">
             {/* Search Bar */}
