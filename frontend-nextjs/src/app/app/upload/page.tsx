@@ -263,7 +263,7 @@ const Upload = () => {
             </button>
           </div>
 
-          {/* Conditionally render Drop Zone or Processing Indicator */}
+          {/* Conditionally render Drop Zone, File Queue, or Processing Indicator */}
           {showProcessingIndicator ? (
             <div 
               className="ocr-processing-indicator" 
@@ -446,7 +446,52 @@ const Upload = () => {
                 我们正在为您解析图片内容，请稍候
               </p>
             </div>
+          ) : files.length > 0 ? (
+            /* File Queue Section */
+            <div className="file-queue" style={{ marginTop: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ margin: 0 }}>File Queue ({files.length})</h3>
+                <button
+                  onClick={() => {
+                    dispatch(clearFiles())
+                    setOriginalFiles({})
+                  }}
+                  className="neo-btn"
+                  style={{ 
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.9rem',
+                    backgroundColor: '#FF6B6B',
+                    color: 'white'
+                  }}
+                >
+                  Clear All
+                </button>
+              </div>
+              {files.map((file, index) => (
+                <div key={index} className="file-item">
+                  <div className="file-preview">
+                    {isImage(file) && originalFiles[file.id] ? (
+                      <img src={URL.createObjectURL(originalFiles[file.id])} alt={file.name} />
+                    ) : (
+                      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="file-details">
+                    <p>{file.name}</p>
+                    <span>{formatFileSize(file.size)}</span>
+                  </div>
+                  <div className="remove-btn" onClick={() => removeFileFromList(index)}>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
+            /* Drop Zone Section */
             <div 
               className={`drop-zone ${dragActive ? 'drag-over' : ''}`}
               onDrop={handleDrop}
@@ -507,35 +552,6 @@ const Upload = () => {
             className="hidden"
           />
         </div>
-
-        {/* File Queue */}
-        {files.length > 0 && !showProcessingIndicator && (
-          <div className="file-queue">
-            <h3>File Queue</h3>
-            {files.map((file, index) => (
-              <div key={index} className="file-item">
-                <div className="file-preview">
-                  {isImage(file) && originalFiles[file.id] ? (
-                    <img src={URL.createObjectURL(originalFiles[file.id])} alt={file.name} />
-                  ) : (
-                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  )}
-                </div>
-                <div className="file-details">
-                  <p>{file.name}</p>
-                  <span>{formatFileSize(file.size)}</span>
-                </div>
-                <div className="remove-btn" onClick={() => removeFileFromList(index)}>
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Action Bar */}
         <div className="action-bar" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
