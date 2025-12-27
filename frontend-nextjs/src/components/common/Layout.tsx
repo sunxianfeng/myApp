@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import MistakeBookStarIcon from './MistakeBookStarIcon'
 
 function Icon({ name, className }: { name: 'dashboard' | 'file' | 'upload' | 'settings' | 'search' | 'chevronDown'; className?: string }) {
   const common = { className, fill: 'none', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', 'aria-hidden': true }
@@ -109,10 +110,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div>
           {/* Logo */}
           <div className="flex items-center mb-10 space-x-3">
-            <div className="w-9 h-9 flex items-center justify-center border-2 border-gray-800 rounded-lg self-center flex-shrink-0">
-              <div className="w-3.5 h-3.5 bg-gray-800 rounded-full"></div>
-            </div>
-            <h1 className="text-lg font-bold text-gray-800 self-center">我的应用</h1>
+            <MistakeBookStarIcon />
+            <h1 className="text-lg font-bold text-gray-800 self-center">错题本</h1>
           </div>
 
           {/* Navigation */}
