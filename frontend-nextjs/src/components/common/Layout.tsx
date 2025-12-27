@@ -168,7 +168,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex items-center gap-20">
             {/* Search Bar */}
             <div className="relative w-80">
-              <Icon name="search" className="absolute left-5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Icon name="search" className="absolute left-5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="搜索..."

@@ -302,6 +302,46 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.1) !important;
 }
 
+/* ============== HEADER SEARCH BAR - NEOBRUTALISM ============== */
+header .relative input[type="text"] {
+  border: 3px solid #000000 !important;
+  border-radius: 0 !important;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+  transition: all 0.2s ease !important;
+  padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+}
+
+header .relative input[type="text"]::placeholder {
+  color: #6B7280 !important;
+  font-weight: 600 !important;
+}
+
+header .relative input[type="text"]:focus {
+  border-color: #000000 !important;
+  outline: none !important;
+  box-shadow: 6px 6px 0px 0px #000000 !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+header .relative input[type="text"]:hover {
+  background-color: #FFFBEB !important;
+}
+
+/* Search icon neobrutalism style */
+header .relative svg {
+  stroke-width: 2.5 !important;
+  color: #000000 !important;
+}
+
+/* Increase spacing between search and user profile */
+header .flex.items-center.gap-20 {
+  gap: 6rem !important; /* Increased from 5rem (gap-20) to 6rem */
+}
+
 /* ============== ANIMATIONS ============== */
 .fade-in-up {
   animation: fadeInUp 0.4s ease-out forwards !important;
