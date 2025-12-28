@@ -78,12 +78,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Get page title based on current pathname
   const getPageTitle = (): string => {
-    if (pathname === '/app') return '仪表板'
+    if (pathname === '/app') return '首页'
     if (pathname.startsWith('/app/questions')) return '题目管理'
     if (pathname.startsWith('/app/collections')) return '题目管理' // Collections are part of questions
     if (pathname.startsWith('/app/upload')) return '文档上传'
     if (pathname.startsWith('/app/settings')) return '设置'
-    return '仪表板' // fallback
+    return '首页' // fallback
+  }
+
+  // Check if search bar should be displayed
+  const shouldShowSearchBar = (): boolean => {
+    return pathname === '/app' || pathname.startsWith('/app/questions') || pathname.startsWith('/app/collections')
   }
 
   // Prevent hydration mismatch by not rendering active states until mounted
@@ -116,13 +121,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Navigation */}
           <nav className="flex flex-col space-y-2">
-            {/* 仪表板 */}
+            {/* 首页 */}
             <Link
               href="/app"
               className={getNavItemClassName('/app')}
             >
               <Icon name="dashboard" className="w-4 h-4 mr-3" />
-              仪表板
+              首页
             </Link>
 
             {/* 题目管理 */}
@@ -168,15 +173,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
           </div>
           <div className="flex items-center gap-20">
-            {/* Search Bar */}
-            <div className="relative w-80">
-              <Icon name="search" className="absolute left-5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="搜索..."
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg bg-white outline-none focus:border-gray-400 transition-colors"
-              />
-            </div>
+            {/* Search Bar - Only show on dashboard and questions pages */}
+            {shouldShowSearchBar() && (
+              <div className="relative w-80">
+                <Icon name="search" className="absolute left-5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="搜索..."
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg bg-white outline-none focus:border-gray-400 transition-colors"
+                />
+              </div>
+            )}
 
             {/* User Profile */}
             <div className="flex items-center gap-3">
