@@ -56,7 +56,7 @@
 }
 
 .upload-header h1 {
-  font-size: 2rem !important;
+  font-size: 1.75rem !important;
   font-weight: 900 !important;
   color: var(--neo-black) !important;
   margin-bottom: 0.75rem !important;
@@ -65,7 +65,7 @@
 }
 
 .upload-header p {
-  font-size: 1.25rem !important;
+  font-size: 1.5rem !important;
   font-weight: 700 !important;
   color: var(--neo-black) !important;
   opacity: 0.8 !important;
@@ -88,7 +88,7 @@
 
 .mode-btn {
   padding: 1rem 2.5rem !important;
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   font-weight: 900 !important;
   text-transform: uppercase !important;
   border: 4px solid var(--neo-black) !important;
@@ -156,7 +156,7 @@
 }
 
 .drop-zone p {
-  font-size: 1.5rem !important;
+  font-size: 1.125rem !important;
   font-weight: 900 !important;
   color: var(--neo-black) !important;
   margin-bottom: 2.5rem !important;
@@ -181,8 +181,8 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 1.25rem 2rem !important;
-  font-size: 1.1rem !important;
+  padding: 1rem 1.75rem !important;
+  font-size: 1rem !important;
   font-weight: 900 !important;
   text-transform: uppercase !important;
   border: 4px solid var(--neo-black) !important;
@@ -230,7 +230,7 @@
 }
 
 .file-queue h3 {
-  font-size: 1.75rem !important;
+  font-size: 1.25rem !important;
   font-weight: 900 !important;
   color: var(--neo-black) !important;
   margin-bottom: 2rem !important;
@@ -296,7 +296,7 @@
 }
 
 .file-details p {
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   font-weight: 800 !important;
   color: var(--neo-black) !important;
   margin-bottom: 0.5rem !important;
@@ -306,7 +306,7 @@
 }
 
 .file-details span {
-  font-size: 0.95rem !important;
+  font-size: 0.875rem !important;
   font-weight: 700 !important;
   color: var(--neo-black) !important;
   opacity: 0.6 !important;
@@ -381,7 +381,7 @@
 
 .action-bar .neo-btn-orange {
   padding: 1.5rem 3rem !important;
-  font-size: 1.5rem !important;
+  font-size: 1rem !important;
   font-weight: 900 !important;
   text-transform: uppercase !important;
   min-width: 300px !important;
@@ -570,7 +570,7 @@
 
 .ocr-processing-label {
   font-weight: 900 !important;
-  font-size: 1.5rem !important;
+  font-size: 1.25rem !important;
   letter-spacing: 0.5px !important;
   color: #000000 !important;
   text-transform: uppercase !important;
@@ -627,7 +627,7 @@
   border: var(--neo-border) !important;
   color: var(--neo-white) !important;
   font-weight: 900 !important;
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   margin: 2rem 3rem !important;
   box-shadow: var(--neo-shadow-sm) !important;
   position: relative !important;

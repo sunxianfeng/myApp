@@ -268,7 +268,7 @@ const Upload = () => {
         {/* Improved Header with Breadcrumb */}
         <div className="upload-header">
           {/* Breadcrumb removed */}
-          <p style={{ fontSize: '1.1rem', fontWeight: 500, margin: 0 }}>上传图片和文档以提取题目内容</p>
+          <p style={{ fontSize: '1.5rem', fontWeight: 500, margin: 0 }}>上传图片和文档以提取题目内容</p>
         </div>
 
         {/* Mode Selection */}
@@ -341,7 +341,7 @@ const Upload = () => {
             /* File Queue Section */
             <div className="file-queue" style={{ marginTop: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ margin: 0 }}>File Queue ({files.length})</h3>
+                <h3 style={{ margin: 0, fontSize: '1.125rem' }}>File Queue ({files.length})</h3>
                 <button
                   onClick={() => {
                     dispatch(clearFiles())
@@ -350,7 +350,7 @@ const Upload = () => {
                   className="neo-btn"
                   style={{ 
                     padding: '0.5rem 1rem',
-                    fontSize: '0.9rem',
+                    fontSize: '0.875rem',
                     backgroundColor: '#FF6B6B',
                     color: 'white'
                   }}
@@ -394,7 +394,7 @@ const Upload = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <p>Drag & drop files here, or click to select</p>
+              <p style={{ fontSize: '1.125rem' }}>Drag & drop files here, or click to select</p>
               <div>
                 <button
                   className="select-btn"
@@ -453,8 +453,8 @@ const Upload = () => {
               style={{
                 width: '100%',
                 maxWidth: '400px',
-                fontSize: '1.5rem',
-                padding: '1.5rem',
+                fontSize: '1.25rem',
+                padding: '1.25rem',
                 backgroundColor: '#ef4444',
                 color: 'white',
                 border: '2px solid #000',
@@ -472,8 +472,8 @@ const Upload = () => {
               style={{ 
                 width: '100%', 
                 maxWidth: '400px', 
-                fontSize: '1.5rem', 
-                padding: '1.5rem',
+                fontSize: '1rem', 
+                padding: '1.25rem',
                 alignSelf: 'center'
               }}
             >

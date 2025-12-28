@@ -986,31 +986,35 @@ const QuestionsContent = () => {
   return (
     <div className="unified-questions-page">
       <header className="unified-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
-          <div>
-            <p style={{ fontSize: '1.125rem', fontWeight: 500, color: '#374151', margin: 0 }}>
-              Drag questions into collections to organize them.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8 }} suppressHydrationWarning>
-            <button
-              className="neo-btn neo-btn-white"
-              aria-pressed={viewMode === 'card'}
-              onClick={() => setViewMode('card')}
-              style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
-            >
-              <IconGrid size={16} style={{ marginRight: 6 }} />
-            </button>
-            <button
-              className="neo-btn neo-btn-white"
-              aria-pressed={viewMode === 'list'}
-              onClick={() => setViewMode('list')}
-              style={{ opacity: mounted ? 1 : 0, pointerEvents: mounted ? 'auto' : 'none' }}
-            >
-              <IconList size={16} style={{ marginRight: 6 }} />
-            </button>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
+          <button
+            className="neo-btn neo-btn-white"
+            aria-pressed={viewMode === 'card'}
+            onClick={() => setViewMode('card')}
+            style={{ 
+              opacity: mounted ? 1 : 0, 
+              pointerEvents: mounted ? 'auto' : 'none',
+              padding: '0.5rem 0.75rem',
+              fontSize: '0.875rem'
+            }}
+          >
+            <IconGrid size={14} style={{ marginRight: 4 }} />
+            Card
+          </button>
+          <button
+            className="neo-btn neo-btn-white"
+            aria-pressed={viewMode === 'list'}
+            onClick={() => setViewMode('list')}
+            style={{ 
+              opacity: mounted ? 1 : 0, 
+              pointerEvents: mounted ? 'auto' : 'none',
+              padding: '0.5rem 0.75rem',
+              fontSize: '0.875rem'
+            }}
+          >
+            <IconList size={14} style={{ marginRight: 4 }} />
+            List
+          </button>
         </div>
       </header>
 
@@ -1242,25 +1246,27 @@ const QuestionsContent = () => {
         </div>
       )}
 
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild>
-          <button className="fab" aria-label="Create new">
-            <IconPlus size={24} />
-          </button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Portal>
-          <DropdownMenu.Content className="card-dropdown-content" sideOffset={15} align="end">
-            <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('question')}>
-              <IconEdit />
-              <span>New Question</span>
-            </DropdownMenu.Item>
-            <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('collection')}>
-              <IconFolder size={14} />
-              <span>New Collection</span>
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Portal>
-      </DropdownMenu.Root>
+      {mounted && (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button className="fab" aria-label="Create new">
+              <IconPlus size={24} />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content className="card-dropdown-content" sideOffset={15} align="end">
+              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('question')}>
+                <IconEdit />
+                <span>New Question</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('collection')}>
+                <IconFolder size={14} />
+                <span>New Collection</span>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+      )}
 
       {/* Question Detail Modal */}
       <QuestionDetailModal

@@ -81,7 +81,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (pathname === '/app') return '首页'
     if (pathname.startsWith('/app/questions')) return '题目管理'
     if (pathname.startsWith('/app/collections')) return '题目管理' // Collections are part of questions
-    if (pathname.startsWith('/app/upload')) return '文档上传'
+    if (pathname.startsWith('/app/upload')) return '题目解析'
     if (pathname.startsWith('/app/settings')) return '设置'
     return '首页' // fallback
   }
@@ -130,6 +130,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               首页
             </Link>
 
+            {/* 题目解析 */}
+            <Link
+              href="/app/upload"
+              className={getNavItemClassName('/app/upload')}
+            >
+              <Icon name="upload" className="w-4 h-4 mr-3" />
+              题目解析
+            </Link>
+
             {/* 题目管理 */}
             <Link
               href="/app/questions"
@@ -137,15 +146,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             >
               <Icon name="file" className="w-4 h-4 mr-3" />
               题目管理
-            </Link>
-
-            {/* 文档上传 */}
-            <Link
-              href="/app/upload"
-              className={getNavItemClassName('/app/upload')}
-            >
-              <Icon name="upload" className="w-4 h-4 mr-3" />
-              文档上传
             </Link>
           </nav>
         </div>
@@ -171,8 +171,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {pathname === '/app' && (
               <p className="text-gray-700 text-3xl font-semibold mt-1">欢迎回来, Username!</p>
             )}
+            {pathname.startsWith('/app/questions') && (
+              <p className="text-gray-500 text-sm mt-1">Drag questions into collections to organize them.</p>
+            )}
           </div>
-          <div className="flex items-center gap-20">
+          <div className="flex items-center gap-4">
             {/* Search Bar - Only show on dashboard and questions pages */}
             {shouldShowSearchBar() && (
               <div className="relative w-80">
