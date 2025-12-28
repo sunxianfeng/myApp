@@ -88,7 +88,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Check if search bar should be displayed
   const shouldShowSearchBar = (): boolean => {
-    return pathname === '/app' || pathname.startsWith('/app/questions') || pathname.startsWith('/app/collections')
+    return pathname === '/app' || pathname.startsWith('/app/collections')
   }
 
   // Prevent hydration mismatch by not rendering active states until mounted
@@ -172,7 +172,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <p className="text-gray-700 text-3xl font-semibold mt-1">欢迎回来, Username!</p>
             )}
             {pathname.startsWith('/app/questions') && (
-              <p className="text-gray-500 text-sm mt-1">Drag questions into collections to organize them.</p>
+              <p className="text-gray-500 text-sm mt-3">Drag questions into collections to organize them.</p>
             )}
           </div>
           <div className="flex items-center gap-4">

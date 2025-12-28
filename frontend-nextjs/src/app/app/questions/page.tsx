@@ -16,6 +16,7 @@ import {
   Tag as IconTag,
   ArrowRightLeft as IconMove,
   X as IconX,
+  Search as IconSearch,
 } from 'lucide-react'
 
 const IconEdit = () => (
@@ -985,43 +986,75 @@ const QuestionsContent = () => {
 
   return (
     <div className="unified-questions-page">
-      <header className="unified-header">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
-          <button
-            className="neo-btn neo-btn-white"
-            aria-pressed={viewMode === 'card'}
-            onClick={() => setViewMode('card')}
-            style={{ 
-              opacity: mounted ? 1 : 0, 
-              pointerEvents: mounted ? 'auto' : 'none',
-              padding: '0.5rem 0.75rem',
-              fontSize: '0.875rem'
-            }}
-          >
-            <IconGrid size={14} style={{ marginRight: 4 }} />
-            Card
-          </button>
-          <button
-            className="neo-btn neo-btn-white"
-            aria-pressed={viewMode === 'list'}
-            onClick={() => setViewMode('list')}
-            style={{ 
-              opacity: mounted ? 1 : 0, 
-              pointerEvents: mounted ? 'auto' : 'none',
-              padding: '0.5rem 0.75rem',
-              fontSize: '0.875rem'
-            }}
-          >
-            <IconList size={14} style={{ marginRight: 4 }} />
-            List
-          </button>
+      <header className="unified-header" style={{ paddingLeft: '16px', paddingRight: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+          {/* Search Bar */}
+          <div className="relative" style={{ flex: 1, maxWidth: '400px' }}>
+            <IconSearch 
+              size={16} 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" 
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }}
+            />
+            <input
+              type="text"
+              placeholder="搜索..."
+              className="w-full pl-10 pr-4 py-2 border-2 border-black rounded-lg bg-white outline-none focus:border-gray-600 transition-colors"
+              style={{
+                width: '100%',
+                paddingLeft: '2.5rem',
+                paddingRight: '1rem',
+                paddingTop: '0.5rem',
+                paddingBottom: '0.5rem',
+                border: '2px solid black',
+                borderRadius: '8px',
+                backgroundColor: 'white',
+                outline: 'none',
+                fontSize: '0.875rem',
+              }}
+            />
+          </div>
+          
+          {/* View Mode Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              className="neo-btn neo-btn-white"
+              aria-pressed={viewMode === 'card'}
+              onClick={() => setViewMode('card')}
+              style={{ 
+                opacity: mounted ? 1 : 0, 
+                pointerEvents: mounted ? 'auto' : 'none',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.875rem'
+              }}
+            >
+              <IconGrid size={14} style={{ marginRight: 4 }} />
+              Card
+            </button>
+            <button
+              className="neo-btn neo-btn-white"
+              aria-pressed={viewMode === 'list'}
+              onClick={() => setViewMode('list')}
+              style={{ 
+                opacity: mounted ? 1 : 0, 
+                pointerEvents: mounted ? 'auto' : 'none',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.875rem'
+              }}
+            >
+              <IconList size={14} style={{ marginRight: 4 }} />
+              List
+            </button>
+          </div>
         </div>
       </header>
 
       {pageError && <div className="questions-error">{pageError}</div>}
 
       {/* Unified view: collections + default questions */}
-      <main className={viewMode === 'card' ? 'unified-main-grid' : 'unified-main-list'}>
+      <main 
+        className={viewMode === 'card' ? 'unified-main-grid' : 'unified-main-list'}
+        style={viewMode === 'list' ? { marginLeft: '16px', marginRight: '16px', padding: 0 } : {}}
+      >
         {viewMode === 'list' && (
           <div className="list-view-header">
             <div></div>
