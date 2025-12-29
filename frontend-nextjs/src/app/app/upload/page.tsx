@@ -240,17 +240,6 @@ const Upload = () => {
       // Success: Show completion message
       setShowCompletionMessage(true)
       
-      // Optional: Play completion sound (user preference)
-      try {
-        const audio = new Audio('/sounds/notification-success.wav')
-        audio.volume = 0.3
-        audio.play().catch(() => {
-          // Ignore audio errors (user might have disabled autoplay)
-        })
-      } catch (e) {
-        // Ignore audio errors
-      }
-      
       // Browser notification (if permission granted)
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('题目识别完成！', {
@@ -264,11 +253,11 @@ const Upload = () => {
       dispatch(clearFiles())
       setOriginalFiles({})
       
-      // Auto-hide completion message after 2 seconds before navigation
+      // Navigate immediately to result page
       setTimeout(() => {
         setShowCompletionMessage(false)
         router.push('/app/upload/result')
-      }, 2000)
+      }, 500)
       
     } catch (err: any) {
       // Check if error is from abort
@@ -360,8 +349,9 @@ const Upload = () => {
               className={`mode-btn ${uploadMode === 'batch' ? 'active' : ''} disabled`}
               disabled={true}
               title="批量上传功能即将推出"
+              style={{ opacity: 0.5, cursor: 'not-allowed' }}
             >
-              批量上传 (即将推出)
+              批量上传（即将推出）
             </button>
           </div>
 
@@ -424,7 +414,7 @@ const Upload = () => {
                         任务已上传，请稍等
                       </p>
                       <p className="ocr-processing-sublabel">
-                        正在分析图片内容，预计需要 10-30 秒
+                        正在分析图片内容，预计需要 5-30 秒
                       </p>
                     </div>
                   )}
@@ -523,7 +513,8 @@ const Upload = () => {
                     docsInputRef.current?.click()
                   }}
                   disabled={true}
-                  title="批量上传功能即将推出"
+                  title="文档上传功能即将推出"
+                  style={{ opacity: 0.5, cursor: 'not-allowed' }}
                 >
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
