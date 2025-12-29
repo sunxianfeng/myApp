@@ -24,8 +24,8 @@ class QwenQuestionExtractor:
         初始化通义千问题目提取器。
 
         Args:
-            api_key (str, optional): DashScope API 密钥。如果未提供，将从配置中读取。
-            model (str, optional): 使用的模型名称，默认从配置读取。
+            api_key (str, optional): DashScope API 密钥。如果未提供,将从配置中读取。
+            model (str, optional): 使用的模型名称,默认从配置读取。
         """
         try:
             self.api_key = api_key or settings.DASHSCOPE_API_KEY
@@ -43,33 +43,34 @@ class QwenQuestionExtractor:
 
     def _build_prompt(self) -> str:
         """构建用于指导模型分析试卷的指令 (Prompt)"""
-        return """你是一个专业的试卷分析助手。请仔细分析这张试卷图片，并提取出所有的题目。
+        return """你是一个专业的试卷分析助手。请仔细分析这张试卷图片,并提取出所有的题目。
 
-请遵循以下规则：
-1. 识别每个题目的题号、题干内容、所有选项（如果是选择题）以及题目类型。
-2. 题目类型应为以下几种之一：'single_choice' (单选题), 'multiple_choice' (多选题), 'fill_blank' (填空题), 'true_false' (判断题), 'essay' (解答题，包括计算、证明等), 'short_answer' (简答题)。
+请遵循以下规则:
+1. 识别每个题目的题号、题干内容、所有选项(如果是选择题)以及题目类型。
+2. 题目类型应为以下几种之一:'single_choice' (单选题), 'multiple_choice' (多选题), 'fill_blank' (填空题), 'true_false' (判断题), 'essay' (解答题,包括计算、证明等), 'short_answer' (简答题)。
 3. 将所有识别出的题目以一个JSON数组的格式返回。不要在JSON代码块前后添加任何额外的解释性文字或注释。
-4. 每个JSON对象应包含以下字段：
+4. 每个JSON对象应包含以下字段:
    - "number": (整数) 题号。
    - "type": (字符串) 题目类型。
-   - "content": (字符串) 完整的题干内容，包括所有文字和对图片/图表的描述（例如：'根据右侧电路图回答...'）。
-   - "options": (对象数组，仅选择题需要) 如果是选择题，包含所有选项。每个选项对象应有 "label" (如 "A") 和 "content" (选项内容)。如果不是选择题，此字段应为空数组 []。
+   - "content": (字符串) 完整的题干内容,包括所有文字和对图片/图表的描述(例如:'根据右侧电路图回答...')。
+   - "options": (对象数组,仅选择题需要) 如果是选择题,包含所有选项。每个选项对象应有 "label" (如 "A") 和 "content" (选项内容)。如果不是选择题,此字段应为空数组 []。
 
-特别注意：
-- 数学符号和公式要保持原样，使用LaTeX格式表示（如 $\\leqslant$, $\\geqslant$, $\\frac{}{}$, $\\infty$ 等）
+特别注意:
+- 数学符号和公式要保持原样,使用LaTeX格式表示(如 $\\leqslant$, $\\geqslant$, $\\frac{}{}$, $\\infty$ 等)
 - 集合符号用 $\\{\\}$ 表示
 - 属于符号用 $\\in$ 表示
 - 分数用 $\\frac{分子}{分母}$ 表示
 - 不等式用 $\\leqslant$ (≤), $\\geqslant$ (≥) 表示
 - 分段函数用 $\\begin{cases} ... \\end{cases}$ 表示
-- 确保JSON格式正确，可以直接被Python的json.loads解析
+- 确保JSON格式正确,可以直接被Python的json.loads解析
+- 标记识别:仔细观察每个题目区域内或题目旁是否存在红色的手写 ❎(叉号)或 ✅(勾号), 如果存在只输出❎(叉号)的题目,如果不存在全部输出
 
-示例输出格式：
+示例输出格式:
 [
   {
     "number": 1,
     "type": "single_choice",
-    "content": "集合$\\{x|-2\\leqslant x\\leqslant 1,x\\in N\\}$表示为（）",
+    "content": "集合$\\{x|-2\\leqslant x\\leqslant 1,x\\in N\\}$表示为()",
     "options": [
       {"label": "A", "content": "$\\{-2,-1,0,1\\}$"},
       {"label": "B", "content": "$\\{-1,0,1,2\\}$"},
@@ -89,13 +90,13 @@ class QwenQuestionExtractor:
             image_path (str): 图片文件的路径。
 
         Returns:
-            List[Dict]: 解析后的题目列表。每个题目包含：
+            List[Dict]: 解析后的题目列表。每个题目包含:
                 - number: 题号
                 - type: 题目类型
                 - content: 题干内容
-                - options: 选项列表（选择题）
-                - full_content: 完整内容（与content相同，为了兼容）
-                - images: 图片字典（空字典，为了兼容）
+                - options: 选项列表(选择题)
+                - full_content: 完整内容(与content相同,为了兼容)
+                - images: 图片字典(空字典,为了兼容)
         """
         if not os.path.exists(image_path):
             logger.error(f"Image file not found at: {image_path}")
@@ -186,7 +187,7 @@ class QwenQuestionExtractor:
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response from Qwen-VL for image {image_path}. Error: {e}")
-            # 尝试在日志中记录原始返回，便于调试
+            # 尝试在日志中记录原始返回,便于调试
             if 'response' in locals() and hasattr(response, 'output'):
                 logger.error(f"Raw response was: {response.output.choices[0].message.content}")
             return []
@@ -220,7 +221,7 @@ class QwenQuestionExtractor:
 
     def extract_text_from_image(self, image_path: str) -> List[Dict[str, Any]]:
         """
-        从图片中提取纯文本内容（为了兼容旧接口）。
+        从图片中提取纯文本内容(为了兼容旧接口)。
         
         Args:
             image_path (str): 图片文件路径。
@@ -236,11 +237,11 @@ class QwenQuestionExtractor:
             text_regions.append({
                 "text": question.get("content", ""),
                 "bbox": [],
-                "confidence": 0.95,  # Qwen-VL 没有提供置信度，使用默认值
+                "confidence": 0.95,  # Qwen-VL 没有提供置信度,使用默认值
                 "position": None
             })
             
-            # 如果有选项，也加入文本区域
+            # 如果有选项,也加入文本区域
             for option in question.get("options", []):
                 text_regions.append({
                     "text": f"{option.get('label', '')}: {option.get('content', '')}",

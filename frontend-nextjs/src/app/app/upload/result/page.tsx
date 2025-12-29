@@ -336,17 +336,24 @@ const UploadResultPage = () => {
                   value={item.draftContent}
                   onChange={e => updateDraftContent(item.id, e.target.value)}
                   className="edit-textarea"
+                  placeholder="输入题目内容（支持LaTeX公式，如 $x^2$）"
                 />
                 {item.draftOptions.length > 0 && (
                   <div className="edit-options-list">
                     {item.draftOptions.map((opt, idx) => (
                       <div key={idx} className="edit-option-row">
                         <label className="edit-option-label">{opt.label}</label>
-                        <input
+                        <textarea
                           value={opt.content}
                           onChange={e => updateDraftOption(item.id, idx, e.target.value)}
-                          className="edit-option-input"
+                          className="edit-option-textarea"
+                          placeholder={`输入选项 ${opt.label} 的内容（支持换行和LaTeX公式）`}
+                          rows={2}
                         />
+                        {/* Live math preview for option */}
+                        <div className="option-preview" style={{ marginTop: '6px', background: '#fffbe6', border: '1px dashed #eab308', padding: '6px 10px', borderRadius: '6px' }}>
+                          <MathRenderer content={opt.content} />
+                        </div>
                       </div>
                     ))}
                   </div>
