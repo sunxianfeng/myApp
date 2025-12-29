@@ -856,6 +856,13 @@ const QuestionsContent = () => {
       const questionId = String(question.id);
       const assignedCollections = questionToCollectionsMap.get(questionId) || [];
       
+      // Check if question is only in default collection or unassigned
+      const nonDefaultCollections = assignedCollections.filter((col: any) => 
+        col?.title !== 'Uncategorized' && 
+        col?.title !== '默认错题本' && 
+        col?.title !== 'Default'
+      );
+      
       // For display purposes, show the first collection or mark as uncategorized
       const primaryCollection = assignedCollections.length > 0 
         ? assignedCollections[0]
@@ -866,13 +873,33 @@ const QuestionsContent = () => {
         collection: primaryCollection,
         assignedCollections, // Store all collections this question belongs to
         isUnassigned: assignedCollections.length === 0,
+        isOnlyInDefaultCollection: nonDefaultCollections.length === 0 && assignedCollections.length > 0,
       };
     });
   }, [allQuestions, collectionsWithQuestions]);
 
-  // Only show unassigned questions (questions not in any collection)
+  // Show unassigned questions AND questions from the default collection
   const filteredQuestions = useMemo(() => {
-    return allQuestionsWithCollection.filter(q => q.isUnassigned);
+    return allQuestionsWithCollection.filter(q => {
+      // Show if unassigned
+      if (q.isUnassigned) return true;
+      
+      // Show if only in the default collection
+      const isInDefaultCollection = q.assignedCollections?.some((col: any) => 
+        col?.title === 'Uncategorized' || 
+        col?.title === '默认错题本' || 
+        col?.title === 'Default'
+      );
+      
+      // Show if ONLY in default collection (not in any other non-default collections)
+      const nonDefaultCollections = q.assignedCollections?.filter((col: any) => 
+        col?.title !== 'Uncategorized' && 
+        col?.title !== '默认错题本' && 
+        col?.title !== 'Default'
+      ) || [];
+      
+      return isInDefaultCollection && nonDefaultCollections.length === 0;
+    });
   }, [allQuestionsWithCollection]);
 
   const handleAction = (action: string, payload: any) => {
