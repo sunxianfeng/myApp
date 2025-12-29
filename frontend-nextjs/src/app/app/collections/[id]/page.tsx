@@ -58,9 +58,47 @@ const QuestionDetailModal = ({
   isOpen: boolean
   onClose: () => void 
 }) => {
+  const [isGeneratingAnswer, setIsGeneratingAnswer] = useState(false)
+  const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false)
+  const [generatedAnswer, setGeneratedAnswer] = useState<string | null>(null)
+  const [similarQuestions, setSimilarQuestions] = useState<any[] | null>(null)
+  
   if (!isOpen || !question) return null
 
   const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+  
+  const handleGetReferenceAnswer = async () => {
+    setIsGeneratingAnswer(true)
+    try {
+      // TODO: Implement API call to generate reference answer
+      // For now, show a placeholder
+      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
+      setGeneratedAnswer("这是一个示例参考答案。实际实现中，这里会调用服务根据题目内容生成详细的答案解析。")
+    } catch (error) {
+      console.error('Failed to generate answer:', error)
+      alert('生成答案失败，请稍后重试')
+    } finally {
+      setIsGeneratingAnswer(false)
+    }
+  }
+  
+  const handleGenerateSimilar = async () => {
+    setIsGeneratingSimilar(true)
+    try {
+      // TODO: Implement API call to generate similar questions
+      // For now, show a placeholder
+      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
+      setSimilarQuestions([
+        { id: 'similar-1', content: '相似题目1：这是一个类似的问题...', question_type: 'multiple_choice' },
+        { id: 'similar-2', content: '相似题目2：这是另一个类似的问题...', question_type: 'multiple_choice' }
+      ])
+    } catch (error) {
+      console.error('Failed to generate similar questions:', error)
+      alert('生成相似题目失败，请稍后重试')
+    } finally {
+      setIsGeneratingSimilar(false)
+    }
+  }
 
   return (
     <div 
@@ -284,6 +322,134 @@ const QuestionDetailModal = ({
                 lineHeight: '1.6',
               }}>
                 {question.explanation}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div style={{ 
+            marginBottom: '24px',
+            padding: '20px',
+            backgroundColor: '#F9FAFB',
+            border: '3px solid black',
+            borderRadius: '12px',
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px', 
+              flexWrap: 'wrap' 
+            }}>
+              <button
+                onClick={handleGetReferenceAnswer}
+                disabled={isGeneratingAnswer}
+                style={{
+                  padding: '12px 20px',
+                  backgroundColor: isGeneratingAnswer ? '#D1D5DB' : '#10B981',
+                  color: 'white',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: isGeneratingAnswer ? 'not-allowed' : 'pointer',
+                  boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                {isGeneratingAnswer ? '🤔 生成中...' : ' 获取参考答案'}
+              </button>
+              
+              <button
+                onClick={handleGenerateSimilar}
+                disabled={isGeneratingSimilar}
+                style={{
+                  padding: '12px 20px',
+                  backgroundColor: isGeneratingSimilar ? '#D1D5DB' : '#3B82F6',
+                  color: 'white',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: isGeneratingSimilar ? 'not-allowed' : 'pointer',
+                  boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                {isGeneratingSimilar ? '🔄 生成中...' : '举一反三'}
+              </button>
+            </div>
+          </div>
+
+          {/* Generated Answer */}
+          {generatedAnswer && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>参考答案</h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#DCFCE7',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
+              }}>
+                {generatedAnswer}
+              </div>
+            </div>
+          )}
+
+          {/* Similar Questions */}
+          {similarQuestions && similarQuestions.length > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>举一反三 - 相似题目</h3>
+              <div style={{ 
+                backgroundColor: '#EFF6FF',
+                border: '3px solid black',
+                borderRadius: '8px',
+                overflow: 'hidden',
+              }}>
+                {similarQuestions.map((simQuestion, index) => (
+                  <div 
+                    key={simQuestion.id} 
+                    style={{ 
+                      padding: '16px',
+                      borderBottom: index < similarQuestions.length - 1 ? '2px solid black' : 'none',
+                    }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'flex-start',
+                      marginBottom: '8px' 
+                    }}>
+                      <span style={{ 
+                        fontWeight: 700, 
+                        fontSize: '0.875rem',
+                        color: '#3B82F6'
+                      }}>
+                        相似题目 {index + 1}
+                      </span>
+                      <span style={{ 
+                        padding: '2px 8px',
+                        backgroundColor: 'white',
+                        border: '2px solid black',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                      }}>
+                        {simQuestion.question_type}
+                      </span>
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.95rem',
+                      lineHeight: '1.6',
+                    }}>
+                      {simQuestion.content}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}

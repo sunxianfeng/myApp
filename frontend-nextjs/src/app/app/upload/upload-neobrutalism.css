@@ -116,6 +116,20 @@
   box-shadow: none !important;
 }
 
+/* Disabled button state */
+.mode-btn.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #F5F5F5 !important;
+  color: #9CA3AF !important;
+  border-color: #CCCCCC !important;
+}
+
+.mode-btn.disabled:hover {
+  transform: none !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
 /* ========================================
    DROP ZONE
    ======================================== */
@@ -994,5 +1008,124 @@
 .save-selected-btn.active:active {
   transform: translate(2px, 2px) !important;
   box-shadow: var(--neo-shadow-pressed) !important;
+}
+
+/* ========================================
+   ENHANCED UPLOAD FEATURES - DECEMBER 2024
+   ======================================== */
+
+/* Disabled button state */
+.mode-btn.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #F5F5F5 !important;
+  color: #9CA3AF !important;
+  border-color: #CCCCCC !important;
+}
+
+.mode-btn.disabled:hover {
+  transform: none !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+/* Enhanced processing messages */
+.ocr-processing-messages {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.ocr-processing-label.primary {
+  color: var(--neo-black) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  text-transform: uppercase !important;
+}
+
+.ocr-processing-label.secondary {
+  color: var(--neo-orange) !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 0.5rem 0 !important;
+  text-transform: uppercase !important;
+}
+
+.ocr-processing-label.success {
+  color: #10B981 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin: 0 0 0.5rem 0 !important;
+  text-transform: uppercase !important;
+}
+
+.ocr-processing-sublabel {
+  color: #6B7280 !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+}
+
+.ocr-waiting-message {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.ocr-completion-message {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+.completion-icon {
+  font-size: 3rem !important;
+  color: #10B981 !important;
+  margin-bottom: 0.5rem !important;
+  animation: checkmarkPop 0.6s ease-out;
+  display: block !important;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmarkPop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile responsiveness for new elements */
+@media (max-width: 768px) {
+  .ocr-processing-label.primary,
+  .ocr-processing-label.secondary,
+  .ocr-processing-label.success {
+    font-size: 1rem !important;
+  }
+  
+  .completion-icon {
+    font-size: 2rem !important;
+  }
 }
 

@@ -51,6 +51,6 @@ class Settings:
 
     # Qwen OCR Configuration (Alibaba Cloud DashScope)
     DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "sk-cf7028f008864ce3b4605704f51f7726")
-    QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen-vl-max")
+    QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen-vl-max") # qwen-vl-plus  qwen2-vl-72b-instruct
 
 settings = Settings()

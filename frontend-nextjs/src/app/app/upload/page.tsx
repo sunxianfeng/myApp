@@ -47,11 +47,34 @@ const Upload = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('auto')
   const [originalFiles, setOriginalFiles] = useState<{ [key: string]: File }>({})
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [showWaitingMessage, setShowWaitingMessage] = useState(false)
+  const [processingStartTime, setProcessingStartTime] = useState<Date | null>(null)
+  const [showCompletionMessage, setShowCompletionMessage] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const waitingMessageTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     dispatch(clearUploadResult())
   }, [dispatch])
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    // Request notification permission on component mount
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        console.log('Notification permission:', permission)
+      })
+    }
+    
+    return () => {
+      if (waitingMessageTimerRef.current) {
+        clearTimeout(waitingMessageTimerRef.current)
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -123,12 +146,22 @@ const Upload = () => {
   }
 
   const handleCancelUpload = () => {
+    // Clear all timers
+    if (waitingMessageTimerRef.current) {
+      clearTimeout(waitingMessageTimerRef.current)
+      waitingMessageTimerRef.current = null
+    }
+    
     // Abort the ongoing request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
       abortControllerRef.current = null
     }
+    
     setIsAnalyzing(false)
+    setShowWaitingMessage(false)
+    setShowCompletionMessage(false)
+    setProcessingStartTime(null)
     dispatch(clearFiles())
     setOriginalFiles({})
     dispatch(clearError())
@@ -154,6 +187,14 @@ const Upload = () => {
     }
 
     setIsAnalyzing(true)
+    setProcessingStartTime(new Date())
+    setShowWaitingMessage(false)
+    setShowCompletionMessage(false)
+    
+    // Set timer to show waiting message after 3 seconds
+    waitingMessageTimerRef.current = setTimeout(() => {
+      setShowWaitingMessage(true)
+    }, 3000)
     
     // Create new AbortController for this upload
     abortControllerRef.current = new AbortController()
@@ -196,11 +237,39 @@ const Upload = () => {
         })
       }
 
+      // Success: Show completion message
+      setShowCompletionMessage(true)
+      
+      // Optional: Play completion sound (user preference)
+      try {
+        const audio = new Audio('/sounds/notification-success.wav')
+        audio.volume = 0.3
+        audio.play().catch(() => {
+          // Ignore audio errors (user might have disabled autoplay)
+        })
+      } catch (e) {
+        // Ignore audio errors
+      }
+      
+      // Browser notification (if permission granted)
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('题目识别完成！', {
+          body: `成功识别了图片中的内容，即将跳转到结果页面。`,
+          icon: '/favicon.ico'
+        })
+      }
+      
       // Save result into Redux for result page and clear queue
       dispatch(setUploadResult(result))
       dispatch(clearFiles())
       setOriginalFiles({})
-      router.push('/app/upload/result')
+      
+      // Auto-hide completion message after 2 seconds before navigation
+      setTimeout(() => {
+        setShowCompletionMessage(false)
+        router.push('/app/upload/result')
+      }, 2000)
+      
     } catch (err: any) {
       // Check if error is from abort
       if (err.name === 'AbortError' || err.message === 'canceled') {
@@ -218,7 +287,13 @@ const Upload = () => {
         })
       }
     } finally {
+      // Clear timers
+      if (waitingMessageTimerRef.current) {
+        clearTimeout(waitingMessageTimerRef.current)
+        waitingMessageTimerRef.current = null
+      }
       setIsAnalyzing(false)
+      setShowWaitingMessage(false)
       abortControllerRef.current = null
     }
   }
@@ -282,9 +357,11 @@ const Upload = () => {
             </button>
             <button
               onClick={() => setUploadMode('batch')}
-              className={`mode-btn ${uploadMode === 'batch' ? 'active' : ''}`}
+              className={`mode-btn ${uploadMode === 'batch' ? 'active' : ''} disabled`}
+              disabled={true}
+              title="批量上传功能即将推出"
             >
-              批量上传
+              批量上传 (即将推出)
             </button>
           </div>
 
@@ -332,16 +409,45 @@ const Upload = () => {
                   <span className="ocr-scan-corner corner-bottom-left" />
                   <span className="ocr-scan-corner corner-bottom-right" />
                 </div>
-                <p className="ocr-processing-label">
-                  图片解析中...
-                </p>
+                
+                {/* Dynamic status messages */}
+                <div className="ocr-processing-messages">
+                  {!showWaitingMessage && !showCompletionMessage && (
+                    <p className="ocr-processing-label primary">
+                      图片解析中...
+                    </p>
+                  )}
+                  
+                  {showWaitingMessage && !showCompletionMessage && (
+                    <div className="ocr-waiting-message">
+                      <p className="ocr-processing-label secondary">
+                        任务已上传，请稍等
+                      </p>
+                      <p className="ocr-processing-sublabel">
+                        正在分析图片内容，预计需要 10-30 秒
+                      </p>
+                    </div>
+                  )}
+                  
+                  {showCompletionMessage && (
+                    <div className="ocr-completion-message">
+                      <div className="completion-icon">✓</div>
+                      <p className="ocr-processing-label success">
+                        解析完成！
+                      </p>
+                      <p className="ocr-processing-sublabel">
+                        正在跳转到结果页面...
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : files.length > 0 ? (
             /* File Queue Section */
             <div className="file-queue" style={{ marginTop: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.125rem' }}>File Queue ({files.length})</h3>
+                <h3 style={{ margin: 0, fontSize: '1.125rem' }}>文件队列 ({files.length})</h3>
                 <button
                   onClick={() => {
                     dispatch(clearFiles())
@@ -355,7 +461,7 @@ const Upload = () => {
                     color: 'white'
                   }}
                 >
-                  Clear All
+                  清空全部
                 </button>
               </div>
               {files.map((file, index) => (
@@ -394,7 +500,7 @@ const Upload = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <p style={{ fontSize: '1.125rem' }}>Drag & drop files here, or click to select</p>
+              <p style={{ fontSize: '1.125rem' }}>拖拽文件到此处，或点击选择文件</p>
               <div>
                 <button
                   className="select-btn"
@@ -407,7 +513,7 @@ const Upload = () => {
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  Select Images
+                  选择图片
                 </button>
                 <button
                   className="select-btn"
@@ -416,11 +522,13 @@ const Upload = () => {
                     setDocsClicked(true)
                     docsInputRef.current?.click()
                   }}
+                  disabled={true}
+                  title="批量上传功能即将推出"
                 >
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Select Documents
+                  选择文档（即将推出）
                 </button>
               </div>
             </div>
