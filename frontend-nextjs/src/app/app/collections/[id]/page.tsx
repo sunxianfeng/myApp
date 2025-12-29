@@ -39,6 +39,13 @@ const generateColorFromString = (str: string) => {
   return `hsl(${hue}, 70%, 80%)`
 }
 
+// Helper to extract text content from question.content (string or object)
+const getQuestionContentText = (content: string | { text?: string } | any): string => {
+  if (typeof content === 'string') return content
+  if (content && typeof content === 'object' && 'text' in content) return content.text || ''
+  return String(content || '')
+}
+
 // Question Detail Modal Component
 const QuestionDetailModal = ({ 
   question, 
@@ -889,7 +896,7 @@ export default function CollectionDetailPage() {
                   <td style={{ padding: '12px 16px', fontSize: '0.875rem' }}>{index + 1}</td>
                   <td style={{ padding: '12px 16px', fontSize: '0.875rem', maxWidth: '400px' }}>
                     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                      {question.content}
+                      {getQuestionContentText(question.content)}
                     </div>
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '0.875rem' }}>

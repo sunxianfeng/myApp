@@ -343,12 +343,27 @@ export const selectFilteredQuestions = (state: { questions: QuestionState }) => 
   }
   
   const query = searchQuery.toLowerCase()
-  return questions.filter(question =>
-    question.title.toLowerCase().includes(query) ||
-    question.content.toLowerCase().includes(query) ||
-    question.category.toLowerCase().includes(query) ||
-    question.tags.some(tag => tag.toLowerCase().includes(query))
-  )
+  return questions.filter(question => {
+    // Helper to get text content from question.content (string or object)
+    const contentText = typeof question.content === 'string' 
+      ? question.content 
+      : (question.content && typeof question.content === 'object' && 'text' in question.content)
+        ? question.content.text || ''
+        : String(question.content || '')
+    
+    // Handle both old and new field names
+    const title = question.title || ''
+    const category = question.category || question.subject || ''
+    const tags = question.tags || question.topic_tags || []
+    const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : [])
+    
+    return (
+      title.toLowerCase().includes(query) ||
+      contentText.toLowerCase().includes(query) ||
+      category.toLowerCase().includes(query) ||
+      tagsArray.some(tag => String(tag).toLowerCase().includes(query))
+    )
+  })
 }
 
 export const selectSelectedQuestionsCount = (state: { questions: QuestionState }) => 

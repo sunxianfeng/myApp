@@ -50,18 +50,41 @@ export interface AuthResponse {
 // 问题相关类型
 export interface Question {
   id: string
-  title: string
-  content: string
-  type: 'multiple_choice' | 'true_false' | 'short_answer' | 'essay'
-  category: string
-  difficulty: 'easy' | 'medium' | 'hard'
-  options?: string[]
-  correctAnswer?: string
+  number?: number
+  content: string | { text?: string }
+  full_content?: string
+  question_type: 'multiple_choice' | 'fill_blank' | 'true_false' | 'essay' | 'other'
+  difficulty_level?: 'easy' | 'medium' | 'hard'
+  subject?: string
+  topic_tags?: string[] | string
+  options?: any
+  question_images?: any
+  has_images?: boolean
+  correct_answer?: string
   explanation?: string
-  tags: string[]
-  createdAt: string
-  updatedAt: string
-  createdBy: string
+  answer_key?: string
+  source_image_path?: string
+  source_image_url?: string
+  source_document_id?: string
+  ocr_confidence?: string
+  is_verified?: boolean
+  is_active?: boolean
+  processing_status?: string
+  created_by: string
+  verified_by?: string
+  created_at: string
+  updated_at: string
+  verified_at?: string
+  // Legacy properties for backwards compatibility
+  title?: string
+  type?: 'multiple_choice' | 'true_false' | 'short_answer' | 'essay'
+  category?: string
+  difficulty?: 'easy' | 'medium' | 'hard'
+  correctAnswer?: string
+  tags?: string[]
+  createdAt?: string
+  updatedAt?: string
+  createdBy?: string
 }
 
 export interface CreateQuestionData {

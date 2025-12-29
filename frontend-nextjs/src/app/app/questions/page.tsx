@@ -47,6 +47,13 @@ const generateColorFromString = (str: string) => {
   return `hsl(${hue}, 70%, 80%)`
 }
 
+// Helper to extract text content from question.content (string or object)
+const getQuestionContentText = (content: string | { text?: string } | any): string => {
+  if (typeof content === 'string') return content
+  if (content && typeof content === 'object' && 'text' in content) return content.text || ''
+  return String(content || '')
+}
+
 // Question Detail Modal Component
 const QuestionDetailModal = ({ 
   question, 

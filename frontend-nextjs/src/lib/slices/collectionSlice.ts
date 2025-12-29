@@ -52,7 +52,7 @@ const initialState: CollectionState = {
 
 export const fetchCategories = createAsyncThunk(
   'collection/fetchCategories',
-  async (categoryType?: string, { rejectWithValue }) => {
+  async (categoryType: string | undefined, { rejectWithValue }) => {
     try {
       const response = await getCategories(categoryType)
       return response
@@ -102,12 +102,12 @@ export const removeCategory = createAsyncThunk(
 
 export const fetchCollections = createAsyncThunk(
   'collection/fetchCollections',
-  async (params?: {
+  async (params: {
     category_id?: string
     is_favorite?: boolean
     skip?: number
     limit?: number
-  }, { rejectWithValue }) => {
+  } | undefined, { rejectWithValue }) => {
     try {
       const response = await getCollections(params)
       return response
