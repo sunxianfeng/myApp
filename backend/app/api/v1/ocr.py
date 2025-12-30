@@ -1,6 +1,7 @@
 """
 OCR相关API端点
 """
+import asyncio
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from typing import List, Dict, Optional
@@ -79,8 +80,10 @@ async def upload_image_for_ocr(
         background_tasks.add_task(cleanup_temp_file, file_path)
         
         # 进行OCR识别
+        # NOTE: OCR + LLM calls are blocking. Run in a worker thread so we don't
+        # block the FastAPI event loop (which would stall other pages like "题目管理").
         ocr_service = get_ocr_service()
-        questions = ocr_service.extract_questions(str(file_path))
+        questions = await asyncio.to_thread(ocr_service.extract_questions, str(file_path))
         
         return {
             "success": True,
@@ -163,7 +166,7 @@ async def batch_upload_images_for_ocr(
             # 进行OCR识别
             try:
                 ocr_service = get_ocr_service()
-                questions = ocr_service.extract_questions(str(file_path))
+                questions = await asyncio.to_thread(ocr_service.extract_questions, str(file_path))
                 
                 results.append({
                     "filename": file.filename,
@@ -239,8 +242,9 @@ async def extract_text_from_image(
             )
         
         # 进行文字提取
+        # NOTE: This is also blocking, so run it off the event loop.
         ocr_service = get_ocr_service()
-        text_results = ocr_service.extract_text_from_image(str(file_path))
+        text_results = await asyncio.to_thread(ocr_service.extract_text_from_image, str(file_path))
         
         # 添加清理任务
         background_tasks.add_task(cleanup_temp_file, str(file_path))

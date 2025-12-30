@@ -2,21 +2,11 @@
 
 import './upload-neobrutalism.css'
 import React, { useState, useRef, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { useRouter } from 'next/navigation'
-import { 
-  addFile, 
-  removeFile, 
-  updateFileStatus, 
-  setFileError, 
-  clearFiles, 
-  clearError,
-  startUpload,
-  clearUploadResult
-} from '@/lib/slices/uploadSlice'
-import { AppDispatch, RootState } from '@/lib/store'
+import { useRouter, usePathname } from 'next/navigation'
+import { backgroundTaskManager } from '@/lib/backgroundTaskManager'
+import { uploadImageForOCR, batchUploadImagesForOCR } from '@/lib/api'
 
-// Define UploadedFile interface locally since it's not exported
+// Define UploadedFile interface locally
 interface UploadedFile {
   id: string
   name: string
@@ -31,52 +21,84 @@ interface UploadedFile {
 }
 
 const Upload = () => {
-  const dispatch = useDispatch<AppDispatch>()
-  const { files, isUploading, error, latestResult } = useSelector((state: RootState) => state.upload)
   const router = useRouter()
+  const pathname = usePathname()
   
   const [uploadMode, setUploadMode] = useState<'single' | 'batch'>('single')
   const [dragActive, setDragActive] = useState(false)
   const [imageClicked, setImageClicked] = useState(false)
   const [docsClicked, setDocsClicked] = useState(false)
   const [originalFiles, setOriginalFiles] = useState<{ [key: string]: File }>({})
+  const [files, setFiles] = useState<UploadedFile[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showWaitingMessage, setShowWaitingMessage] = useState(false)
-  const [uploadPromise, setUploadPromise] = useState<any>(null)
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    dispatch(clearUploadResult())
-  }, [dispatch])
-
-  useEffect(() => {
-    if (latestResult) {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('题目识别完成！', {
-          body: `成功识别了图片中的内容，即将跳转到结果页面。`,
-          icon: '/favicon.ico'
-        })
-      }
-
-      // Jump to result page immediately once the task is done
-      router.push('/app/upload/result')
+    setMounted(true)
+    return () => {
+      setMounted(false)
     }
-  }, [latestResult, router, dispatch])
+  }, [])
 
-  // Cleanup timers on unmount
+  // Listen for background task completion
   useEffect(() => {
-    // Request notification permission on component mount
+    if (!currentTaskId) return
+
+    const unsubscribe = backgroundTaskManager.subscribe(currentTaskId, (task) => {
+      if (task.status === 'completed' && task.result) {
+        // Show notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('题目识别完成！', {
+            body: `成功识别了图片中的内容，点击查看结果。`,
+            icon: '/favicon.ico',
+            requireInteraction: true
+          })
+        }
+
+        // Only redirect if still on upload page AND component is mounted
+        if (pathname === '/app/upload' && mounted) {
+          // Save result to localStorage for result page to pick up
+          localStorage.setItem('ocr_task_result', JSON.stringify(task.result))
+          localStorage.setItem('ocr_task_timestamp', Date.now().toString())
+          router.push('/app/upload/result')
+        }
+
+        // Reset upload UI - only if mounted
+        if (mounted) {
+          setIsAnalyzing(false)
+          setShowWaitingMessage(false)
+          setCurrentTaskId(null)
+          setFiles([])
+        }
+      } else if (task.status === 'failed') {
+        // Show error - only if mounted
+        if (mounted) {
+          alert(task.error || '识别失败')
+          setIsAnalyzing(false)
+          setShowWaitingMessage(false)
+          setCurrentTaskId(null)
+          setFiles(prev => prev.map(f => ({
+            ...f,
+            status: 'failed',
+            error: task.error || '识别失败'
+          })))
+        }
+      }
+    })
+
+    return () => unsubscribe()
+  }, [currentTaskId, pathname, router, mounted])
+
+  // Request notification permission on component mount
+  useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission().then(permission => {
         console.log('Notification permission:', permission)
       })
     }
-    
-    return () => {
-      if (uploadPromise && uploadPromise.abort) {
-        uploadPromise.abort('Component unmounted')
-      }
-    }
-  }, [uploadPromise])
+  }, [])
   
   const imageInputRef = useRef<HTMLInputElement>(null)
   const docsInputRef = useRef<HTMLInputElement>(null)
@@ -105,13 +127,13 @@ const Upload = () => {
       return
     }
     
-    // Convert File objects to UploadedFile objects and add to Redux
-    validFiles.forEach(fileObj => {
+    // Convert File objects to UploadedFile objects
+    const newFiles: UploadedFile[] = validFiles.map(fileObj => {
       const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
-      // Store original File separately to avoid non-serializable Redux state
+      // Store original File separately
       setOriginalFiles(prev => ({ ...prev, [id]: fileObj }))
 
-      dispatch(addFile({
+      return {
         id,
         name: fileObj.name,
         size: fileObj.size,
@@ -119,10 +141,10 @@ const Upload = () => {
         status: 'pending',
         progress: 0,
         uploadedAt: new Date().toISOString(),
-      }))
+      }
     })
-    
-    dispatch(clearError())
+
+    setFiles(prev => [...prev, ...newFiles])
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -147,21 +169,25 @@ const Upload = () => {
   }
 
   const handleCancelUpload = () => {
-    // Abort the thunk
-    if (uploadPromise && uploadPromise.abort) {
-      uploadPromise.abort('User canceled')
+    // Cancel background task
+    if (currentTaskId) {
+      backgroundTaskManager.cancelTask(currentTaskId)
     }
     
     setIsAnalyzing(false)
     setShowWaitingMessage(false)
-    dispatch(clearFiles())
+    setCurrentTaskId(null)
+    setFiles([])
     setOriginalFiles({})
-    dispatch(clearError())
   }
 
   const removeFileFromList = (index: number) => {
     const fileToRemove = files[index]
-    dispatch(removeFile(fileToRemove.id))
+    if (!fileToRemove) return
+    
+    // Update files list
+    setFiles(prev => prev.filter(f => f.id !== fileToRemove.id))
+    
     // Clean up original file from state
     if (fileToRemove) {
       setOriginalFiles(prev => {
@@ -190,34 +216,31 @@ const Upload = () => {
       return
     }
 
-    // Set status to uploading for UX
-    files.forEach(meta => {
-      dispatch(updateFileStatus({ id: meta.id, status: 'uploading' }))
-    })
+    const fileName = filesToUpload[0].name
 
-    const promise = dispatch(startUpload({ filesToUpload, uploadMode }))
-    setUploadPromise(promise)
-
-    promise.unwrap().catch((err: any) => {
-      // unwrap() will throw an error if the thunk is rejected
-      if (err !== 'Upload canceled' && err !== 'User canceled') {
-        const msg = err?.message || '上传失败'
-        alert(msg)
-        files.forEach(meta => {
-          dispatch(setFileError({ id: meta.id, error: msg }))
-        })
+    // Start background task using backgroundTaskManager
+    // This will continue even if the component unmounts
+    const taskId = await backgroundTaskManager.startTask(
+      'ocr-upload',
+      async () => {
+        let result: any
+        if (uploadMode === 'single') {
+          result = await uploadImageForOCR(filesToUpload[0])
+        } else {
+          result = await batchUploadImagesForOCR(filesToUpload)
+        }
+        return result
+      },
+      {
+        fileName,
+        fileSize: filesToUpload[0].size
       }
-      // Reset UI state on failure/cancellation
-      setIsAnalyzing(false)
-      setShowWaitingMessage(false)
-      files.forEach(meta => {
-        dispatch(updateFileStatus({ id: meta.id, status: 'pending' }))
-      })
-    }).finally(() => {
-        setIsAnalyzing(false)
-        setShowWaitingMessage(false)
-        setUploadPromise(null)
-    })
+    )
+
+    setCurrentTaskId(taskId)
+
+    // Note: We don't await the task - it runs in background
+    // The task completion is handled by the useEffect above
   }
 
   const formatFileSize = (bytes: number): string => {
@@ -241,7 +264,7 @@ const Upload = () => {
     return file.type.startsWith('image/')
   }
 
-  const showProcessingIndicator = isUploading || isAnalyzing
+  const showProcessingIndicator = isAnalyzing // Only use local state, not Redux state
 
   return (
     <div className="upload-page">
@@ -349,6 +372,9 @@ const Upload = () => {
                       <p className="ocr-processing-sublabel">
                         正在分析图片内容，预计需要 5-30 秒
                       </p>
+                      <p className="ocr-processing-sublabel" style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#666' }}>
+                        您可以离开此页面，任务将继续在后台运行
+                      </p>
                     </div>
                   )}
                 </div>
@@ -361,7 +387,7 @@ const Upload = () => {
                 <h3 style={{ margin: 0, fontSize: '1.125rem' }}>文件队列 ({files.length})</h3>
                 <button
                   onClick={() => {
-                    dispatch(clearFiles())
+                    setFiles([])
                     setOriginalFiles({})
                   }}
                   className="neo-btn"
@@ -444,8 +470,7 @@ const Upload = () => {
                 </button>
               </div>
             </div>
-          )}
-          
+          )}          
           <input
             ref={imageInputRef}
             type="file"
@@ -487,7 +512,7 @@ const Upload = () => {
           ) : (
             <button 
               onClick={handleUpload}
-              disabled={isUploading || files.length === 0}
+              disabled={isAnalyzing || files.length === 0}
               className="neo-btn neo-btn-orange" 
               style={{ 
                 width: '100%', 
@@ -503,9 +528,9 @@ const Upload = () => {
         </div>
 
         {/* Error Message */}
-        {error && (
+        {files.some(f => f.error) && (
           <div className="error-message">
-            {error}
+            {files.find(f => f.error)?.error}
           </div>
         )}
       </div>

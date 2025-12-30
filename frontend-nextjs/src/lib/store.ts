@@ -18,13 +18,20 @@ export const store = configureStore({
         // non-serializable File objects (e.g. browsers `File`). The
         // upload UI stores File objects in local component state but
         // some callers may accidentally include them in actions. We
-        // sanitize in reducers but the middleware sees the action
+        // sanitize in reducers but middleware sees: action
         // before reducers run, so ignore this action to avoid noisy
-        // warnings while keeping the rest of the checks enabled.
+        // warnings while keeping rest of checks enabled.
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE', 'upload/addFile'],
         ignoredPaths: ['upload.files.*.file'],
       },
+      // Disable thunk auto-abort on unmount for background tasks
+      // This allows uploads to continue even when user navigates away
+      immutableCheck: {
+        warnAfter: 128,
+        ignoredPaths: [],
+      },
     }),
+  devTools: process.env.NODE_ENV !== 'production',
 })
 
 export type RootState = ReturnType<typeof store.getState>

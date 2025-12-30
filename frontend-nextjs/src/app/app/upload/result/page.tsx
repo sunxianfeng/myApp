@@ -1,11 +1,11 @@
 'use client'
 
 import './result-neobrutalism.css'
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import { AppDispatch, RootState } from '@/lib/store'
-import { clearUploadResult } from '@/lib/slices/uploadSlice'
+import { clearUploadResult, loadFromStorage, clearStorage, STORAGE_KEYS } from '@/lib/slices/uploadSlice'
 import { bulkCreateQuestions } from '@/lib/api'
 import {
   fetchCollections,
@@ -33,6 +33,56 @@ const UploadResultPage = () => {
   // IMPORTANT: initialize from store synchronously to prevent hydration mismatch
   // (server HTML is generated without store data; client may have it on first render).
   const [result, setResult] = useState<any>(() => resultFromStore ?? undefined)
+
+  // Poll for background task completion
+  useEffect(() => {
+    // Check if there's a background task running
+    const taskStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
+    const taskResult = loadFromStorage(STORAGE_KEYS.TASK_RESULT)
+    const timestamp = loadFromStorage(STORAGE_KEYS.TASK_TIMESTAMP)
+    
+    // Check if task is too old (older than 30 minutes)
+    const isTaskExpired = timestamp && Date.now() - timestamp > 30 * 60 * 1000
+
+    // If result exists and is not expired, load it
+    if (taskResult && !isTaskExpired && taskStatus === 'completed') {
+      setResult(taskResult)
+      // Clear from storage after loading
+      clearStorage([STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
+      return
+    }
+
+    // If task is still running, set up polling
+    if (taskStatus === 'running' && !isTaskExpired) {
+      const pollInterval = setInterval(() => {
+        const currentStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
+        const currentResult = loadFromStorage(STORAGE_KEYS.TASK_RESULT)
+        
+        if (currentStatus === 'completed' && currentResult) {
+          clearInterval(pollInterval)
+          setResult(currentResult)
+          clearStorage([STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
+          
+          // Show notification
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('题目识别完成！', {
+              body: '点击查看识别结果。',
+              icon: '/favicon.ico',
+              requireInteraction: true
+            })
+          }
+        } else if (currentStatus === 'failed') {
+          clearInterval(pollInterval)
+          alert('任务执行失败，请重试')
+          clearStorage([STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
+        }
+      }, 2000) // Poll every 2 seconds
+
+      return () => {
+        clearInterval(pollInterval)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     // Prefer store result when available
@@ -126,13 +176,25 @@ const UploadResultPage = () => {
   
   const collections = useSelector(selectCollections)
   const isCollectionSaving = useSelector(selectCollectionSaving)
+  const [mounted, setMounted] = useState(false)
   
   const totalQuestions = result?.data?.total_questions ?? questions.length
   const fileResults = result?.data?.results ?? []
   
   useEffect(() => {
-    dispatch(fetchCollections())
-  }, [dispatch])
+    setMounted(true)
+    return () => {
+      setMounted(false)
+    }
+  }, [])
+  
+  useEffect(() => {
+    if (mounted) {
+      dispatch(fetchCollections()).catch((err: any) => {
+        console.error('Failed to fetch collections:', err)
+      })
+    }
+  }, [dispatch, mounted])
 
   const handleReturnToUpload = () => {
     dispatch(clearUploadResult())

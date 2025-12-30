@@ -747,9 +747,23 @@ const QuestionsContent = () => {
     const loadInitialData = async () => {
       setIsProcessing(true)
       setPageError(null)
+      
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        if (isProcessing) {
+          console.warn('Loading timeout - forcing load complete')
+          setIsProcessing(false)
+          setPageError('Loading timeout. Please refresh the page.')
+        }
+      }, 10000) // 10 second timeout
+
       try {
         // 1) Load collections into redux (used elsewhere + for create actions)
-        await dispatch(fetchCollections()).unwrap()
+        // Use catch instead of unwrap to ensure state is updated even on error
+        await dispatch(fetchCollections()).unwrap().catch((err: any) => {
+          console.error('Failed to fetch collections:', err)
+          // Don't re-throw, just log it
+        })
 
         // 2) Load unified data for this page (collections + questions)
         const [collectionsData, allQuestionsData] = await Promise.all([
@@ -775,12 +789,13 @@ const QuestionsContent = () => {
         console.error(err)
         setPageError(err?.message || 'Failed to load data.')
       } finally {
+        clearTimeout(timeoutId)
         setIsProcessing(false)
       }
     }
 
     loadInitialData()
-  }, [dispatch])
+  }, []) // Remove dispatch dependency to prevent re-triggering
 
   const defaultCollectionBlock = useMemo(() => {
     // We treat "default" collection as the one coming back with a falsy id or title "Uncategorized" or "默认错题本".

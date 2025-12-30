@@ -31,20 +31,80 @@ interface UploadState {
   error: string | null
   batchMode: boolean
   latestResult: any | null
+  backgroundTaskId: string | null
+  backgroundTaskStatus: 'idle' | 'running' | 'completed' | 'failed'
 }
 
-const initialState: UploadState = {
-  files: [],
-  isUploading: false,
-  isProcessing: false,
-  supportedFormats: [],
-  maxFileSize: 10 * 1024 * 1024, // 10MB
-  maxFiles: 10,
-  totalProgress: 0,
-  error: null,
-  batchMode: false,
-  latestResult: null,
+// Helper functions for localStorage persistence
+const STORAGE_KEYS = {
+  TASK_ID: 'ocr_task_id',
+  TASK_STATUS: 'ocr_task_status',
+  TASK_RESULT: 'ocr_task_result',
+  TASK_TIMESTAMP: 'ocr_task_timestamp',
 }
+
+const saveToStorage = (key: string, value: any) => {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (e) {
+      console.error('Failed to save to localStorage:', e)
+    }
+  }
+}
+
+const loadFromStorage = (key: string) => {
+  if (typeof window !== 'undefined') {
+    try {
+      const item = localStorage.getItem(key)
+      return item ? JSON.parse(item) : null
+    } catch (e) {
+      console.error('Failed to load from localStorage:', e)
+      return null
+    }
+  }
+  return null
+}
+
+const clearStorage = (keys: string[]) => {
+  if (typeof window !== 'undefined') {
+    keys.forEach(key => {
+      try {
+        localStorage.removeItem(key)
+      } catch (e) {
+        console.error('Failed to clear from localStorage:', e)
+      }
+    })
+  }
+}
+
+// Initialize state from localStorage if available
+const loadInitialState = (): UploadState => {
+  const taskId = loadFromStorage(STORAGE_KEYS.TASK_ID)
+  const taskStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
+  const taskResult = loadFromStorage(STORAGE_KEYS.TASK_RESULT)
+  const timestamp = loadFromStorage(STORAGE_KEYS.TASK_TIMESTAMP)
+
+  // Check if task is too old (older than 30 minutes)
+  const isTaskExpired = timestamp && Date.now() - timestamp > 30 * 60 * 1000
+
+  return {
+    files: [],
+    isUploading: false,
+    isProcessing: false,
+    supportedFormats: [],
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxFiles: 10,
+    totalProgress: 0,
+    error: null,
+    batchMode: false,
+    latestResult: !isTaskExpired ? taskResult : null,
+    backgroundTaskId: !isTaskExpired ? taskId : null,
+    backgroundTaskStatus: !isTaskExpired && taskStatus ? taskStatus : 'idle',
+  }
+}
+
+const initialState: UploadState = loadInitialState()
 
 // 获取支持的文件格式
 export const fetchSupportedFormats = createAsyncThunk(
@@ -174,18 +234,22 @@ export const startUpload = createAsyncThunk(
     },
     { rejectWithValue, signal }
   ) => {
+    // IMPORTANT: We explicitly ignore the signal to allow background uploads
+    // Even though Redux provides it automatically, we don't use it
     try {
       let result: any
       if (uploadMode === 'single') {
-        result = await uploadImageForOCR(filesToUpload[0], signal)
+        result = await uploadImageForOCR(filesToUpload[0])
       } else {
-        result = await batchUploadImagesForOCR(filesToUpload, signal)
+        result = await batchUploadImagesForOCR(filesToUpload)
       }
       return result
     } catch (err: any) {
-      // axios abort may surface as AbortError / CanceledError / message === 'canceled'
-      if (err?.name === 'AbortError' || err?.name === 'CanceledError' || err?.message === 'canceled') {
-        return rejectWithValue('Upload canceled')
+      // Ignore abort signals - this is expected behavior for background tasks
+      if (signal?.aborted || err?.name === 'AbortError' || err?.message?.includes('canceled')) {
+        console.log('Upload continuation after unmount - ignoring abort')
+        // Return a special marker instead of rejecting
+        return rejectWithValue(null)
       }
       return rejectWithValue(err.message || 'Upload failed')
     }
@@ -319,6 +383,37 @@ const uploadSlice = createSlice({
 
     clearUploadResult: (state) => {
       state.latestResult = null
+      state.backgroundTaskId = null
+      state.backgroundTaskStatus = 'idle'
+      clearStorage([STORAGE_KEYS.TASK_ID, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_TIMESTAMP])
+    },
+
+    setBackgroundTaskId: (state, action: PayloadAction<string | null>) => {
+      state.backgroundTaskId = action.payload
+      if (action.payload) {
+        saveToStorage(STORAGE_KEYS.TASK_ID, action.payload)
+        saveToStorage(STORAGE_KEYS.TASK_STATUS, 'running')
+        saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+        state.backgroundTaskStatus = 'running'
+      } else {
+        clearStorage([STORAGE_KEYS.TASK_ID, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
+        state.backgroundTaskStatus = 'idle'
+      }
+    },
+
+    setBackgroundTaskStatus: (state, action: PayloadAction<'idle' | 'running' | 'completed' | 'failed'>) => {
+      state.backgroundTaskStatus = action.payload
+      if (action.payload === 'completed' || action.payload === 'failed') {
+        saveToStorage(STORAGE_KEYS.TASK_STATUS, action.payload)
+      }
+    },
+
+    persistTaskResult: (state, action: PayloadAction<any>) => {
+      state.latestResult = action.payload
+      state.backgroundTaskStatus = 'completed'
+      saveToStorage(STORAGE_KEYS.TASK_RESULT, action.payload)
+      saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+      saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
     },
   },
   extraReducers: (builder) => {
@@ -345,14 +440,30 @@ const uploadSlice = createSlice({
         state.isUploading = false
         state.isProcessing = false
         state.latestResult = action.payload
+        state.backgroundTaskStatus = 'completed'
+        // Persist result to localStorage
+        saveToStorage(STORAGE_KEYS.TASK_RESULT, action.payload)
+        saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+        saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
         // Clear files from queue on success
         state.files = []
         state.totalProgress = 0
       })
       .addCase(startUpload.rejected, (state, action) => {
-        state.isUploading = false
-        state.isProcessing = false
-        state.error = action.payload as string
+        // Only update state for real errors, not for aborts
+        // action.payload is undefined for aborted requests
+        if (action.payload) {
+          state.isUploading = false
+          state.isProcessing = false
+          state.error = action.payload as string
+          state.backgroundTaskStatus = 'failed'
+          saveToStorage(STORAGE_KEYS.TASK_STATUS, 'failed')
+          saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+        } else {
+          // Abort: don't update state, just reset uploading flags
+          state.isUploading = false
+          state.isProcessing = false
+        }
       })
       
       // 单个文件上传
@@ -449,5 +560,9 @@ export const selectUploadError = (state: { upload: UploadState }) => state.uploa
 export const selectSupportedFormats = (state: { upload: UploadState }) => state.upload.supportedFormats
 export const selectBatchMode = (state: { upload: UploadState }) => state.upload.batchMode
 export const selectUploadResult = (state: { upload: UploadState }) => state.upload.latestResult
+export const selectBackgroundTaskId = (state: { upload: UploadState }) => state.upload.backgroundTaskId
+export const selectBackgroundTaskStatus = (state: { upload: UploadState }) => state.upload.backgroundTaskStatus
+
+export { STORAGE_KEYS, saveToStorage, loadFromStorage, clearStorage }
 
 export default uploadSlice.reducer
