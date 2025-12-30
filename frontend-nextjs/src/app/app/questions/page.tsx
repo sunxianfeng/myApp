@@ -135,29 +135,6 @@ const QuestionDetailModal = ({
         </div>
 
         <div style={{ padding: '24px' }}>
-          {/* Collection Info */}
-          <div style={{ 
-            marginBottom: '20px',
-            padding: '12px',
-            backgroundColor: '#F3F4F6',
-            border: '2px solid black',
-            borderRadius: '8px',
-          }}>
-            <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '0.875rem' }}>Collection</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div 
-                style={{ 
-                  width: '12px', 
-                  height: '12px', 
-                  backgroundColor: collectionColor,
-                  border: '2px solid black',
-                  borderRadius: '3px',
-                }} 
-              />
-              <span style={{ fontWeight: 900 }}>{collection?.title || 'Uncategorized'}</span>
-            </div>
-          </div>
-
           {/* Question Content */}
           <div style={{ marginBottom: '20px' }}>
             <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Question</h3>
