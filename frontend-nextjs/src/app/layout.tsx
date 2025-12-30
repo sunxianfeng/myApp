@@ -4,6 +4,7 @@ import ReduxProvider from '@/components/providers/ReduxProvider'
 import ErrorBoundary from '@/components/common/ErrorBoundary'
 import ErrorFallback from '@/components/common/ErrorFallback'
 import AntdRegistry from '@/lib/AntdRegistry'
+import NotificationBar from '@/components/common/NotificationBar'
 
 export const metadata: Metadata = {
   title: {
@@ -90,6 +91,7 @@ export default function RootLayout({
         <ErrorBoundary fallback={ErrorFallback}>
           <AntdRegistry>
             <ReduxProvider>
+              <NotificationBar />
               {children}
             </ReduxProvider>
           </AntdRegistry>

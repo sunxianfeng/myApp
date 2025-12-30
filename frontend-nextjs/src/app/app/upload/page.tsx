@@ -5,7 +5,16 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { backgroundTaskManager } from '@/lib/backgroundTaskManager'
 import { uploadImageForOCR, batchUploadImagesForOCR } from '@/lib/api'
-import { STORAGE_KEYS, loadFromStorage, saveToStorage, clearStorage } from '@/lib/slices/uploadSlice'
+import { STORAGE_KEYS as IMPORTED_STORAGE_KEYS, loadFromStorage, saveToStorage, clearStorage } from '@/lib/slices/uploadSlice'
+import NeobrutalDialog from '@/components/common/NeobrutalDialog'
+
+// Provide a safe fallback in case the imported STORAGE_KEYS is undefined due to a circular import
+const STORAGE_KEYS = (typeof IMPORTED_STORAGE_KEYS !== 'undefined' && IMPORTED_STORAGE_KEYS) ? IMPORTED_STORAGE_KEYS : {
+  TASK_ID: 'ocr_task_id',
+  TASK_STATUS: 'ocr_task_status',
+  TASK_RESULT: 'ocr_task_result',
+  TASK_TIMESTAMP: 'ocr_task_timestamp',
+}
 
 // Define UploadedFile interface locally
 interface UploadedFile {
@@ -35,6 +44,10 @@ const Upload = () => {
   const [showWaitingMessage, setShowWaitingMessage] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogTitle, setDialogTitle] = useState<string | undefined>(undefined)
+  const [dialogMessage, setDialogMessage] = useState<string | undefined>(undefined)
+  const [dialogActionText, setDialogActionText] = useState<string | undefined>(undefined)
 
   // Simple persistent debug logger that appends messages into localStorage
   const appendDebug = (key: string, ...parts: any[]) => {
@@ -107,12 +120,19 @@ const Upload = () => {
         (error) => {
           saveToStorage(STORAGE_KEYS.TASK_STATUS, 'failed')
           saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
-          // Only alert if we're actually on the upload page.
-          alert(error || '任务执行失败，请重试')
+          // Show styled dialog instead of native alert
+          if (typeof window !== 'undefined') {
+            const isTimeout = (error || '').toLowerCase().includes('time') || (error === 'Task timed out')
+            setDialogTitle(isTimeout ? '任务超时' : '任务失败')
+            setDialogMessage(isTimeout ? '任务已超过 60 秒，可能需要更长时间，您可以稍后在任务列表查看或重试。' : (error || '任务执行失败，请重试'))
+            setDialogActionText(isTimeout ? '重试' : undefined)
+            setDialogOpen(true)
+          }
           setIsAnalyzing(false)
           setShowWaitingMessage(false)
           setCurrentTaskId(null)
-        }
+        },
+        60000 // 60 seconds timeout
       )
     }
 
@@ -165,7 +185,10 @@ const Upload = () => {
 
         // Show error - only if mounted
         if (mounted) {
-          alert(task.error || '识别失败')
+          setDialogTitle('识别失败')
+          setDialogMessage(task.error || '识别失败')
+          setDialogActionText(undefined)
+          setDialogOpen(true)
           setIsAnalyzing(false)
           setShowWaitingMessage(false)
           setCurrentTaskId(null)
@@ -363,6 +386,19 @@ const Upload = () => {
 
   return (
     <div className="upload-page">
+      <NeobrutalDialog
+        open={dialogOpen}
+        title={dialogTitle}
+        message={dialogMessage}
+        actionText={dialogActionText}
+        onClose={() => setDialogOpen(false)}
+        onAction={() => {
+          // If user chooses to retry, re-trigger upload flow by redirecting back to upload page
+          // or re-invoking handleUpload depending on state. We'll simply reload the page to allow retry.
+          setDialogOpen(false)
+          window.location.reload()
+        }}
+      />
       <style jsx>{`
         @keyframes scanMove {
           0% {

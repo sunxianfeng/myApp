@@ -220,11 +220,19 @@ class BackgroundTaskManager {
    * Poll for task updates (for use in result page)
    * Returns a cleanup function to stop polling
    */
-  pollForCompletion(taskId: string, onResult: (result: any) => void, onError?: (error: string) => void): () => void {
+  pollForCompletion(taskId: string, onResult: (result: any) => void, onError?: (error: string) => void, timeoutMs: number = 60000): () => void {
     let missingCount = 0
     const maxMissingCount = 5
+    const startedAt = Date.now()
 
     const pollInterval = setInterval(async () => {
+      // If we've exceeded the configured timeout, abort with a timeout error
+      if (Date.now() - startedAt > timeoutMs) {
+        clearInterval(pollInterval)
+        onError?.('Task timed out')
+        return
+      }
+
       const task = this.getTask(taskId)
       if (!task) {
         missingCount += 1
