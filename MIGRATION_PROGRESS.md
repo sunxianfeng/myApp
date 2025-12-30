@@ -264,3 +264,37 @@ frontend-nextjs/
 - 基础路由和页面结构就绪
 
 **下一步重点**: 继续完成路由系统迁移，然后逐步迁移现有组件和功能。
+
+## 🔧 性能优化和修复
+
+### 后端并发处理修复 (2025-12-30)
+
+**问题描述**: 
+在上传页面启动 OCR 任务后，导航到问题管理页面时页面会无限加载挂起，无法正常显示内容。
+
+**根本原因 (Root Cause)**:
+FastAPI 后端的 OCR 端点 (`/api/v1/ocr/extract-questions` 和 `/api/v1/ocr/extract-text`) 中使用了同步的 OCR 处理操作，这些操作会阻塞 FastAPI 的事件循环。当 OCR 任务正在执行时，其他 API 调用（如获取问题列表）会被阻塞，导致前端页面加载超时。
+
+**技术细节**:
+- DashScope API 的 QwenQuestionExtractor.extract_questions() 和 extract_text_from_image() 方法是同步阻塞操作
+- FastAPI 使用 asyncio 事件循环处理并发请求
+- 阻塞操作占用事件循环线程，导致其他请求无法被处理
+
+**修复方案**:
+使用 `asyncio.to_thread()` 将 OCR 操作移至后台线程执行，释放事件循环以处理并发请求。
+
+**修改文件**:
+- `backend/app/api/v1/ocr.py`: 
+  - `extract_questions` 端点：将 `extractor.extract_questions(...)` 包装在 `await asyncio.to_thread()`
+  - `extract_text_from_image` 端点：将 `extractor.extract_text_from_image(...)` 包装在 `await asyncio.to_thread()`
+
+**验证方法**:
+1. 重启后端服务器：`uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
+2. 启动 OCR 上传任务
+3. 立即导航到问题管理页面
+4. 确认页面正常加载，不再挂起
+
+**影响**:
+- 修复后，前端页面导航不再被 OCR 处理阻塞
+- 后端可以并发处理多个 API 请求
+- OCR 任务继续在后台线程执行，不影响用户体验

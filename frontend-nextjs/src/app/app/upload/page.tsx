@@ -5,6 +5,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { backgroundTaskManager } from '@/lib/backgroundTaskManager'
 import { uploadImageForOCR, batchUploadImagesForOCR } from '@/lib/api'
+import { STORAGE_KEYS, loadFromStorage, saveToStorage, clearStorage } from '@/lib/slices/uploadSlice'
 
 // Define UploadedFile interface locally
 interface UploadedFile {
@@ -35,12 +36,97 @@ const Upload = () => {
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
+  // Simple persistent debug logger that appends messages into localStorage
+  const appendDebug = (key: string, ...parts: any[]) => {
+    try {
+      if (typeof window === 'undefined') return
+      const k = key
+      const prev = JSON.parse(localStorage.getItem(k) || '[]')
+      prev.push({ ts: Date.now(), payload: parts })
+      localStorage.setItem(k, JSON.stringify(prev))
+    } catch (e) {
+      // ignore
+    }
+  }
+
   useEffect(() => {
     setMounted(true)
     return () => {
       setMounted(false)
     }
   }, [])
+
+  // Restore background task UI when navigating back to this page
+  useEffect(() => {
+    const taskId = loadFromStorage(STORAGE_KEYS.TASK_ID)
+    const taskStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
+    const taskResult = loadFromStorage(STORAGE_KEYS.TASK_RESULT)
+    const timestamp = loadFromStorage(STORAGE_KEYS.TASK_TIMESTAMP)
+
+    const isTaskExpired = timestamp && Date.now() - timestamp > 30 * 60 * 1000
+    if (isTaskExpired) {
+      clearStorage([STORAGE_KEYS.TASK_ID, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_TIMESTAMP])
+      return
+    }
+
+    if (taskStatus === 'running' && typeof taskId === 'string' && taskId) {
+      setIsAnalyzing(true)
+      setShowWaitingMessage(true)
+      setCurrentTaskId(taskId)
+
+      // If the task already completed while we were away, subscription won't replay.
+      // Read/poll the authoritative task state from backgroundTaskManager.
+      const immediateTask = backgroundTaskManager.getTask(taskId)
+      if (immediateTask?.status === 'completed' && immediateTask.result) {
+        saveToStorage(STORAGE_KEYS.TASK_RESULT, immediateTask.result)
+        saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+        saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+        console.log('[upload] immediateTask completed, result:', immediateTask.result)
+        appendDebug('debug_upload_logs', '[upload] immediateTask completed', immediateTask.result)
+        router.push('/app/upload/result')
+        return
+      }
+
+      if (immediateTask?.status === 'failed') {
+        saveToStorage(STORAGE_KEYS.TASK_STATUS, 'failed')
+        saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+        return
+      }
+
+      // Keep polling until we have a definitive outcome.
+      return backgroundTaskManager.pollForCompletion(
+        taskId,
+        (realResult) => {
+          saveToStorage(STORAGE_KEYS.TASK_RESULT, realResult)
+          saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+          saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+          console.log('[upload] polled result:', realResult)
+          appendDebug('debug_upload_logs', '[upload] polled result', realResult)
+          router.push('/app/upload/result')
+        },
+        (error) => {
+          saveToStorage(STORAGE_KEYS.TASK_STATUS, 'failed')
+          saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+          // Only alert if we're actually on the upload page.
+          alert(error || '任务执行失败，请重试')
+          setIsAnalyzing(false)
+          setShowWaitingMessage(false)
+          setCurrentTaskId(null)
+        }
+      )
+    }
+
+    if (taskStatus === 'completed' && taskResult) {
+      console.log('[upload] storage already completed, result:', taskResult)
+      appendDebug('debug_upload_logs', '[upload] storage already completed', taskResult)
+      router.push('/app/upload/result')
+      return
+    }
+
+    if (taskStatus === 'failed') {
+      clearStorage([STORAGE_KEYS.TASK_ID, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_TIMESTAMP])
+    }
+  }, [router])
 
   // Listen for background task completion
   useEffect(() => {
@@ -59,9 +145,10 @@ const Upload = () => {
 
         // Only redirect if still on upload page AND component is mounted
         if (pathname === '/app/upload' && mounted) {
-          // Save result to localStorage for result page to pick up
-          localStorage.setItem('ocr_task_result', JSON.stringify(task.result))
-          localStorage.setItem('ocr_task_timestamp', Date.now().toString())
+          // Save result for result page to pick up
+          saveToStorage(STORAGE_KEYS.TASK_RESULT, task.result)
+          saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+          saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
           router.push('/app/upload/result')
         }
 
@@ -73,6 +160,9 @@ const Upload = () => {
           setFiles([])
         }
       } else if (task.status === 'failed') {
+        saveToStorage(STORAGE_KEYS.TASK_STATUS, 'failed')
+        saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+
         // Show error - only if mounted
         if (mounted) {
           alert(task.error || '识别失败')
@@ -173,6 +263,8 @@ const Upload = () => {
     if (currentTaskId) {
       backgroundTaskManager.cancelTask(currentTaskId)
     }
+
+    clearStorage([STORAGE_KEYS.TASK_ID, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_TIMESTAMP])
     
     setIsAnalyzing(false)
     setShowWaitingMessage(false)
@@ -237,6 +329,9 @@ const Upload = () => {
       }
     )
 
+    saveToStorage(STORAGE_KEYS.TASK_ID, taskId)
+    saveToStorage(STORAGE_KEYS.TASK_STATUS, 'running')
+    saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
     setCurrentTaskId(taskId)
 
     // Note: We don't await the task - it runs in background

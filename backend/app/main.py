@@ -1,8 +1,15 @@
+
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    force=True,
+)
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import logging
 
 from app.config import settings
 from app.api.v1.auth import router as auth_router

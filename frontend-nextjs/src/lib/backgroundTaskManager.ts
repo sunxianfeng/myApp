@@ -56,25 +56,33 @@ class BackgroundTaskManager {
     this.saveTask(task)
     this.broadcastTask(task)
 
-    try {
-      // Execute the task
-      const result = await executor()
-      
-      // Update task with result
-      task.status = 'completed'
-      task.result = result
-      this.saveTask(task)
-      this.broadcastTask(task)
-      
-      return taskId
-    } catch (error: any) {
-      // Update task with error
-      task.status = 'failed'
-      task.error = error.message || 'Task failed'
-      this.saveTask(task)
-      this.broadcastTask(task)
-      throw error
-    }
+    // Fire-and-forget execution so the task continues even if the caller navigates away.
+    // Updates are persisted in localStorage and broadcast via BroadcastChannel.
+    void (async () => {
+      try {
+        const result = await executor()
+
+        const completedTask: BackgroundTask = {
+          ...task,
+          status: 'completed',
+          result,
+          timestamp: Date.now(),
+        }
+        this.saveTask(completedTask)
+        this.broadcastTask(completedTask)
+      } catch (error: any) {
+        const failedTask: BackgroundTask = {
+          ...task,
+          status: 'failed',
+          error: error?.message || 'Task failed',
+          timestamp: Date.now(),
+        }
+        this.saveTask(failedTask)
+        this.broadcastTask(failedTask)
+      }
+    })()
+
+    return taskId
   }
 
   /**
@@ -213,13 +221,23 @@ class BackgroundTaskManager {
    * Returns a cleanup function to stop polling
    */
   pollForCompletion(taskId: string, onResult: (result: any) => void, onError?: (error: string) => void): () => void {
+    let missingCount = 0
+    const maxMissingCount = 5
+
     const pollInterval = setInterval(async () => {
       const task = this.getTask(taskId)
       if (!task) {
-        clearInterval(pollInterval)
-        onError?.('Task not found')
+        missingCount += 1
+        // localStorage may briefly miss the entry due to timing/races; tolerate a few misses
+        if (missingCount >= maxMissingCount) {
+          clearInterval(pollInterval)
+          onError?.('Task not found')
+        }
         return
       }
+
+      // Reset miss counter once we can read the task
+      missingCount = 0
 
       if (task.status === 'completed' && task.result) {
         clearInterval(pollInterval)

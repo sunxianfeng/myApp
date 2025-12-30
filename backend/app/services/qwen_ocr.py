@@ -154,7 +154,7 @@ class QwenQuestionExtractor:
                         question.setdefault("images", {})
                         question.setdefault("options", [])
                     
-                    logger.info(f"Successfully extracted {len(questions)} questions")
+                    logger.info(f"Successfully extracted {len(questions)} questions: {questions}")
                     return questions
                 except json.JSONDecodeError as e:
                     logger.error(f"JSON解析失败: {e}")

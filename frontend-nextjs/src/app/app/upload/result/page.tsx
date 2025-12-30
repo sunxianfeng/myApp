@@ -2,10 +2,12 @@
 
 import './result-neobrutalism.css'
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
+import { useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import { AppDispatch, RootState } from '@/lib/store'
-import { clearUploadResult, loadFromStorage, clearStorage, STORAGE_KEYS } from '@/lib/slices/uploadSlice'
+import { clearUploadResult, loadFromStorage, saveToStorage, clearStorage, STORAGE_KEYS } from '@/lib/slices/uploadSlice'
+import { backgroundTaskManager } from '@/lib/backgroundTaskManager'
 import { bulkCreateQuestions } from '@/lib/api'
 import {
   fetchCollections,
@@ -29,6 +31,21 @@ const UploadResultPage = () => {
   const router = useRouter()
   const resultFromStore = useSelector((state: RootState) => state.upload.latestResult)
 
+  // Prevent fallback effects from overwriting a real result.
+  const hasRealResultRef = useRef(false)
+
+  // persistent debug appender
+  const appendDebug = (key: string, ...parts: any[]) => {
+    try {
+      if (typeof window === 'undefined') return
+      const prev = JSON.parse(localStorage.getItem(key) || '[]')
+      prev.push({ ts: Date.now(), payload: parts })
+      localStorage.setItem(key, JSON.stringify(prev))
+    } catch (e) {
+      // ignore
+    }
+  }
+
   // Use `undefined` as "initializing" state to avoid briefly rendering the empty-state.
   // IMPORTANT: initialize from store synchronously to prevent hydration mismatch
   // (server HTML is generated without store data; client may have it on first render).
@@ -36,64 +53,228 @@ const UploadResultPage = () => {
 
   // Poll for background task completion
   useEffect(() => {
-    // Check if there's a background task running
+    // Check if there's a background task running (or completed) - prefer authoritative task store
     const taskStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
+    const taskId = loadFromStorage(STORAGE_KEYS.TASK_ID)
     const taskResult = loadFromStorage(STORAGE_KEYS.TASK_RESULT)
     const timestamp = loadFromStorage(STORAGE_KEYS.TASK_TIMESTAMP)
-    
+
+    console.log('[result] onMount storage:', { taskId, taskStatus, taskResult, timestamp })
+    appendDebug('debug_result_logs', '[result] onMount storage', { taskId, taskStatus, taskResult, timestamp })
+
     // Check if task is too old (older than 30 minutes)
     const isTaskExpired = timestamp && Date.now() - timestamp > 30 * 60 * 1000
 
+    const tryRecoverNewestCompletedTask = () => {
+      try {
+        if (typeof window === 'undefined') return null
+        let newest: { ts: number; result: any } | null = null
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && key.startsWith('task-')) {
+            try {
+              const raw = localStorage.getItem(key)
+              if (!raw) continue
+              const t = JSON.parse(raw)
+              if (t && t.status === 'completed' && t.result) {
+                if (!newest || t.timestamp > newest.ts) {
+                  newest = { ts: t.timestamp, result: t.result }
+                }
+              }
+            } catch (e) {
+              // ignore parse errors
+            }
+          }
+        }
+        return newest
+      } catch (e) {
+        return null
+      }
+    }
+
     // If result exists and is not expired, load it
     if (taskResult && !isTaskExpired && taskStatus === 'completed') {
-      setResult(taskResult)
-      // Clear from storage after loading
-      clearStorage([STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
+      hasRealResultRef.current = true
+      setResult(normalizeResultShape(taskResult))
       return
     }
 
-    // If task is still running, set up polling
-    if (taskStatus === 'running' && !isTaskExpired) {
-      const pollInterval = setInterval(() => {
-        const currentStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
-        const currentResult = loadFromStorage(STORAGE_KEYS.TASK_RESULT)
-        
-        if (currentStatus === 'completed' && currentResult) {
-          clearInterval(pollInterval)
-          setResult(currentResult)
-          clearStorage([STORAGE_KEYS.TASK_RESULT, STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
-          
-          // Show notification
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('题目识别完成！', {
-              body: '点击查看识别结果。',
-              icon: '/favicon.ico',
-              requireInteraction: true
-            })
-          }
-        } else if (currentStatus === 'failed') {
-          clearInterval(pollInterval)
-          alert('任务执行失败，请重试')
-          clearStorage([STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
-        }
-      }, 2000) // Poll every 2 seconds
+    // If we have a taskId but storage doesn't clearly indicate running/completed,
+    // consult the backgroundTaskManager authoritative task entry. This covers cases
+    // where tasks are persisted under keys like `task-<id>` but the simple STORAGE_KEYS
+    // weren't updated (e.g. navigation race or recovery scenarios).
+    if (typeof taskId === 'string' && taskId) {
+      try {
+        const immediateTask = backgroundTaskManager.getTask(taskId)
+        if (immediateTask) {
+          appendDebug('debug_result_logs', '[result] immediateTask read', immediateTask)
+          console.log('[result] immediateTask read:', immediateTask)
 
-      return () => {
-        clearInterval(pollInterval)
+          if (immediateTask.status === 'completed' && immediateTask.result) {
+            hasRealResultRef.current = true
+            const normalized = normalizeResultShape(immediateTask.result)
+            setResult(normalized)
+            saveToStorage(STORAGE_KEYS.TASK_RESULT, normalized)
+            saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+            saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+            return
+          }
+
+          if (immediateTask.status === 'failed') {
+            appendDebug('debug_result_logs', '[result] immediateTask failed', immediateTask.error)
+            // Clear stale storage status so UI can recover
+            clearStorage([STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
+            return
+          }
+
+          // If it's running, start polling.
+          if (immediateTask.status === 'running' && !isTaskExpired) {
+            return backgroundTaskManager.pollForCompletion(
+              taskId,
+              (realResult) => {
+                hasRealResultRef.current = true
+                console.log('[result] polled realResult:', realResult)
+                appendDebug('debug_result_logs', '[result] polled realResult', realResult)
+                const normalized = normalizeResultShape(realResult)
+                setResult(normalized)
+
+                // Persist so other pages (and future loads) can pick it up consistently.
+                saveToStorage(STORAGE_KEYS.TASK_RESULT, normalized)
+                saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+                saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+
+                // Show notification
+                if ('Notification' in window && Notification.permission === 'granted') {
+                  new Notification('题目识别完成！', {
+                    body: '点击查看识别结果。',
+                    icon: '/favicon.ico',
+                    requireInteraction: true,
+                  })
+                }
+              },
+              (error) => {
+                alert(error || '任务执行失败，请重试')
+                clearStorage([STORAGE_KEYS.TASK_STATUS, STORAGE_KEYS.TASK_TIMESTAMP])
+              }
+            )
+          }
+        }
+      } catch (e) {
+        console.error('Failed to read immediateTask:', e)
       }
+    }
+
+    // Fallback: if no authoritative task was found using TASK_ID, scan all `task-` keys
+    // and pick the newest completed task result.
+    const newest = tryRecoverNewestCompletedTask()
+    if (newest) {
+      appendDebug('debug_result_logs', '[result] fallback newest completed task found', { ts: newest.ts })
+      hasRealResultRef.current = true
+      const normalized = normalizeResultShape(newest.result)
+      setResult(normalized)
+      saveToStorage(STORAGE_KEYS.TASK_RESULT, normalized)
+      saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+      saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+      return
+    }
+
+    // Recovery loop: for a short window after navigation, keep trying to recover
+    // (handles localStorage races and cases where completion lands right after mount).
+    if (!isTaskExpired && (taskId || taskStatus === 'running')) {
+      const startedAt = Date.now()
+      const intervalId = window.setInterval(() => {
+        if (hasRealResultRef.current) {
+          window.clearInterval(intervalId)
+          return
+        }
+
+        const latestTaskId = loadFromStorage(STORAGE_KEYS.TASK_ID)
+        if (typeof latestTaskId === 'string' && latestTaskId) {
+          const t = backgroundTaskManager.getTask(latestTaskId)
+          if (t?.status === 'completed' && t.result) {
+            hasRealResultRef.current = true
+            const normalized = normalizeResultShape(t.result)
+            setResult(normalized)
+            saveToStorage(STORAGE_KEYS.TASK_RESULT, normalized)
+            saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+            saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+            window.clearInterval(intervalId)
+            return
+          }
+        }
+
+        const newest2 = tryRecoverNewestCompletedTask()
+        if (newest2) {
+          hasRealResultRef.current = true
+          const normalized = normalizeResultShape(newest2.result)
+          setResult(normalized)
+          saveToStorage(STORAGE_KEYS.TASK_RESULT, normalized)
+          saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
+          saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
+          window.clearInterval(intervalId)
+          return
+        }
+
+        if (Date.now() - startedAt > 15_000) {
+          window.clearInterval(intervalId)
+          appendDebug('debug_result_logs', '[result] recovery timed out', {
+            latestTaskId,
+          })
+          // Let the second effect decide the final state.
+        }
+      }, 500)
+
+      return () => window.clearInterval(intervalId)
     }
   }, [])
 
   useEffect(() => {
     // Prefer store result when available
     if (resultFromStore) {
-      setResult(resultFromStore)
+      hasRealResultRef.current = true
+      setResult(normalizeResultShape(resultFromStore))
+      return
+    }
+
+    // If we already hydrated a real result (from storage or polling), never overwrite it.
+    if (hasRealResultRef.current) {
+      return
+    }
+
+    // If storage already has a real result (or task is still running), do not overwrite it.
+    const taskStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
+    const taskResult = loadFromStorage(STORAGE_KEYS.TASK_RESULT)
+    const taskId = loadFromStorage(STORAGE_KEYS.TASK_ID)
+    const timestamp = loadFromStorage(STORAGE_KEYS.TASK_TIMESTAMP)
+    const isTaskExpired = timestamp && Date.now() - timestamp > 30 * 60 * 1000
+
+    if (!isTaskExpired) {
+      if (taskStatus === 'completed' && taskResult) {
+        hasRealResultRef.current = true
+        console.log('[result] storage completed result (raw):', taskResult)
+        appendDebug('debug_result_logs', '[result] storage completed result (raw)', taskResult)
+        setResult(normalizeResultShape(taskResult))
+        return
+      }
+
+      // While running, keep the page in "waiting" state; the polling effect will resolve it.
+      if (taskStatus === 'running') {
+        return
+      }
+    }
+
+    // If we still have a taskId and it's not expired, don't show the empty-state yet.
+    // This prevents flicker/false-negative when STORAGE_KEYS are briefly missing.
+    if (!isTaskExpired && typeof taskId === 'string' && taskId) {
       return
     }
 
     // If result is not in store (e.g. direct navigation), check if we should use mock data.
     // This logic runs only on the client, avoiding hydration mismatch.
-    const enableMock = new URLSearchParams(window.location.search).get('mock') !== '0'
+    // IMPORTANT: mock data should be opt-in only.
+    // Defaulting to mock would hide real backend results when storage isn't ready.
+    const mockParam = new URLSearchParams(window.location.search).get('mock')
+    const enableMock = mockParam === '1' || mockParam === 'true'
     if (enableMock) {
       const mockQuestions: any[] = [
         {
@@ -137,6 +318,19 @@ const UploadResultPage = () => {
   }, [resultFromStore])
 
   const questions = result?.data?.questions ?? []
+
+  // Accept both shapes: raw array (i.e. result is an array) or wrapped { data: { questions: [...] } }
+  const normalizeResultShape = (r: any) => {
+    if (!r) return null
+    if (Array.isArray(r)) {
+      return { data: { questions: r, total_questions: r.length, results: [] } }
+    }
+    // If it already looks like { data: { questions: [...] } }
+    if (r.data && Array.isArray(r.data.questions)) return r
+    // If r has questions directly
+    if (r.questions && Array.isArray(r.questions)) return { data: { questions: r.questions, total_questions: r.questions.length, results: [] } }
+    return r
+  }
   interface EditableQuestion {
     id: string
     number: number
