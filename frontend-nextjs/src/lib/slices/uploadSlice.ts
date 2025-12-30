@@ -162,6 +162,36 @@ export const extractText = createAsyncThunk(
   }
 )
 
+export const startUpload = createAsyncThunk(
+  'upload/startUpload',
+  async (
+    {
+      filesToUpload,
+      uploadMode,
+    }: {
+      filesToUpload: File[]
+      uploadMode: 'single' | 'batch'
+    },
+    { rejectWithValue, signal }
+  ) => {
+    try {
+      let result: any
+      if (uploadMode === 'single') {
+        result = await uploadImageForOCR(filesToUpload[0], signal)
+      } else {
+        result = await batchUploadImagesForOCR(filesToUpload, signal)
+      }
+      return result
+    } catch (err: any) {
+      // axios abort may surface as AbortError / CanceledError / message === 'canceled'
+      if (err?.name === 'AbortError' || err?.name === 'CanceledError' || err?.message === 'canceled') {
+        return rejectWithValue('Upload canceled')
+      }
+      return rejectWithValue(err.message || 'Upload failed')
+    }
+  }
+)
+
 // 模拟上传进度（用于演示）
 export const simulateUploadProgress = createAsyncThunk(
   'upload/simulateProgress',
@@ -303,6 +333,25 @@ const uploadSlice = createSlice({
         state.maxFiles = action.payload.maxFiles
       })
       .addCase(fetchSupportedFormats.rejected, (state, action) => {
+        state.error = action.payload as string
+      })
+
+      // 新的 startUpload thunk
+      .addCase(startUpload.pending, (state) => {
+        state.isUploading = true
+        state.error = null
+      })
+      .addCase(startUpload.fulfilled, (state, action) => {
+        state.isUploading = false
+        state.isProcessing = false
+        state.latestResult = action.payload
+        // Clear files from queue on success
+        state.files = []
+        state.totalProgress = 0
+      })
+      .addCase(startUpload.rejected, (state, action) => {
+        state.isUploading = false
+        state.isProcessing = false
         state.error = action.payload as string
       })
       

@@ -8,18 +8,13 @@ import {
   addFile, 
   removeFile, 
   updateFileStatus, 
-  updateFileProgress, 
   setFileError, 
   clearFiles, 
   clearError,
-  uploadFile,
-  uploadFiles,
-  fetchSupportedFormats,
-  setUploadResult,
+  startUpload,
   clearUploadResult
 } from '@/lib/slices/uploadSlice'
 import { AppDispatch, RootState } from '@/lib/store'
-import { uploadImageForOCR, batchUploadImagesForOCR } from '@/lib/api'
 
 // Define UploadedFile interface locally since it's not exported
 interface UploadedFile {
@@ -37,25 +32,35 @@ interface UploadedFile {
 
 const Upload = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { files, isUploading, error } = useSelector((state: RootState) => state.upload)
+  const { files, isUploading, error, latestResult } = useSelector((state: RootState) => state.upload)
   const router = useRouter()
   
   const [uploadMode, setUploadMode] = useState<'single' | 'batch'>('single')
   const [dragActive, setDragActive] = useState(false)
   const [imageClicked, setImageClicked] = useState(false)
   const [docsClicked, setDocsClicked] = useState(false)
-  const [selectedLanguage, setSelectedLanguage] = useState('auto')
   const [originalFiles, setOriginalFiles] = useState<{ [key: string]: File }>({})
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showWaitingMessage, setShowWaitingMessage] = useState(false)
-  const [processingStartTime, setProcessingStartTime] = useState<Date | null>(null)
-  const [showCompletionMessage, setShowCompletionMessage] = useState(false)
-  const abortControllerRef = useRef<AbortController | null>(null)
-  const waitingMessageTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [uploadPromise, setUploadPromise] = useState<any>(null)
 
   useEffect(() => {
     dispatch(clearUploadResult())
   }, [dispatch])
+
+  useEffect(() => {
+    if (latestResult) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('题目识别完成！', {
+          body: `成功识别了图片中的内容，即将跳转到结果页面。`,
+          icon: '/favicon.ico'
+        })
+      }
+
+      // Jump to result page immediately once the task is done
+      router.push('/app/upload/result')
+    }
+  }, [latestResult, router, dispatch])
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -67,16 +72,12 @@ const Upload = () => {
     }
     
     return () => {
-      if (waitingMessageTimerRef.current) {
-        clearTimeout(waitingMessageTimerRef.current)
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
+      if (uploadPromise && uploadPromise.abort) {
+        uploadPromise.abort('Component unmounted')
       }
     }
-  }, [])
+  }, [uploadPromise])
   
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const docsInputRef = useRef<HTMLInputElement>(null)
 
@@ -146,22 +147,13 @@ const Upload = () => {
   }
 
   const handleCancelUpload = () => {
-    // Clear all timers
-    if (waitingMessageTimerRef.current) {
-      clearTimeout(waitingMessageTimerRef.current)
-      waitingMessageTimerRef.current = null
-    }
-    
-    // Abort the ongoing request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-      abortControllerRef.current = null
+    // Abort the thunk
+    if (uploadPromise && uploadPromise.abort) {
+      uploadPromise.abort('User canceled')
     }
     
     setIsAnalyzing(false)
     setShowWaitingMessage(false)
-    setShowCompletionMessage(false)
-    setProcessingStartTime(null)
     dispatch(clearFiles())
     setOriginalFiles({})
     dispatch(clearError())
@@ -187,104 +179,45 @@ const Upload = () => {
     }
 
     setIsAnalyzing(true)
-    setProcessingStartTime(new Date())
-    setShowWaitingMessage(false)
-    setShowCompletionMessage(false)
-    
-    // Set timer to show waiting message after 3 seconds
-    waitingMessageTimerRef.current = setTimeout(() => {
-      setShowWaitingMessage(true)
-    }, 3000)
-    
-    // Create new AbortController for this upload
-    abortControllerRef.current = new AbortController()
+    // Show the detailed tip immediately (no delay)
+    setShowWaitingMessage(true)
 
-    try {
-      // Build array of actual File objects (kept in local `originalFiles`) matching Redux metadata order
-      const filesToUpload: File[] = files.map(f => originalFiles[f.id]).filter(Boolean)
+    const filesToUpload: File[] = files.map(f => originalFiles[f.id]).filter(Boolean)
 
-      if (filesToUpload.length === 0) {
-        alert('未找到需要上传的文件')
-        return
-      }
+    if (filesToUpload.length === 0) {
+      alert('未找到需要上传的文件')
+      setIsAnalyzing(false)
+      return
+    }
 
-      // Set status to uploading for UX
-      files.forEach(meta => {
-        dispatch(updateFileStatus({ id: meta.id, status: 'uploading', progress: 0 }))
-      })
+    // Set status to uploading for UX
+    files.forEach(meta => {
+      dispatch(updateFileStatus({ id: meta.id, status: 'uploading' }))
+    })
 
-      let result: any = null
+    const promise = dispatch(startUpload({ filesToUpload, uploadMode }))
+    setUploadPromise(promise)
 
-      if (uploadMode === 'single') {
-        // uploadImageForOCR expects a single File
-        const file = filesToUpload[0]
-        const response = await uploadImageForOCR(file, abortControllerRef.current.signal)
-        // response already returns parsed data via api interceptor
-        result = response
-
-        // mark processed
-        files.forEach(meta => {
-          dispatch(updateFileStatus({ id: meta.id, status: 'processing', progress: 100 }))
-        })
-      } else {
-        // batch mode
-        const response = await batchUploadImagesForOCR(filesToUpload, abortControllerRef.current.signal)
-        result = response
-
-        // mark processed
-        files.forEach(meta => {
-          dispatch(updateFileStatus({ id: meta.id, status: 'processing', progress: 100 }))
-        })
-      }
-
-      // Success: Show completion message
-      setShowCompletionMessage(true)
-      
-      // Browser notification (if permission granted)
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('题目识别完成！', {
-          body: `成功识别了图片中的内容，即将跳转到结果页面。`,
-          icon: '/favicon.ico'
-        })
-      }
-      
-      // Save result into Redux for result page and clear queue
-      dispatch(setUploadResult(result))
-      dispatch(clearFiles())
-      setOriginalFiles({})
-      
-      // Navigate immediately to result page
-      setTimeout(() => {
-        setShowCompletionMessage(false)
-        router.push('/app/upload/result')
-      }, 500)
-      
-    } catch (err: any) {
-      // Check if error is from abort
-      if (err.name === 'AbortError' || err.message === 'canceled') {
-        // Don't show error alert for user-initiated cancellation
-        console.log('Upload cancelled by user')
-        files.forEach(meta => {
-          dispatch(updateFileStatus({ id: meta.id, status: 'pending', progress: 0 }))
-        })
-      } else {
-        // Try to set file-level error if possible
+    promise.unwrap().catch((err: any) => {
+      // unwrap() will throw an error if the thunk is rejected
+      if (err !== 'Upload canceled' && err !== 'User canceled') {
         const msg = err?.message || '上传失败'
         alert(msg)
         files.forEach(meta => {
           dispatch(setFileError({ id: meta.id, error: msg }))
         })
       }
-    } finally {
-      // Clear timers
-      if (waitingMessageTimerRef.current) {
-        clearTimeout(waitingMessageTimerRef.current)
-        waitingMessageTimerRef.current = null
-      }
+      // Reset UI state on failure/cancellation
       setIsAnalyzing(false)
       setShowWaitingMessage(false)
-      abortControllerRef.current = null
-    }
+      files.forEach(meta => {
+        dispatch(updateFileStatus({ id: meta.id, status: 'pending' }))
+      })
+    }).finally(() => {
+        setIsAnalyzing(false)
+        setShowWaitingMessage(false)
+        setUploadPromise(null)
+    })
   }
 
   const formatFileSize = (bytes: number): string => {
@@ -402,31 +335,19 @@ const Upload = () => {
                 
                 {/* Dynamic status messages */}
                 <div className="ocr-processing-messages">
-                  {!showWaitingMessage && !showCompletionMessage && (
+                  {!showWaitingMessage && (
                     <p className="ocr-processing-label primary">
                       图片解析中...
                     </p>
                   )}
-                  
-                  {showWaitingMessage && !showCompletionMessage && (
+
+                  {showWaitingMessage && (
                     <div className="ocr-waiting-message">
                       <p className="ocr-processing-label secondary">
                         任务已上传，请稍等
                       </p>
                       <p className="ocr-processing-sublabel">
                         正在分析图片内容，预计需要 5-30 秒
-                      </p>
-                    </div>
-                  )}
-                  
-                  {showCompletionMessage && (
-                    <div className="ocr-completion-message">
-                      <div className="completion-icon">✓</div>
-                      <p className="ocr-processing-label success">
-                        解析完成！
-                      </p>
-                      <p className="ocr-processing-sublabel">
-                        正在跳转到结果页面...
                       </p>
                     </div>
                   )}
