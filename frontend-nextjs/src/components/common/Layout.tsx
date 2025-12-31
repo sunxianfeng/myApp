@@ -78,7 +78,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   const getNavItemClassName = (path: string): string => {
-    const baseClasses = 'sidebar-item flex items-center p-3 rounded-md transition-all duration-100'
+    const baseClasses = 'sidebar-item flex items-center p-3 rounded-xl transition-all duration-100'
     if (!mounted) {
       return `${baseClasses} font-semibold text-gray-500`
     }
@@ -91,7 +91,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
 
     if (active) {
-      // Clean active style: soft yellow background
+      // Clean active style: soft yellow background with rounded pill shape
       return `${baseClasses} bg-yellow-100 text-black font-semibold`
     }
 
@@ -100,15 +100,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col text-sm w-screen h-screen bg-[#F8F7F5] overflow-hidden">
-      {/* Full-Width Top Header - Clean Style */}
-      <header className="w-full h-16 bg-[#FFD028] flex items-center justify-between px-8 flex-shrink-0 shadow-sm" suppressHydrationWarning>
+    <div className="flex flex-col text-sm w-screen h-screen bg-yellow-400 overflow-hidden">
+      {/* Full-Width Top Header - Seamless Yellow Background */}
+      <header className="w-full h-16 bg-yellow-400 border-0 flex items-center justify-between px-8 flex-shrink-0" suppressHydrationWarning>
         {/* Left: Logo - Text-based with small icon square */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-black rounded-md flex items-center justify-center flex-shrink-0">
             <AppLogo className="w-5 h-5 text-yellow-300" />
           </div>
-          <h1 className="text-base font-bold text-black">题宝 OCR</h1>
+          <h1 className="text-lg font-black text-black">题宝 OCR</h1>
         </div>
 
         {/* Right: User Profile */}
@@ -127,18 +127,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <div className="hidden sm:flex sm:flex-col">
-            <p className="font-semibold text-black text-sm">Username</p>
-            <p className="text-xs text-gray-700">高级会员</p>
+            <p className="font-black text-black text-sm">Username</p>
+            <p className="text-xs text-black font-semibold">高级会员</p>
           </div>
 
           <Icon name="chevronDown" className="w-4 h-4 text-black" />
         </div>
       </header>
 
-      {/* Main Content Area: Sidebar + Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar - Left Navigation */}
-        <aside className="sidebar w-64 flex flex-col flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
+      {/* Main Content Area: Sidebar + Main Content with Floating Islands */}
+      <div className="flex flex-1 overflow-hidden gap-8 p-6">
+        {/* Sidebar - Floating White Island */}
+        <aside className="sidebar w-64 flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Navigation - All items in one list */}
           <nav className="flex flex-col space-y-2 p-4">
             {/* 首页 */}
@@ -179,8 +179,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </nav>
         </aside>
 
-        {/* Main Content Area - Right Side */}
-        <main className="flex-1 overflow-auto p-8">
+        {/* Main Content Area - Right Side - Floating White Island */}
+        <main className="flex-1 bg-white rounded-3xl shadow-2xl overflow-auto p-8">
           {children}
         </main>
       </div>

@@ -1,10 +1,10 @@
 /* ========================================
-   NEOBRUTALISM DESIGN SYSTEM - UPLOAD PAGES
+   NEOBRUTALISM DESIGN SYSTEM - UPLOAD PAGES - FLOATING ISLANDS THEME
    ======================================== */
 
 /* Root Variables */
 :root {
-  --neo-yellow: #FFD100;
+  --neo-yellow: #FACC15;
   --neo-lime: #A3E635;
   --neo-orange: #FF7A00;
   --neo-purple: #6366f1;
@@ -12,15 +12,15 @@
   --neo-pink: #FF6B9D;
   --neo-black: #000000;
   --neo-white: #FFFFFF;
-  --neo-gray: #F8F7F5;
-  --neo-light-gray: #ECECEC;
+  --neo-gray: #F9FAFB;
+  --neo-light-gray: #F3F4F6;
   --neo-error: #FF4444;
-  --neo-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
-  --neo-shadow-sm: 4px 4px 0px 0px rgba(0, 0, 0, 1);
-  --neo-shadow-lg: 12px 12px 0px 0px rgba(0, 0, 0, 1);
-  --neo-shadow-pressed: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-  --neo-transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --neo-border: 4px solid var(--neo-black);
+  --neo-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --neo-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --neo-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --neo-shadow-pressed: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --neo-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --neo-border: 0;
 }
 
 /* ========================================
@@ -29,41 +29,41 @@
 
 .upload-page {
   min-height: 100vh !important;
-  background-color: var(--neo-gray) !important;
-  padding: 2rem !important;
+  background-color: transparent !important;
+  padding: 0 !important;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
 .upload-container {
-  max-width: 900px !important;
-  margin: 0 auto !important;
-  background-color: var(--neo-white) !important;
-  border: var(--neo-border) !important;
-  box-shadow: var(--neo-shadow) !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   padding: 0 !important;
   border-radius: 0 !important;
 }
 
-/* Page wrapper: keep centered and not full-width so the card can float */
+/* Page wrapper: content already within the white floating island from Layout */
 .upload-neobrutalism-page {
-  margin: 32px auto; /* whitespace around the floating card */
-  max-width: 1000px; /* keeps content narrow and readable */
-  padding: 0 16px;
+  margin: 0;
+  max-width: 100%;
+  padding: 0;
   background: transparent;
 }
 
-/* The framed card (the "frame") */
+/* The framed card (the "frame") - Already provided by Layout's main element */
 .upload-neobrutalism-card {
-  background: #ffffff;
-  border: 3px solid #000; /* reduced from 4px to be less heavy */
-  box-shadow: 6px 6px 0 0 rgba(0,0,0,1); /* hard shadow, slightly softened distance */
-  border-radius: 12px;
-  padding: 28px; /* increased internal spacing for breathing room */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
 }
 
 /* Inner content spacing (if card has inner content wrapper) */
 .upload-neobrutalism-card .content {
-  padding: 20px 0;
+  padding: 0;
 }
 
 /* Make headings and controls breathe */
@@ -82,10 +82,10 @@
    ======================================== */
 
 .upload-header {
-  background-color: var(--neo-yellow) !important;
-  border-bottom: var(--neo-border) !important;
-  padding: 3rem 2rem !important;
-  text-align: center !important;
+  background-color: transparent !important;
+  border-bottom: none !important;
+  padding: 0 0 2rem 0 !important;
+  text-align: left !important;
 }
 
 .upload-header h1 {
@@ -93,15 +93,14 @@
   font-weight: 900 !important;
   color: var(--neo-black) !important;
   margin-bottom: 0.75rem !important;
-  text-transform: uppercase !important;
   letter-spacing: -0.02em !important;
 }
 
 .upload-header p {
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
   color: var(--neo-black) !important;
-  opacity: 0.8 !important;
+  opacity: 0.7 !important;
 }
 
 /* ========================================
@@ -109,44 +108,42 @@
    ======================================== */
 
 .upload-section {
-  padding: 3rem !important;
+  padding: 2rem 0 !important;
 }
 
 .mode-selector {
   display: flex !important;
-  gap: 1.5rem !important;
-  justify-content: center !important;
-  margin-bottom: 3rem !important;
+  gap: 1rem !important;
+  justify-content: flex-start !important;
+  margin-bottom: 2rem !important;
 }
 
 .mode-btn {
-  padding: 1rem 2.5rem !important;
-  font-size: 1rem !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
-  border: 4px solid var(--neo-black) !important;
-  background-color: var(--neo-white) !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  background-color: var(--neo-light-gray) !important;
   color: var(--neo-black) !important;
   cursor: pointer !important;
   transition: var(--neo-transition) !important;
-  box-shadow: var(--neo-shadow-sm) !important;
+  box-shadow: none !important;
 }
 
 .mode-btn:hover {
-  transform: translate(4px, 4px) !important;
-  box-shadow: var(--neo-shadow-pressed) !important;
+  background-color: #E5E7EB !important;
+  transform: translateY(-1px) !important;
 }
 
 .mode-btn:active {
-  transform: translate(6px, 6px) !important;
-  box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translateY(0) !important;
 }
 
 .mode-btn.active {
-  background-color: var(--neo-lime) !important;
+  background-color: var(--neo-yellow) !important;
   color: var(--neo-black) !important;
-  transform: translate(4px, 4px) !important;
-  box-shadow: none !important;
+  font-weight: 700 !important;
 }
 
 /* Disabled button state */
@@ -155,12 +152,11 @@
   cursor: not-allowed !important;
   background-color: #F5F5F5 !important;
   color: #9CA3AF !important;
-  border-color: #CCCCCC !important;
 }
 
 .mode-btn.disabled:hover {
   transform: none !important;
-  box-shadow: var(--neo-shadow-sm) !important;
+  background-color: #F5F5F5 !important;
 }
 
 /* ========================================
@@ -168,12 +164,10 @@
    ======================================== */
 
 .drop-zone {
-  border: 4px dashed var(--neo-black) !important;
-  background-color: var(--neo-white) !important;
-  /* Dot pattern removed for minimalism */
-  /* background-image: radial-gradient(var(--neo-black) 1.5px, transparent 0) !important; */
-  /* background-size: 32px 32px !important; */
-  padding: 4rem 2rem !important;
+  border: 2px dashed #D1D5DB !important;
+  background-color: #F9FAFB !important;
+  border-radius: 1rem !important;
+  padding: 3rem 2rem !important;
   text-align: center !important;
   transition: all 0.2s ease !important;
   position: relative !important;
@@ -184,36 +178,35 @@
 }
 
 .drop-zone.drag-over {
-  background-color: var(--neo-cyan) !important;
-  border-color: var(--neo-black) !important;
+  background-color: #FEF3C7 !important;
+  border-color: var(--neo-yellow) !important;
   border-style: solid !important;
-  transform: scale(1.02) !important;
+  transform: scale(1.01) !important;
 }
 
 .drop-zone-icon {
-  margin-bottom: 2rem !important;
+  margin-bottom: 1.5rem !important;
   display: inline-block !important;
 }
 
 .drop-zone-icon svg {
-  width: 80px !important;
-  height: 80px !important;
-  stroke: var(--neo-black) !important;
-  stroke-width: 3 !important;
+  width: 64px !important;
+  height: 64px !important;
+  stroke: #9CA3AF !important;
+  stroke-width: 2 !important;
 }
 
 .drop-zone p {
-  font-size: 1.125rem !important;
-  font-weight: 900 !important;
-  color: var(--neo-black) !important;
-  margin-bottom: 2.5rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: #6B7280 !important;
+  margin-bottom: 1.5rem !important;
+  letter-spacing: 0 !important;
 }
 
 .drop-zone > div {
   display: flex !important;
-  gap: 1.5rem !important;
+  gap: 1rem !important;
   justify-content: center !important;
   flex-wrap: wrap !important;
   position: relative !important;
@@ -228,24 +221,23 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 1rem 1.75rem !important;
-  font-size: 1rem !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
-  border: 4px solid var(--neo-black) !important;
-  background-color: var(--neo-lime) !important;
-  color: var(--neo-black) !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
   cursor: pointer !important;
   box-shadow: var(--neo-shadow-sm) !important;
-  transition: all 0.1s ease !important;
+  transition: all 0.2s ease !important;
   white-space: nowrap !important;
 }
 
 .select-btn:hover {
-  transform: translate(-2px, -2px) !important;
-  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
-  background-color: var(--neo-lime) !important;
-  filter: brightness(1.05) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
+  background-color: #1F2937 !important;
 }
 
 .select-btn:active {
@@ -255,16 +247,14 @@
 
 .select-btn:active,
 .select-btn[data-clicked="true"] {
-  transform: translate(4px, 4px) !important;
-  box-shadow: none !important;
-  background-color: var(--neo-lime) !important;
-  color: var(--neo-black) !important;
-  filter: brightness(0.95) !important;
+  transform: translateY(0) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+  background-color: var(--neo-black) !important;
 }
 
 .select-btn svg {
-  margin-right: 0.75rem !important;
-  stroke-width: 3 !important;
+  margin-right: 0.5rem !important;
+  stroke-width: 2.5 !important;
 }
 
 /* ========================================
@@ -272,42 +262,43 @@
    ======================================== */
 
 .file-queue {
-  padding: 3rem !important;
-  background-color: var(--neo-white) !important;
+  padding: 2rem 0 !important;
+  background-color: transparent !important;
 }
 
 .file-queue h3 {
-  font-size: 1.25rem !important;
-  font-weight: 900 !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
   color: var(--neo-black) !important;
-  margin-bottom: 2rem !important;
-  text-transform: uppercase !important;
-  padding-bottom: 1rem !important;
-  border-bottom: 4px solid var(--neo-black) !important;
+  margin-bottom: 1rem !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 1px solid #E5E7EB !important;
 }
 
 .file-item {
   display: flex !important;
   align-items: center !important;
-  gap: 1.5rem !important;
-  padding: 1.5rem !important;
-  background-color: var(--neo-white) !important;
-  border: 4px solid var(--neo-black) !important;
-  margin-bottom: 1.5rem !important;
+  gap: 1rem !important;
+  padding: 1rem !important;
+  background-color: var(--neo-light-gray) !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  margin-bottom: 1rem !important;
   box-shadow: var(--neo-shadow-sm) !important;
-  transition: transform 0.2s ease !important;
+  transition: all 0.2s ease !important;
 }
 
 .file-item:hover {
-  transform: translate(-4px, -4px) !important;
-  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
 }
 
 .file-preview {
-  width: 80px !important;
-  height: 80px !important;
-  border: 3px solid var(--neo-black) !important;
-  background-color: var(--neo-gray) !important;
+  width: 64px !important;
+  height: 64px !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  background-color: var(--neo-white) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -323,59 +314,73 @@
 }
 
 .file-preview svg {
-  stroke: var(--neo-black) !important;
-  stroke-width: 3 !important;
+  stroke: #9CA3AF !important;
+  stroke-width: 2 !important;
+}
+
+.file-details {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+  min-width: 0 !important;
+}
+
+.file-details p {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: var(--neo-black) !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.file-details span {
+  font-size: 0.75rem !important;
+  font-weight: 400 !important;
+  color: #6B7280 !important;
 }
 
 /* Thumbnail overlay for better visibility */
 .file-preview::after {
-  border: 3px solid var(--neo-black) !important;
-  background-color: var(--neo-white) !important;
-  overflow: hidden !important;
-  position: relative !important;
+  display: none !important;
 }
 
 .progress {
   height: 100% !important;
-  background-color: var(--neo-lime) !important;
+  background-color: var(--neo-yellow) !important;
   transition: width 0.3s ease !important;
   position: relative !important;
+  border-radius: 0.25rem !important;
 }
 
 .progress::after {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 5px,
-    rgba(0, 0, 0, 0.1) 5px,
-    rgba(0, 0, 0, 0.1) 10px
-  ) !important;
+  display: none !important;
 }
 
 .remove-btn {
-  width: 48px !important;
-  height: 48px !important;
-  border: 3px solid var(--neo-black) !important;
+  width: 36px !important;
+  height: 36px !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
   background-color: var(--neo-white) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.2s ease !important;
   flex-shrink: 0 !important;
 }
 
 .remove-btn:hover {
-  background-color: var(--neo-orange) !important;
-  transform: rotate(90deg) !important;
+  background-color: #FEE2E2 !important;
+  transform: scale(1.1) !important;
 }
 
 .remove-btn svg {
-  stroke: var(--neo-black) !important;
-  stroke-width: 3 !important;
+  stroke: #EF4444 !important;
+  stroke-width: 2.5 !important;
 }
 
 /* ========================================
@@ -383,9 +388,9 @@
    ======================================== */
 
 .action-bar {
-  padding: 2rem 3rem !important;
-  background-color: var(--neo-gray) !important;
-  border-top: var(--neo-border) !important;
+  padding: 2rem 0 !important;
+  background-color: transparent !important;
+  border-top: none !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -394,18 +399,20 @@
 }
 
 .action-bar .neo-btn-orange {
-  padding: 1.5rem 3rem !important;
-  font-size: 1rem !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
-  min-width: 300px !important;
+  padding: 1rem 2rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  min-width: 200px !important;
   max-width: 400px !important;
+  border-radius: 0.75rem !important;
+  border: none !important;
+  box-shadow: var(--neo-shadow) !important;
 }
 
 .action-bar .btn-primary {
-  padding: 1.5rem 3rem !important;
-  font-size: 1.25rem !important;
-  font-weight: 900 !important;
+  padding: 1rem 2rem !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
   text-transform: uppercase !important;
   letter-spacing: -0.01em !important;
   border: 4px solid var(--neo-black) !important;
@@ -418,23 +425,20 @@
   align-items: center !important;
   gap: 1rem !important;
   width: 100% !important;
-  max-width: 500px !important;
+  max-width: 400px !important;
   margin: 0 auto !important;
   position: relative !important;
+  border-radius: 0.75rem !important;
+  border: none !important;
 }
 
 .action-bar .btn-primary::before {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%) !important;
-  opacity: 0 !important;
-  transition: opacity 0.3s ease !important;
+  display: none !important;
 }
 
 .action-bar .btn-primary:hover:not(:disabled) {
-  transform: translate(-4px, -4px) !important;
-  box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
 }
 
 .action-bar .btn-primary:hover:not(:disabled)::before {
@@ -442,36 +446,36 @@
 }
 
 .action-bar .btn-primary:active:not(:disabled) {
-  transform: translate(4px, 4px) !important;
+  transform: translateY(0) !important;
   box-shadow: var(--neo-shadow-pressed) !important;
 }
 
 .action-bar .btn-primary:disabled {
   background-color: var(--neo-light-gray) !important;
-  color: #999999 !important;
+  color: #9CA3AF !important;
   cursor: not-allowed !important;
   opacity: 0.6 !important;
-  border-color: #CCCCCC !important;
 }
 
 .action-bar .btn-primary svg {
-  stroke-width: 3 !important;
+  stroke-width: 2.5 !important;
 }
 
 /* ========================================
-   OCR PROCESSING INDICATOR (IMPROVED v2)
+   OCR PROCESSING INDICATOR (IMPROVED v3 - FLOATING ISLANDS)
    ======================================== */
 
 .ocr-processing-container {
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: center !important;
   gap: 2rem !important;
-  padding: 4rem 2rem !important;
+  padding: 3rem 2rem !important;
   width: 100% !important;
   margin: 0 auto !important;
-  background: linear-gradient(135deg, #F0F4FF 0%, #E6F0FF 50%, #F9FAFB 100%) !important;
-  border: 4px dashed #000000 !important;
+  background: #F9FAFB !important;
+  border: 2px dashed #D1D5DB !important;
+  border-radius: 1rem !important;
   position: relative !important;
 }
 
@@ -493,10 +497,10 @@
   align-items: center !important;
   justify-content: center !important;
   margin: 0 auto 2rem auto !important;
-  background-color: #FFE000 !important;
-  border-radius: 16px !important;
-  border: 4px solid #000000 !important;
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, 1) !important;
+  background-color: var(--neo-yellow) !important;
+  border-radius: 1rem !important;
+  border: none !important;
+  box-shadow: var(--neo-shadow) !important;
   padding: 20px !important;
 }
 
@@ -504,8 +508,8 @@
   width: 140px !important;
   height: 140px !important;
   display: block !important;
-  border-radius: 12px !important;
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, 1) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: var(--neo-shadow-sm) !important;
   background: #FFFFFF !important;
   position: relative !important;
   z-index: 10 !important;
@@ -515,14 +519,14 @@
   position: absolute !important;
   left: 50% !important;
   width: 60% !important;
-  height: 4px !important;
+  height: 3px !important;
   background: linear-gradient(90deg, 
     rgba(99, 102, 241, 0) 0%, 
-    rgba(99, 102, 241, 0.9) 50%, 
+    rgba(99, 102, 241, 0.8) 50%, 
     rgba(99, 102, 241, 0) 100%) !important;
   border-radius: 999px !important;
-  box-shadow: 0 0 16px rgba(99, 102, 241, 0.5), 
-              0 0 8px rgba(99, 102, 241, 0.7) !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4), 
+              0 0 6px rgba(99, 102, 241, 0.6) !important;
   z-index: 25 !important;
   pointer-events: none !important;
   transform: translateX(-50%) !important;
@@ -532,7 +536,7 @@
 @keyframes scanMove {
   0% {
     top: 15% !important;
-    opacity: 0.6 !important;
+    opacity: 0.5 !important;
   }
   50% {
     top: 50% !important;
@@ -540,81 +544,83 @@
   }
   100% {
     top: 85% !important;
-    opacity: 0.6 !important;
+    opacity: 0.5 !important;
   }
 }
 
 .ocr-scan-corner {
   position: absolute !important;
-  width: 24px !important;
-  height: 24px !important;
-  border: 4px solid #000000 !important;
+  width: 20px !important;
+  height: 20px !important;
+  border: 3px solid #6366F1 !important;
   box-sizing: border-box !important;
   background: transparent !important;
   z-index: 20 !important;
+  border-radius: 2px !important;
 }
 
 .corner-top-left {
-  top: 8px !important;
-  left: 8px !important;
+  top: 10px !important;
+  left: 10px !important;
   border-right: none !important;
   border-bottom: none !important;
 }
 
 .corner-top-right {
-  top: 8px !important;
-  right: 8px !important;
+  top: 10px !important;
+  right: 10px !important;
   border-left: none !important;
+  border-bottom: none !important;
   border-bottom: none !important;
 }
 
 .corner-bottom-left {
-  bottom: 8px !important;
-  left: 8px !important;
+  bottom: 10px !important;
+  left: 10px !important;
   border-right: none !important;
   border-top: none !important;
 }
 
 .corner-bottom-right {
-  bottom: 8px !important;
-  right: 8px !important;
+  bottom: 10px !important;
+  right: 10px !important;
   border-left: none !important;
   border-top: none !important;
 }
 
 .ocr-processing-label {
-  font-weight: 900 !important;
-  font-size: 1.25rem !important;
-  letter-spacing: 0.5px !important;
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  letter-spacing: 0 !important;
   color: #000000 !important;
-  text-transform: uppercase !important;
-  margin: 0 0 2.5rem 0 !important;
+  margin: 0 0 1rem 0 !important;
 }
 
 .cancel-upload-btn {
-  align-self: flex-start !important;
-  padding: 0.75rem 1rem !important;
-  font-size: 1.25rem !important;
-  line-height: 1 !important;
+  align-self: center !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
   min-width: auto !important;
   background-color: var(--neo-white) !important;
-  border: 3px solid var(--neo-black) !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
   color: var(--neo-black) !important;
   box-shadow: var(--neo-shadow-sm) !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.2s ease !important;
   cursor: pointer !important;
   flex-shrink: 0 !important;
 }
 
 .cancel-upload-btn:hover {
-  background-color: var(--neo-error) !important;
-  color: var(--neo-white) !important;
-  transform: translate(-2px, -2px) !important;
-  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+  background-color: #FEE2E2 !important;
+  color: #EF4444 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
 }
 
 .cancel-upload-btn:active {
-  transform: translate(2px, 2px) !important;
+  transform: translateY(0) !important;
   box-shadow: var(--neo-shadow-pressed) !important;
 }
 
@@ -636,13 +642,14 @@
    ======================================== */
 
 .error-message {
-  padding: 1.5rem !important;
-  background-color: var(--neo-error) !important;
-  border: var(--neo-border) !important;
-  color: var(--neo-white) !important;
-  font-weight: 900 !important;
-  font-size: 1rem !important;
-  margin: 2rem 3rem !important;
+  padding: 1rem !important;
+  background-color: #FEE2E2 !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  color: #EF4444 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  margin: 1rem 0 !important;
   box-shadow: var(--neo-shadow-sm) !important;
   position: relative !important;
 }
@@ -653,18 +660,18 @@
   left: 1rem !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  font-size: 1.5rem !important;
+  font-size: 1.25rem !important;
 }
 
 /* Error state for file items */
 .file-item.error {
-  border-color: var(--neo-error) !important;
-  background-color: rgba(255, 68, 68, 0.1) !important;
+  border-color: #EF4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
 }
 
 .file-item.error .file-preview {
-  border-color: var(--neo-error) !important;
-  background-color: rgba(255, 68, 68, 0.2) !important;
+  border-color: #EF4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
 }
 
 /* ========================================
@@ -681,37 +688,38 @@
 
 @media (max-width: 768px) {
   .upload-page {
-    padding: 1rem !important;
+    padding: 0 !important;
   }
 
   .upload-header h1 {
-    font-size: 2rem !important;
+    font-size: 1.5rem !important;
   }
 
   .upload-header p {
-    font-size: 1rem !important;
+    font-size: 0.875rem !important;
   }
 
   .upload-section {
-    padding: 2rem 1.5rem !important;
+    padding: 1.5rem 0 !important;
   }
 
   .mode-selector {
-    flex-direction: column !important;
-    gap: 1rem !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
   }
 
   .mode-btn {
-    width: 100% !important;
-    padding: 1rem !important;
+    width: auto !important;
+    padding: 0.625rem 1rem !important;
+    font-size: 0.75rem !important;
   }
 
   .drop-zone {
-    padding: 3rem 1.5rem !important;
+    padding: 2rem 1rem !important;
   }
 
   .drop-zone p {
-    font-size: 1.1rem !important;
+    font-size: 0.875rem !important;
   }
 
   .ocr-processing-container {
@@ -764,16 +772,16 @@
 
 @media (max-width: 480px) {
   :root {
-    --neo-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
-    --neo-border: 3px solid var(--neo-black);
+    --neo-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --neo-border: 0;
   }
 
   .upload-header {
-    padding: 2rem 1.5rem !important;
+    padding: 0 0 1.5rem 0 !important;
   }
 
   .file-queue h3 {
-    font-size: 1.5rem !important;
+    font-size: 1rem !important;
   }
 }
 
@@ -784,7 +792,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -793,34 +801,35 @@
 }
 
 .upload-container {
-  animation: fadeIn 0.5s ease-out !important;
-}
-
-.file-item {
   animation: fadeIn 0.3s ease-out !important;
 }
 
+.file-item {
+  animation: fadeIn 0.2s ease-out !important;
+}
+
 /* ========================================
-   NEO BUTTON SYSTEM
+   NEO BUTTON SYSTEM - FLOATING ISLANDS STYLE
    ======================================== */
 
 .neo-btn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 1rem 2rem !important;
-  font-size: 1rem !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
-  border: 4px solid var(--neo-black) !important;
+  padding: 0.875rem 1.75rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
   cursor: pointer !important;
   transition: var(--neo-transition) !important;
   text-decoration: none !important;
   gap: 0.5rem !important;
+  box-shadow: var(--neo-shadow-sm) !important;
 }
 
 .neo-btn:active {
-  transform: translate(4px, 4px) !important;
+  transform: translateY(0) !important;
   box-shadow: var(--neo-shadow-pressed) !important;
 }
 
@@ -833,34 +842,34 @@
 .neo-btn-orange {
   background-color: var(--neo-orange) !important;
   color: var(--neo-white) !important;
-  box-shadow: var(--neo-shadow-sm) !important;
 }
 
 .neo-btn-orange:hover:not(:disabled) {
-  transform: translate(-4px, -4px) !important;
-  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
+  background-color: #FF8C1A !important;
 }
 
 .neo-btn-white {
   background-color: var(--neo-white) !important;
   color: var(--neo-black) !important;
-  box-shadow: var(--neo-shadow-sm) !important;
 }
 
 .neo-btn-white:hover:not(:disabled) {
-  transform: translate(-4px, -4px) !important;
-  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
+  background-color: #F9FAFB !important;
 }
 
 .neo-badge {
   display: inline-flex !important;
   align-items: center !important;
-  padding: 0.5rem 1rem !important;
-  background-color: var(--neo-lime) !important;
-  border: 2px solid var(--neo-black) !important;
-  font-weight: 800 !important;
-  font-size: 0.875rem !important;
-  text-transform: uppercase !important;
+  padding: 0.375rem 0.75rem !important;
+  background-color: var(--neo-yellow) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
 }
 
 /* ========================================
@@ -868,9 +877,9 @@
    ======================================== */
 
 .neo-divider {
-  height: 4px !important;
-  background-color: var(--neo-black) !important;
-  margin: 2rem 0 !important;
+  height: 1px !important;
+  background-color: #E5E7EB !important;
+  margin: 1.5rem 0 !important;
 }
 
 /* Card header optimizations for better hierarchy */
@@ -879,16 +888,15 @@
   align-items: center !important;
   justify-content: space-between !important;
   padding: 1.5rem 2rem !important;
-  background-color: var(--neo-white) !important;
-  border-bottom: var(--neo-border) !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid #E5E7EB !important;
 }
 
 .card-title {
-  font-size: 1.5rem !important;
-  font-weight: 900 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
   color: var(--neo-black) !important;
-  text-transform: uppercase !important;
-  letter-spacing: -0.02em !important;
+  letter-spacing: -0.01em !important;
   margin: 0 !important;
 }
 
@@ -901,19 +909,20 @@
 }
 
 .status-badge {
-  padding: 0.5rem 1rem !important;
-  background-color: var(--neo-lime) !important;
-  border: 2px solid var(--neo-black) !important;
-  font-weight: 800 !important;
-  font-size: 0.875rem !important;
-  text-transform: uppercase !important;
+  padding: 0.375rem 0.75rem !important;
+  background-color: var(--neo-yellow) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
 }
 
 .quick-edit-btn {
-  padding: 0.75rem 1.5rem !important;
-  background-color: var(--neo-cyan) !important;
+  padding: 0.625rem 1.25rem !important;
+  background-color: var(--neo-black) !important;
   color: var(--neo-white) !important;
-  border: 3px solid var(--neo-black) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
   font-weight: 800 !important;
   font-size: 0.9rem !important;
   text-transform: uppercase !important;
@@ -962,6 +971,8 @@
   color: var(--neo-white) !important;
   font-size: 1.2rem !important;
   font-weight: 900 !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  transition: all 0.2s ease !important;
 }
 
 /* Improved sticky bar */
@@ -970,24 +981,24 @@
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  background-color: var(--neo-lime) !important;
-  border-top: var(--neo-border) !important;
-  padding: 1.25rem 2rem !important;
+  background-color: var(--neo-yellow) !important;
+  border-top: 1px solid #E5E7EB !important;
+  padding: 1rem 2rem !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  box-shadow: 0 -8px 0px 0px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: var(--neo-shadow) !important;
   z-index: 1000 !important;
 }
 
 .save-selected-btn {
-  padding: 1rem 2.5rem !important;
+  padding: 0.75rem 1.5rem !important;
   background-color: var(--neo-white) !important;
   color: var(--neo-black) !important;
-  border: 4px solid var(--neo-black) !important;
-  font-weight: 900 !important;
-  font-size: 1.1rem !important;
-  text-transform: uppercase !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
   cursor: pointer !important;
   transition: var(--neo-transition) !important;
   box-shadow: var(--neo-shadow-sm) !important;
@@ -995,18 +1006,18 @@
 }
 
 .save-selected-btn.active {
-  background-color: var(--neo-orange) !important;
+  background-color: var(--neo-black) !important;
   color: var(--neo-white) !important;
   opacity: 1 !important;
 }
 
 .save-selected-btn.active:hover {
-  transform: translate(-3px, -3px) !important;
-  box-shadow: 7px 7px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
 }
 
 .save-selected-btn.active:active {
-  transform: translate(2px, 2px) !important;
+  transform: translateY(0) !important;
   box-shadow: var(--neo-shadow-pressed) !important;
 }
 
@@ -1020,12 +1031,11 @@
   cursor: not-allowed !important;
   background-color: #F5F5F5 !important;
   color: #9CA3AF !important;
-  border-color: #CCCCCC !important;
 }
 
 .mode-btn.disabled:hover {
   transform: none !important;
-  box-shadow: var(--neo-shadow-sm) !important;
+  background-color: #F5F5F5 !important;
 }
 
 /* Enhanced processing messages */
@@ -1036,37 +1046,34 @@
 
 .ocr-processing-label.primary {
   color: var(--neo-black) !important;
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
   margin: 0 !important;
-  text-transform: uppercase !important;
 }
 
 .ocr-processing-label.secondary {
   color: var(--neo-orange) !important;
-  font-size: 1.125rem !important;
+  font-size: 1rem !important;
   font-weight: 600 !important;
   margin: 0 0 0.5rem 0 !important;
-  text-transform: uppercase !important;
 }
 
 .ocr-processing-label.success {
   color: #10B981 !important;
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
   margin: 0 0 0.5rem 0 !important;
-  text-transform: uppercase !important;
 }
 
 .ocr-processing-sublabel {
   color: #6B7280 !important;
   font-size: 0.875rem !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   margin: 0 !important;
 }
 
 .ocr-waiting-message {
-  animation: fadeInUp 0.5s ease-out;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .ocr-completion-message {
@@ -1074,10 +1081,10 @@
 }
 
 .completion-icon {
-  font-size: 3rem !important;
+  font-size: 2.5rem !important;
   color: #10B981 !important;
   margin-bottom: 0.5rem !important;
-  animation: checkmarkPop 0.6s ease-out;
+  animation: checkmarkPop 0.5s ease-out;
   display: block !important;
 }
 
@@ -1085,7 +1092,7 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -1096,7 +1103,7 @@
 @keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
@@ -1109,7 +1116,7 @@
     transform: scale(0);
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(1.1);
   }
   100% {
     transform: scale(1);
@@ -1121,11 +1128,10 @@
   .ocr-processing-label.primary,
   .ocr-processing-label.secondary,
   .ocr-processing-label.success {
-    font-size: 1rem !important;
+    font-size: 0.875rem !important;
   }
   
   .completion-icon {
     font-size: 2rem !important;
   }
 }
-
