@@ -92,7 +92,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     if (active) {
       // Clean active style: soft yellow background with rounded pill shape
-      return `${baseClasses} bg-yellow-100 text-black font-semibold`
+      return `${baseClasses} bg-yellow-50 text-black font-semibold`
     }
 
     // Inactive state: gray text, subtle hover
@@ -100,9 +100,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col text-sm w-screen h-screen bg-yellow-400 overflow-hidden">
+    <div className="flex flex-col text-sm w-screen min-h-screen bg-[#FACC15] overflow-hidden">
       {/* Full-Width Top Header - Seamless Yellow Background */}
-      <header className="w-full h-16 bg-yellow-400 border-0 flex items-center justify-between px-8 flex-shrink-0" suppressHydrationWarning>
+      <header className="w-full h-16 bg-[#FACC15] border-0 flex items-center justify-between px-8 flex-shrink-0" suppressHydrationWarning>
         {/* Left: Logo - Text-based with small icon square */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-black rounded-md flex items-center justify-center flex-shrink-0">
@@ -136,7 +136,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content Area: Sidebar + Main Content with Floating Islands */}
-      <div className="flex flex-1 overflow-hidden gap-8 p-6">
+      <div className="flex flex-1 overflow-hidden gap-8 p-6 bg-transparent">
         {/* Sidebar - Floating White Island */}
         <aside className="sidebar w-64 flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Navigation - All items in one list */}
