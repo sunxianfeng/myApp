@@ -879,27 +879,27 @@ const QuestionsContent = () => {
 
   // Show unassigned questions AND questions from the default collection
   const filteredQuestions = useMemo(() => {
-    return allQuestionsWithCollection.filter(q => {
+    return allQuestionsWithCollection.filter((q: any) => {
       // Show if unassigned
-      if (q.isUnassigned) return true;
-      
+      if (q.isUnassigned) return true
+
       // Show if only in the default collection
       const isInDefaultCollection = q.assignedCollections?.some((col: any) => 
         col?.title === 'Uncategorized' || 
         col?.title === '默认错题本' || 
         col?.title === 'Default'
-      );
-      
+      )
+
       // Show if ONLY in default collection (not in any other non-default collections)
       const nonDefaultCollections = q.assignedCollections?.filter((col: any) => 
         col?.title !== 'Uncategorized' && 
         col?.title !== '默认错题本' && 
         col?.title !== 'Default'
-      ) || [];
-      
-      return isInDefaultCollection && nonDefaultCollections.length === 0;
-    });
-  }, [allQuestionsWithCollection]);
+      ) || []
+
+      return isInDefaultCollection && nonDefaultCollections.length === 0
+    })
+  }, [allQuestionsWithCollection])
 
   const handleAction = (action: string, payload: any) => {
     console.log('Action:', action, 'Payload:', payload)
@@ -1042,35 +1042,39 @@ const QuestionsContent = () => {
           
           {/* View Mode Buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button
-              className="neo-btn neo-btn-white"
-              aria-pressed={viewMode === 'card'}
-              onClick={() => setViewMode('card')}
-              style={{ 
-                opacity: mounted ? 1 : 0, 
+            <div
+              className="neo-toggle-group"
+              style={{
+                opacity: mounted ? 1 : 0,
                 pointerEvents: mounted ? 'auto' : 'none',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.875rem'
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0,
               }}
             >
-              <IconGrid size={14} style={{ marginRight: 4 }} />
-              Card
-            </button>
-            <button
-              className="neo-btn neo-btn-white"
-              aria-pressed={viewMode === 'list'}
-              onClick={() => setViewMode('list')}
-              style={{ 
-                opacity: mounted ? 1 : 0, 
-                pointerEvents: mounted ? 'auto' : 'none',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.875rem'
-              }}
-            >
-              <IconList size={14} style={{ marginRight: 4 }} />
-              List
-            </button>
-          </div>
+              <button
+                type="button"
+                className={`neo-toggle-btn ${viewMode === 'card' ? 'active' : ''}`}
+                aria-pressed={viewMode === 'card'}
+                onClick={() => setViewMode('card')}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                <IconGrid size={14} />
+                Card
+              </button>
+
+              <button
+                type="button"
+                className={`neo-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                aria-pressed={viewMode === 'list'}
+                onClick={() => setViewMode('list')}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                <IconList size={14} />
+                List
+              </button>
+            </div>
+           </div>
         </div>
       </header>
 
