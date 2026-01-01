@@ -374,7 +374,7 @@
 .result-page .edit-btn-save,
 .result-page .edit-actions button:first-child {
   padding: 0.75rem 1.25rem !important;
-  background-color: #FCD34D !important; /* Yellow 300 */
+  background-color: #A3E635 !important; /* Lime Green - matches bottom dock */
   color: #000000 !important;
   font-weight: 700 !important;
   font-size: 0.95rem !important;
@@ -391,7 +391,7 @@
 
 .result-page .edit-btn-save:hover,
 .result-page .edit-actions button:first-child:hover {
-  background-color: #FBD04E !important;
+  background-color: #92D629 !important; /* Slightly darker lime on hover */
   transform: translate(1px, 1px) !important;
   box-shadow: 1px 1px 0px 0px rgba(0,0,0,1) !important;
 }
