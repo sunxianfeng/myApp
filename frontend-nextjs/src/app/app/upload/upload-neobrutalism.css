@@ -598,7 +598,82 @@ button.neo-btn-primary:disabled {
 .upload-container .ocr-processing-visual,
 .ocr-processing-visual {
   position: relative !important;
-  width: 180px !important;
+  /* ========================================
+   RETRO FLOATING TOAST OVERRIDES
+   ======================================== */
+
+/* Enhanced retro toast styling for perfect neobrutalism integration */
+.retro-toast {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.retro-toast .toast-icon {
+  font-weight: 900 !important;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2) !important;
+}
+
+.retro-toast .toast-title {
+  letter-spacing: -0.01em !important;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1) !important;
+}
+
+.retro-toast .action-btn {
+  text-transform: none !important;
+  letter-spacing: -0.005em !important;
+  font-family: inherit !important;
+}
+
+.retro-toast .action-btn:hover {
+  background-color: #F9FAFB !important;
+}
+
+/* Success toast specific styling */
+.retro-toast[style*="#A3E635"] .toast-icon {
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: #000000 !important;
+}
+
+/* Error toast specific styling */  
+.retro-toast[style*="#EF4444"] .toast-icon {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+/* Info toast specific styling */
+.retro-toast[style*="#22D3EE"] .toast-icon {
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: #000000 !important;
+}
+
+/* Mobile responsiveness for retro toast */
+@media (max-width: 768px) {
+  .retro-toast {
+    margin: 0 1rem !important;
+    min-width: auto !important;
+  }
+  
+  .retro-toast .toast-title {
+    font-size: 0.9375rem !important;
+  }
+  
+  .retro-toast .toast-message {
+    font-size: 0.8125rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .retro-toast {
+    margin: 0 0.5rem !important;
+    padding: 0.875rem 1rem !important;
+  }
+  
+  .retro-toast .action-btn {
+    padding: 0.625rem 1rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+width: 180px !important;
   height: 180px !important;
   display: flex !important;
   align-items: center !important;

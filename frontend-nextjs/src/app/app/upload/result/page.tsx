@@ -876,10 +876,20 @@ const UploadResultPage = (props: PageProps) => {
           {saveError && <span style={{ color: '#EF4444', fontWeight: '700' }}>{saveError}</span>}
           
           <button 
-            className="neo-btn neo-btn-orange" 
+            className="neo-btn neo-btn-orange"
             onClick={handleSaveSelected}
             disabled={saving || items.filter(i => i.selected).length === 0}
-            style={{ fontSize: '1.2rem' }}
+            style={{ 
+              fontSize: '1.2rem',
+              background: '#FBBF24', // Yellow-400 brand color
+              color: '#000000',       // Black text for readability
+              borderRadius: '9999px',
+              border: '2px solid #000000',
+              padding: '0.75rem 1.5rem',
+              fontWeight: '900',
+              boxShadow: '2px 2px 0px 0px rgba(0,0,0,1)', // Standard hard black shadow
+              transition: 'all 0.15s ease'
+            }}
           >
             {saving ? '保存中...' : `保存勾选的 ${items.filter(i => i.selected).length} 题`}
           </button>

@@ -19,23 +19,24 @@ export default function NotificationBar() {
   const [notification, setNotification] = useState<Notification | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
+  const [shownNotificationIds, setShownNotificationIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     // Listen for all active tasks
     const unsubscribe = backgroundTaskManager.subscribeToAllTasks((tasks) => {
-      // Find recently completed tasks (within last 5 seconds)
+      // Find recently completed tasks (within last 30 seconds)
       const recentCompleted = tasks.find(
         (task) =>
           task.status === 'completed' &&
-          Date.now() - task.timestamp < 5000 // 5 seconds
+          Date.now() - task.timestamp < 30000 // 30 seconds
       )
 
-      if (recentCompleted && !notification) {
-        // Don't show notification if already on result page
-        if (pathname === '/app/upload/result') {
-          return
-        }
-
+      if (recentCompleted && !notification && !shownNotificationIds.has(recentCompleted.id)) {
+        console.log('NotificationBar - Showing success notification for:', recentCompleted.id)
+        
+        // Mark this notification as shown
+        setShownNotificationIds(prev => new Set(prev).add(recentCompleted.id))
+        
         const taskTypeLabel = recentCompleted.type === 'ocr-upload' ? '题目识别' : '任务'
         setNotification({
           id: recentCompleted.id,
@@ -44,8 +45,8 @@ export default function NotificationBar() {
           message: recentCompleted.metadata?.fileName 
             ? `已成功识别 "${recentCompleted.metadata.fileName}"` 
             : '识别任务已完成',
-          actionText: '查看结果',
-          actionUrl: '/app/upload/result',
+          actionText: pathname !== '/app/upload/result' ? '查看结果' : undefined,
+          actionUrl: pathname !== '/app/upload/result' ? '/app/upload/result' : undefined,
         })
         setIsVisible(true)
 
@@ -55,14 +56,19 @@ export default function NotificationBar() {
         }, 10000)
       }
 
-      // Check for recent failures
+      // Check for recent failures (within last 30 seconds)
       const recentFailed = tasks.find(
         (task) =>
           task.status === 'failed' &&
-          Date.now() - task.timestamp < 5000
+          Date.now() - task.timestamp < 30000 // 30 seconds
       )
 
-      if (recentFailed && !notification) {
+      if (recentFailed && !notification && !shownNotificationIds.has(recentFailed.id)) {
+        console.log('NotificationBar - Showing error notification for:', recentFailed.id)
+        
+        // Mark this notification as shown
+        setShownNotificationIds(prev => new Set(prev).add(recentFailed.id))
+        
         const taskTypeLabel = recentFailed.type === 'ocr-upload' ? '题目识别' : '任务'
         setNotification({
           id: recentFailed.id,
@@ -80,7 +86,7 @@ export default function NotificationBar() {
     })
 
     return () => unsubscribe()
-  }, [notification, pathname])
+  }, [notification, pathname, shownNotificationIds])
 
   const handleClose = () => {
     setIsExiting(true)
@@ -102,152 +108,320 @@ export default function NotificationBar() {
     return null
   }
 
-  const bgColor = {
-    success: '#10b981', // green
-    error: '#ef4444',   // red
-    info: '#3b82f6',    // blue
+  // Get colors based on notification type
+  const colors = {
+    success: {
+      bg: '#A3E635', // Lime green
+      text: '#000000', // Black
+      border: '#000000'
+    },
+    error: {
+      bg: '#EF4444', // Red
+      text: '#FFFFFF', // White
+      border: '#000000'
+    },
+    info: {
+      bg: '#22D3EE', // Cyan
+      text: '#000000', // Black
+      border: '#000000'
+    }
   }[notification.type]
 
   return (
     <div
-      className={`notification-bar ${isExiting ? 'notification-bar-exit' : ''}`}
+      className={`retro-toast ${isExiting ? 'retro-toast-exit' : 'retro-toast-enter'}`}
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        backgroundColor: bgColor,
-        color: 'white',
-        padding: '1rem 2rem',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+        top: '2rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 50,
+        backgroundColor: colors.bg,
+        color: colors.text,
+        padding: '1rem 1.5rem',
+        borderRadius: '1rem',
+        border: `3px solid ${colors.border}`,
+        boxShadow: '6px 6px 0px 0px rgba(0, 0, 0, 1)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '1rem',
-        animation: isExiting ? 'slideUp 0.3s ease-out' : 'slideDown 0.3s ease-out',
-        border: '3px solid #000',
-        borderTop: 'none',
+        minWidth: '320px',
+        maxWidth: '500px',
+        animation: isExiting ? 'bounceOut 0.3s ease-in' : 'bounceIn 0.4s ease-out',
       }}
     >
       <style jsx>{`
-        @keyframes slideDown {
-          from {
-            transform: translateY(-100%);
+        @keyframes bounceIn {
+          0% {
+            transform: translateX(-50%) translateY(-20px) scale(0.9);
             opacity: 0;
           }
-          to {
-            transform: translateY(0);
+          60% {
+            transform: translateX(-50%) translateY(5px) scale(1.05);
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(-50%) translateY(0) scale(1);
             opacity: 1;
           }
         }
 
-        @keyframes slideUp {
-          from {
-            transform: translateY(0);
+        @keyframes bounceOut {
+          0% {
+            transform: translateX(-50%) translateY(0) scale(1);
             opacity: 1;
           }
-          to {
-            transform: translateY(-100%);
+          100% {
+            transform: translateX(-50%) translateY(-30px) scale(0.8);
             opacity: 0;
           }
         }
 
-        .notification-content {
+        .retro-toast {
+          transition: transform 0.2s ease;
+        }
+
+        .retro-toast:hover {
+          transform: translateX(-50%) translateY(-2px) !important;
+          box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+
+        .toast-content {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: 0.75rem;
           flex: 1;
         }
 
-        .notification-icon {
-          font-size: 1.5rem;
+        .toast-icon {
+          font-size: 1.25rem;
+          font-weight: 900;
+          flex-shrink: 0;
+          width: 2rem;
+          height: 2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 0.5rem;
+          background: ${colors.text === '#000000' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.2)'};
+          border: 2px solid ${colors.text};
+        }
+
+        .toast-text {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .toast-title {
+          font-weight: 900;
+          font-size: 1rem;
+          margin-bottom: 0.125rem;
+          line-height: 1.2;
+        }
+
+        .toast-message {
+          font-size: 0.875rem;
+          font-weight: 500;
+          opacity: 0.9;
+          line-height: 1.3;
+        }
+
+        .toast-actions {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
           flex-shrink: 0;
         }
 
-        .notification-text {
-          flex: 1;
+        /* Neo-brutalism Action Button - Clean White Sticker Style */
+        .neo-action-btn {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          border: 2px solid #000000 !important;
+          border-radius: 9999px !important;
+          padding: 0.5rem 1rem !important;
+          font-weight: 700 !important;
+          font-size: 0.8125rem !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+          box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+          white-space: nowrap !important;
+          text-decoration: none !important;
         }
 
-        .notification-title {
-          font-weight: 600;
-          font-size: 1.125rem;
-          margin-bottom: 0.25rem;
+        .neo-action-btn:hover {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          transform: translate(1px, 1px) !important;
+          box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1) !important;
         }
 
-        .notification-message {
-          font-size: 0.9375rem;
-          opacity: 0.95;
+        .neo-action-btn:active {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          transform: translate(2px, 2px) !important;
+          box-shadow: none !important;
         }
 
-        .notification-actions {
-          display: flex;
-          gap: 0.75rem;
-          align-items: center;
+        .neo-action-btn:focus {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          outline: none !important;
+          box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
         }
 
-        .notification-btn {
-          background: white;
-          color: #000;
-          border: 2px solid #000;
-          padding: 0.625rem 1.25rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-          font-size: 0.9375rem;
-          white-space: nowrap;
+        /* Force override any inherited styles */
+        .neo-action-btn:link,
+        .neo-action-btn:visited {
+          background: #FFFFFF !important;
+          color: #000000 !important;
         }
 
-        .notification-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 3px 3px 0 #000;
+        /* Legacy action-btn class for backwards compatibility */
+        .action-btn {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          border: 2px solid #000000 !important;
+          border-radius: 9999px !important;
+          padding: 0.5rem 1rem !important;
+          font-weight: 700 !important;
+          font-size: 0.8125rem !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+          box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+          white-space: nowrap !important;
+        }
+
+        .action-btn:hover {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          transform: translate(1px, 1px) !important;
+          box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+
+        .action-btn:active {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          transform: translate(2px, 2px) !important;
+          box-shadow: none !important;
+        }
+
+        .action-btn:focus {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          outline: none !important;
+        }
+
+        /* Force override any inherited styles */
+        .action-btn:link,
+        .action-btn:visited {
+          background: #FFFFFF !important;
+          color: #000000 !important;
         }
 
         .close-btn {
           background: transparent;
-          border: 2px solid white;
-          color: white;
-          padding: 0.5rem 0.75rem;
+          border: none;
+          color: ${colors.text};
+          padding: 0.5rem;
           cursor: pointer;
-          font-weight: 600;
+          font-weight: 900;
           font-size: 1.125rem;
           line-height: 1;
-          transition: all 0.2s;
+          width: 2rem;
+          height: 2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 0.5rem;
+          transition: all 0.15s ease;
         }
 
         .close-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: ${colors.text === '#000000' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.2)'};
         }
 
         @media (max-width: 768px) {
-          .notification-bar {
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 1rem;
+          .retro-toast {
+            position: fixed !important;
+            top: 1rem !important;
+            left: 1rem !important;
+            right: 1rem !important;
+            transform: none !important;
+            min-width: auto !important;
+            max-width: none !important;
           }
 
-          .notification-actions {
+          .retro-toast:hover {
+            transform: translateY(-2px) !important;
+          }
+
+          .toast-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .toast-actions {
             width: 100%;
             justify-content: space-between;
+          }
+
+          .action-btn {
+            flex: 1;
+            text-align: center;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .toast-content {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .toast-actions {
+            flex-direction: column;
+            width: 100%;
+          }
+
+          .action-btn {
+            width: 100%;
           }
         }
       `}</style>
 
-      <div className="notification-content">
-        <span className="notification-icon">
+      <div className="toast-content">
+        <div className="toast-icon">
           {notification.type === 'success' && '✓'}
           {notification.type === 'error' && '✕'}
           {notification.type === 'info' && 'ℹ'}
-        </span>
-        <div className="notification-text">
-          <div className="notification-title">{notification.title}</div>
-          <div className="notification-message">{notification.message}</div>
+        </div>
+        <div className="toast-text">
+          <div className="toast-title">{notification.title}</div>
+          <div className="toast-message">{notification.message}</div>
         </div>
       </div>
 
-      <div className="notification-actions">
+      <div className="toast-actions">
         {notification.actionText && notification.actionUrl && (
-          <button className="notification-btn" onClick={handleAction}>
+          <button 
+            className="action-btn neo-action-btn" 
+            onClick={handleAction}
+            style={{
+              background: '#FFFFFF',
+              color: '#000000',
+              border: '2px solid #000000',
+              borderRadius: '9999px',
+              padding: '0.5rem 1rem',
+              fontWeight: 700,
+              fontSize: '0.8125rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              boxShadow: '2px 2px 0px 0px rgba(0, 0, 0, 1)',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {notification.actionText}
           </button>
         )}

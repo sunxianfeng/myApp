@@ -121,8 +121,27 @@
 .result-page .neo-btn:hover { transform: translate(2px, 2px) !important; box-shadow: 1px 1px 0px 0px rgba(0,0,0,1) !important; }
 .result-page .neo-btn:active { transform: translate(3px, 3px) !important; box-shadow: 0px 0px 0px 0px rgba(0,0,0,1) !important; }
 .result-page .neo-btn:disabled { opacity: 0.5 !important; cursor: not-allowed !important; transform: none !important; }
-.result-page .neo-btn-orange { background: #A3E635 !important; color: #000000 !important; font-weight: 900 !important; }
-.result-page .neo-btn-orange:hover:not(:disabled) { background: #84CC16 !important; }
+
+/* Black Pill Button - High Specificity Override */
+.result-page .neo-btn.neo-btn-orange,
+.result-page button.neo-btn-orange { 
+  background: #FBBF24 !important; /* Yellow-400 - Brand Yellow */
+  color: #000000 !important; /* Black text for readability */
+  font-weight: 900 !important; 
+  border-radius: 9999px !important; 
+  border: 2px solid #000000 !important; 
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important; /* Standard hard black shadow */
+  padding: 0.75rem 1.5rem !important;
+}
+
+.result-page .neo-btn.neo-btn-orange:hover:not(:disabled),
+.result-page button.neo-btn-orange:hover:not(:disabled) { 
+  background: #F59E0B !important; /* Yellow-500 - Slightly darker yellow on hover */
+  color: #000000 !important;
+  transform: scale(1.05) !important; 
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important; /* Keep consistent hard shadow */
+  transition: all 0.15s ease !important; 
+}
 .result-page .neo-btn-white { background-color: #FFFFFF !important; color: #000000 !important; border: 2px solid #000000 !important; font-weight: 700 !important; }
 .result-page .neo-btn-white:hover:not(:disabled) { background-color: #f9fafb !important; }
 
