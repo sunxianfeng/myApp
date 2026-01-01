@@ -601,6 +601,7 @@ const UploadResultPage = (props: PageProps) => {
                   value={item.draftContent}
                   onChange={e => updateDraftContent(item.id, e.target.value)}
                   placeholder="输入题目内容（支持LaTeX公式，如 $x^2$）"
+                  className="bg-white border-2 border-black p-4 text-black focus:ring-2 focus:ring-black focus:outline-none"
                 />
                 {item.draftOptions.length > 0 && (
                   <div className="edit-options-list">
@@ -612,11 +613,8 @@ const UploadResultPage = (props: PageProps) => {
                           onChange={e => updateDraftOption(item.id, idx, e.target.value)}
                           placeholder={`输入选项 ${opt.label} 的内容（支持换行和LaTeX公式）`}
                           rows={2}
+                          className="bg-white border-2 border-black p-4 text-black focus:ring-2 focus:ring-black focus:outline-none"
                         />
-                        {/* Live math preview for option */}
-                        <div className="option-preview">
-                          <MathRenderer content={opt.content} />
-                        </div>
                       </div>
                     ))}
                   </div>
