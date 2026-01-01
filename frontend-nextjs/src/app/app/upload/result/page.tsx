@@ -539,8 +539,10 @@ const UploadResultPage = () => {
       {/* Compact Header */}
       <header className="result-hero" style={{ padding: '1.5rem 2rem', marginBottom: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>确认题目</h1>
-          <p className="font-bold">找到 {totalQuestions} 道题目，点击"纠正"可修改文字内容</p>
+          <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: '900' }}>确认题目</h1>
+          <p style={{ fontWeight: '500', color: '#4B5563', lineHeight: '1.6' }}>
+            找到 <span style={{ fontWeight: '900', color: '#000000' }}>{totalQuestions}</span> 道题目，点击"快速修改"可编辑内容
+          </p>
         </div>
         <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>重新上传</button>
       </header>
@@ -660,19 +662,22 @@ const UploadResultPage = () => {
         )}
       </main>
 
-      {/* Sticky Bottom Action Bar */}
+      {/* Sticky Bottom Action Bar - Green Controller/Game Boy */}
       <div style={{
         position: 'sticky',
         bottom: '20px',
         zIndex: 100,
         marginTop: '2rem',
+        marginBottom: '2rem', /* Float above bottom */
         backgroundColor: '#A3E635',
         border: '4px solid black',
+        borderRadius: '1rem', /* rounded-2xl - Soft but Sturdy */
         boxShadow: '8px 8px 0px black',
-        padding: '1rem 2rem',
+        padding: '1.25rem 2rem',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        gap: '1.5rem'
       }}>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button 

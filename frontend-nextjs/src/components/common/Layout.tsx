@@ -78,9 +78,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   const getNavItemClassName = (path: string): string => {
-    const baseClasses = 'sidebar-item flex items-center p-3 rounded-xl transition-all duration-100'
+    const baseClasses = 'sidebar-item'
     if (!mounted) {
-      return `${baseClasses} font-semibold text-gray-500`
+      return baseClasses
     }
 
     let active = false
@@ -90,19 +90,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       active = pathname.startsWith(path)
     }
 
-    if (active) {
-      // Clean active style: soft yellow background with rounded pill shape
-      return `${baseClasses} bg-yellow-50 text-black font-semibold`
-    }
-
-    // Inactive state: gray text, subtle hover
-    return `${baseClasses} text-gray-600 hover:bg-gray-50`
+    // Return base class + 'active' if the route matches
+    // The CSS will handle all styling via .sidebar-item and .sidebar-item.active
+    return active ? `${baseClasses} active` : baseClasses
   }
 
   return (
-    <div className="flex flex-col text-sm w-screen min-h-screen bg-[#FACC15] overflow-hidden">
-      {/* Full-Width Top Header - Seamless Yellow Background */}
-      <header className="w-full h-16 bg-[#FACC15] border-0 flex items-center justify-between px-8 flex-shrink-0" suppressHydrationWarning>
+    <div className="flex flex-col text-sm w-screen min-h-screen bg-yellow-300 overflow-hidden">
+      {/* Full-Width Top Header - Seamless Butter Yellow Background */}
+      <header className="w-full h-16 bg-yellow-300 border-0 shadow-none flex items-center justify-between px-8 flex-shrink-0" suppressHydrationWarning>
         {/* Left: Logo - Text-based with small icon square */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-black rounded-md flex items-center justify-center flex-shrink-0">
@@ -137,8 +133,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content Area: Sidebar + Main Content with Floating Islands */}
       <div className="flex flex-1 overflow-hidden gap-8 p-6 bg-transparent">
-        {/* Sidebar - Floating White Island */}
-        <aside className="sidebar w-64 flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* Sidebar - Floating White Island with Enhanced Shadow for Pale Background */}
+        <aside className="sidebar w-64 flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-hidden" style={{ border: 'none' }}>
           {/* Navigation - All items in one list */}
           <nav className="flex flex-col space-y-2 p-4">
             {/* 首页 */}
@@ -146,7 +142,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               href="/app"
               className={getNavItemClassName('/app')}
             >
-              <Icon name="dashboard" className="w-5 h-5 mr-3 text-black" />
+              <Icon name="dashboard" className="w-5 h-5 mr-3" />
               首页
             </Link>
 
@@ -155,7 +151,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               href="/app/upload"
               className={getNavItemClassName('/app/upload')}
             >
-              <Icon name="upload" className="w-5 h-5 mr-3 text-black" />
+              <Icon name="upload" className="w-5 h-5 mr-3" />
               题目解析
             </Link>
 
@@ -164,7 +160,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               href="/app/questions"
               className={getNavItemClassName('/app/questions')}
             >
-              <Icon name="file" className="w-5 h-5 mr-3 text-black" />
+              <Icon name="file" className="w-5 h-5 mr-3" />
               题目管理
             </Link>
 
@@ -173,14 +169,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               href="/app/settings"
               className={getNavItemClassName('/app/settings')}
             >
-              <Icon name="settings" className="w-5 h-5 mr-3 text-black" />
+              <Icon name="settings" className="w-5 h-5 mr-3" />
               设置
             </Link>
           </nav>
         </aside>
 
-        {/* Main Content Area - Right Side - Floating White Island */}
-        <main className="flex-1 bg-white rounded-3xl shadow-2xl overflow-auto p-8">
+        {/* Main Content Area - Right Side - Floating White Island with Enhanced Shadow for Pale Background */}
+        <main className="flex-1 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-auto p-8" style={{ border: 'none' }}>
           {children}
         </main>
       </div>

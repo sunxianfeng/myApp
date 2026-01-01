@@ -103,63 +103,66 @@ body {
 
 .sidebar-item {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  color: #4B5563 !important;
+  color: #6b7280 !important;
   font-family: var(--font-sans) !important;
   text-decoration: none !important;
-  border-radius: 0 !important;
+  border-radius: 9999px !important; /* Full pill shape */
   cursor: pointer !important;
-  padding: 0.75rem 1rem !important;
+  padding: 0.75rem 1.25rem !important;
   display: flex !important;
   align-items: center !important;
-  margin: 0 0 0.75rem 0 !important;
-  border: 3px solid transparent !important;
-  font-weight: 700 !important;
-  font-size: 1.1rem !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
+  margin: 0 0.75rem 0.5rem 0.75rem !important; /* Margins to float inside container */
+  border: none !important; /* Remove borders for soft look */
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.01em !important;
+  text-transform: none !important; /* Remove uppercase for softer look */
   position: relative !important;
   user-select: none !important;
+  background: transparent !important;
 }
 
 .sidebar-item:hover {
-  background: #A3E635 !important;
+  background: #FBBF24 !important; /* Amber-400 - Honey/Toast color */
   color: #000000 !important;
-  border-color: #000000 !important;
-  box-shadow: 2px 2px 0px 0px #000000 !important;
-  transform: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: translateX(4px) !important; /* Subtle slide effect */
 }
 
 .sidebar-item.active {
-  background: #6366F1 !important;
-  color: #FFFFFF !important;
+  background: #000000 !important; /* Black Pill - High Contrast */
+  color: #FFFFFF !important; /* White text */
   font-weight: 700 !important;
-  border-radius: 0 !important;
-  border: 3px solid #000000 !important;
-  box-shadow: 4px 4px 0px 0px #000000 !important;
-  transform: translate(-2px, -2px) !important;
+  border-radius: 9999px !important; /* Keep pill shape */
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important; /* Strong shadow */
+  transform: none !important;
 }
 
 .sidebar-item.active:hover {
-  background: #4F46E5 !important;
-  transform: translate(-2px, -2px) !important;
-  box-shadow: 4px 4px 0px 0px #000000 !important;
+  background: #1F2937 !important; /* Slightly lighter black on hover */
+  transform: translateX(4px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Sidebar icon styling - 加粗线条 */
+/* Sidebar icon styling - softer approach */
 .sidebar-item svg {
-  width: 1.35rem !important;
-  height: 1.35rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
   margin-right: 0.75rem !important;
   transition: transform 0.2s ease !important;
-  stroke-width: 3 !important;
+  stroke-width: 2 !important; /* Softer stroke */
 }
 
 .sidebar-item:hover svg {
-  transform: scale(1.05) !important;
+  transform: scale(1.08) !important;
 }
 
 .sidebar-item.active svg {
   filter: none !important;
+  stroke: #FFFFFF !important; /* White stroke for active state */
+  stroke-width: 2.5 !important; /* Slightly bolder when active */
 }
 
 /* 移除软性分割线 */
