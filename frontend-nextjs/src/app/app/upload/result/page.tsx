@@ -527,11 +527,93 @@ const UploadResultPage = (props: PageProps) => {
 
   if (!result) {
     return (
-      <div className="empty-state">
-        <div className="empty-state-card">
-          <h2>暂无识别结果</h2>
-          <p>请返回上传页面，选择图片或文档进行 OCR 解析。</p>
-          <button className="empty-state-btn" onClick={handleReturnToUpload}>
+      <div className="result-page" style={{ maxWidth: '1200px', margin: '0 auto', minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: '1.5rem',
+          border: '3px solid #000000',
+          boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+          padding: '4rem 3rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          maxWidth: '600px',
+          width: '100%'
+        }}>
+          {/* Hero Icon - Empty Box */}
+          <svg
+            width="120"
+            height="120"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ color: '#A3E635', marginBottom: '1.5rem' }}
+          >
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+            <line x1="12" y1="22.08" x2="12" y2="12" />
+          </svg>
+          
+          {/* Heading */}
+          <h2 style={{
+            fontSize: '2rem',
+            fontWeight: '900',
+            color: '#000000',
+            marginBottom: '1rem',
+            lineHeight: '1.2'
+          }}>
+            暂无识别结果
+          </h2>
+          
+          {/* Body Text */}
+          <p style={{
+            fontSize: '1.125rem',
+            color: '#6b7280',
+            maxWidth: '28rem',
+            lineHeight: '1.75',
+            marginBottom: '2rem'
+          }}>
+            请返回上传页面，选择图片或文档进行 OCR 解析。
+          </p>
+          
+          {/* CTA Button */}
+          <button
+            onClick={handleReturnToUpload}
+            style={{
+              backgroundColor: '#A3E635',
+              color: '#000000',
+              fontWeight: '700',
+              fontSize: '1rem',
+              padding: '0.875rem 2rem',
+              borderRadius: '9999px',
+              border: '2px solid #000000',
+              boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              fontFamily: "'Plus Jakarta Sans', sans-serif"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(2px, 2px)'
+              e.currentTarget.style.boxShadow = '2px 2px 0px 0px rgba(0,0,0,1)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)'
+              e.currentTarget.style.boxShadow = '4px 4px 0px 0px rgba(0,0,0,1)'
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'translate(4px, 4px)'
+              e.currentTarget.style.boxShadow = '0px 0px 0px 0px rgba(0,0,0,1)'
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'translate(2px, 2px)'
+              e.currentTarget.style.boxShadow = '2px 2px 0px 0px rgba(0,0,0,1)'
+            }}
+          >
             返回上传页面
           </button>
         </div>
@@ -545,12 +627,18 @@ const UploadResultPage = (props: PageProps) => {
       <div className="result-hero-container">
         <header className="result-hero-header">
           <div>
-            <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: '900' }}>确认题目</h1>
-            <p style={{ fontWeight: '500', color: '#1F2937', lineHeight: '1.6' }}>
-              找到 <span style={{ fontWeight: '900', color: '#000000' }}>{totalQuestions}</span> 道题目，点击"快速修改"可编辑内容
-            </p>
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: '900' }}>
+              {items.length > 0 ? '确认题目' : '识别结果（0）'}
+            </h1>
+            {items.length > 0 && (
+              <p style={{ fontWeight: '500', color: '#1F2937', lineHeight: '1.6' }}>
+                找到 <span style={{ fontWeight: '900', color: '#000000' }}>{totalQuestions}</span> 道题目，点击"快速修改"可编辑内容
+              </p>
+            )}
           </div>
-          <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>重新上传</button>
+          {items.length > 0 && (
+            <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>重新上传</button>
+          )}
         </header>
       </div>
 
@@ -659,55 +747,144 @@ const UploadResultPage = (props: PageProps) => {
         ))}
 
         {items.length === 0 && (
-          <div className="no-questions-message">
-            <p>未识别到题目内容。</p>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '1.5rem',
+            border: '3px solid #000000',
+            boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+            padding: '4rem 3rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            margin: '2rem auto',
+            maxWidth: '600px'
+          }}>
+            {/* Hero Icon - Search with X */}
+            <svg
+              width="120"
+              height="120"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: '#A3E635', marginBottom: '1.5rem' }}
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+              <line x1="14" y1="8" x2="8" y2="14" />
+              <line x1="8" y1="8" x2="14" y2="14" />
+            </svg>
+            
+            {/* Heading */}
+            <h3 style={{
+              fontSize: '2rem',
+              fontWeight: '900',
+              color: '#000000',
+              marginBottom: '1rem',
+              lineHeight: '1.2'
+            }}>
+              未识别到题目
+            </h3>
+            
+            {/* Body Text */}
+            <p style={{
+              fontSize: '1.125rem',
+              color: '#6b7280',
+              maxWidth: '28rem',
+              lineHeight: '1.75',
+              marginBottom: '2rem'
+            }}>
+              请确保上传的图片清晰、光线充足，且包含可识别的题目文本。
+            </p>
+            
+            {/* CTA Button */}
+            <button
+              onClick={handleReturnToUpload}
+              style={{
+                backgroundColor: '#A3E635',
+                color: '#000000',
+                fontWeight: '700',
+                fontSize: '1rem',
+                padding: '0.875rem 2rem',
+                borderRadius: '9999px',
+                border: '2px solid #000000',
+                boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                fontFamily: "'Plus Jakarta Sans', sans-serif"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(2px, 2px)'
+                e.currentTarget.style.boxShadow = '2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)'
+                e.currentTarget.style.boxShadow = '4px 4px 0px 0px rgba(0,0,0,1)'
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translate(4px, 4px)'
+                e.currentTarget.style.boxShadow = '0px 0px 0px 0px rgba(0,0,0,1)'
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translate(2px, 2px)'
+                e.currentTarget.style.boxShadow = '2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              重新上传
+            </button>
           </div>
         )}
       </main>
 
-      {/* Sticky Bottom Action Bar - Green Controller/Game Boy */}
-      <div style={{
-        position: 'sticky',
-        bottom: '20px',
-        zIndex: 100,
-        marginTop: '2rem',
-        marginBottom: '2rem', /* Float above bottom */
-        backgroundColor: '#A3E635',
-        border: '4px solid black',
-        borderRadius: '1rem', /* rounded-2xl - Soft but Sturdy */
-        boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)',
-        padding: '1.25rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: '1.5rem'
-      }}>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+      {/* Sticky Bottom Action Bar - Green Controller/Game Boy - Only show when there are questions */}
+      {items.length > 0 && (
+        <div style={{
+          position: 'sticky',
+          bottom: '20px',
+          zIndex: 100,
+          marginTop: '2rem',
+          marginBottom: '2rem', /* Float above bottom */
+          backgroundColor: '#A3E635',
+          border: '4px solid black',
+          borderRadius: '1rem', /* rounded-2xl - Soft but Sturdy */
+          boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)',
+          padding: '1.25rem 2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button 
+              className="neo-btn neo-btn-white" 
+              onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: true })))}
+            >
+              全选
+            </button>
+            <button 
+              className="neo-btn neo-btn-white" 
+              onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: false })))}
+            >
+              清空
+            </button>
+          </div>
+          
+          {saveError && <span style={{ color: '#EF4444', fontWeight: '700' }}>{saveError}</span>}
+          
           <button 
-            className="neo-btn neo-btn-white" 
-            onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: true })))}
+            className="neo-btn neo-btn-orange" 
+            onClick={handleSaveSelected}
+            disabled={saving || items.filter(i => i.selected).length === 0}
+            style={{ fontSize: '1.2rem' }}
           >
-            全选
-          </button>
-          <button 
-            className="neo-btn neo-btn-white" 
-            onClick={() => setItems(prev => prev.map(it => ({ ...it, selected: false })))}
-          >
-            清空
+            {saving ? '保存中...' : `保存勾选的 ${items.filter(i => i.selected).length} 题`}
           </button>
         </div>
-        
-        {saveError && <span style={{ color: '#EF4444', fontWeight: '700' }}>{saveError}</span>}
-        
-        <button 
-          className="neo-btn neo-btn-orange" 
-          onClick={handleSaveSelected}
-          disabled={saving || items.filter(i => i.selected).length === 0}
-          style={{ fontSize: '1.2rem' }}
-        >
-          {saving ? '保存中...' : `保存勾选的 ${items.filter(i => i.selected).length} 题`}
-        </button>
-      </div>
+      )}
 
       {fileResults.length > 0 && (
         <div className="file-status-section">
