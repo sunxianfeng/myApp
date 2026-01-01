@@ -36,8 +36,6 @@ const Upload = () => {
   
   const [uploadMode, setUploadMode] = useState<'single' | 'batch'>('single')
   const [dragActive, setDragActive] = useState(false)
-  const [imageClicked, setImageClicked] = useState(false)
-  const [docsClicked, setDocsClicked] = useState(false)
   const [originalFiles, setOriginalFiles] = useState<{ [key: string]: File }>({})
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -48,6 +46,7 @@ const Upload = () => {
   const [dialogTitle, setDialogTitle] = useState<string | undefined>(undefined)
   const [dialogMessage, setDialogMessage] = useState<string | undefined>(undefined)
   const [dialogActionText, setDialogActionText] = useState<string | undefined>(undefined)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Simple persistent debug logger that appends messages into localStorage
   const appendDebug = (key: string, ...parts: any[]) => {
@@ -226,17 +225,20 @@ const Upload = () => {
     )
     
     if (validFiles.length === 0) {
-      alert('请选择支持的文件格式')
+      setErrorMessage('请选择支持的文件格式')
+      setTimeout(() => setErrorMessage(null), 3000)
       return
     }
     
     if (uploadMode === 'single' && validFiles.length > 1) {
-      alert('单文件模式只能选择一个文件')
+      setErrorMessage('单文件模式只能选择一个文件')
+      setTimeout(() => setErrorMessage(null), 3000)
       return
     }
     
     if (uploadMode === 'batch' && validFiles.length > 10) {
-      alert('批量上传最多支持10个文件')
+      setErrorMessage('批量上传最多支持10个文件')
+      setTimeout(() => setErrorMessage(null), 3000)
       return
     }
     
@@ -315,7 +317,8 @@ const Upload = () => {
 
   const handleUpload = async () => {
     if (files.length === 0) {
-      alert('请先选择文件')
+      setErrorMessage('请先选择文件')
+      setTimeout(() => setErrorMessage(null), 3000)
       return
     }
 
@@ -326,7 +329,8 @@ const Upload = () => {
     const filesToUpload: File[] = files.map(f => originalFiles[f.id]).filter(Boolean)
 
     if (filesToUpload.length === 0) {
-      alert('未找到需要上传的文件')
+      setErrorMessage('未找到需要上传的文件')
+      setTimeout(() => setErrorMessage(null), 3000)
       setIsAnalyzing(false)
       return
     }
@@ -386,6 +390,51 @@ const Upload = () => {
 
   return (
     <div className="upload-page">
+      {/* Error Toast */}
+      {errorMessage && (
+        <div 
+          className="error-toast"
+          style={{
+            position: 'fixed',
+            top: '1rem',
+            right: '1rem',
+            backgroundColor: '#FEE2E2',
+            color: '#991B1B',
+            padding: '1rem 1.5rem',
+            border: '3px solid #000000',
+            borderRadius: '0.75rem',
+            boxShadow: '4px 4px 0px 0px #000000',
+            fontSize: '1rem',
+            fontWeight: '600',
+            zIndex: 9999,
+            maxWidth: '320px',
+            animation: 'slideInRight 0.3s ease-out'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{errorMessage}</span>
+            <button
+              onClick={() => setErrorMessage(null)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                padding: '0',
+                marginLeft: 'auto'
+              }}
+            >
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <NeobrutalDialog
         open={dialogOpen}
         title={dialogTitle}
@@ -414,12 +463,23 @@ const Upload = () => {
             opacity: 0.5;
           }
         }
+        
+        @keyframes slideInRight {
+          0% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
       `}</style>
       <div className="upload-container">
-        {/* Improved Header with Breadcrumb */}
+        {/* Neobrutalism Header */}
         <div className="upload-header">
-          {/* Breadcrumb removed */}
-          <p style={{ fontSize: '1.5rem', fontWeight: 500, margin: 0 }}>上传图片和文档以提取题目内容</p>
+          <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0, color: '#000000', lineHeight: '1.2' }}>上传图片</h1>
+          <p style={{ fontSize: '1rem', fontWeight: 500, margin: '0.75rem 0 0 0', color: '#6B7280', lineHeight: '1.6' }}>拖拽或选择图片文件以提取题目内容</p>
         </div>
 
         {/* Mode Selection */}
@@ -428,6 +488,12 @@ const Upload = () => {
             <button
               onClick={() => setUploadMode('single')}
               className={`mode-btn ${uploadMode === 'single' ? 'active' : ''}`}
+              style={uploadMode !== 'single' ? {
+                backgroundColor: '#F3F4F6',
+                color: '#6B7280',
+                border: '2px solid #000000',
+                boxShadow: 'none'
+              } : {}}
             >
               单文件上传
             </button>
@@ -436,7 +502,12 @@ const Upload = () => {
               className={`mode-btn ${uploadMode === 'batch' ? 'active' : ''} disabled`}
               disabled={true}
               title="批量上传功能即将推出"
-              style={{ opacity: 0.5, cursor: 'not-allowed' }}
+              style={uploadMode !== 'batch' ? {
+                backgroundColor: '#F3F4F6',
+                color: '#6B7280',
+                border: '2px solid #000000',
+                boxShadow: 'none'
+              } : {}}
             >
               批量上传（即将推出）
             </button>
@@ -515,18 +586,31 @@ const Upload = () => {
             /* File Queue Section */
             <div className="file-queue" style={{ marginTop: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.125rem' }}>文件队列 ({files.length})</h3>
+                <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 900 }}>文件队列 ({files.length})</h3>
                 <button
                   onClick={() => {
                     setFiles([])
                     setOriginalFiles({})
                   }}
-                  className="neo-btn"
-                  style={{ 
+                  className="clear-all-btn"
+                  style={{
+                    backgroundColor: '#EF4444',
+                    color: '#000000',
+                    fontWeight: 'bold',
+                    border: '2px solid #000000',
+                    borderRadius: '0.5rem',
                     padding: '0.5rem 1rem',
-                    fontSize: '0.875rem',
-                    backgroundColor: '#FF6B6B',
-                    color: 'white'
+                    boxShadow: '2px 2px 0px 0px #000',
+                    transition: 'all 0.15s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.transform = 'translate(1px, 1px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '2px 2px 0px 0px #000'
+                    e.currentTarget.style.transform = 'translate(0px, 0px)'
                   }}
                 >
                   清空全部
@@ -547,9 +631,31 @@ const Upload = () => {
                     <p>{file.name}</p>
                     <span>{formatFileSize(file.size)}</span>
                   </div>
-                  <div className="remove-btn" onClick={() => removeFileFromList(index)}>
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <div 
+                    className="remove-btn" 
+                    onClick={() => removeFileFromList(index)}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#FFFFFF',
+                      border: '2px solid #000000',
+                      borderRadius: '8px',
+                      color: '#000000',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#FEE2E2'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#FFFFFF'
+                    }}
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                 </div>
@@ -562,40 +668,36 @@ const Upload = () => {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
+              style={{ backgroundColor: dragActive ? '#FACC15' : '#FEFCE8' }}
             >
               <div className="drop-zone-icon">
-                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <p style={{ fontSize: '1.125rem' }}>拖拽文件到此处，或点击选择文件</p>
-              <div>
+              <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#000000', marginBottom: '1.5rem' }}>拖拽文件到此处，或点击选择文件</p>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                 <button
                   className="select-btn"
-                  data-clicked={imageClicked}
                   onClick={() => {
-                    setImageClicked(true)
                     imageInputRef.current?.click()
                   }}
                 >
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}} strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   选择图片
                 </button>
                 <button
-                  className="select-btn"
-                  data-clicked={docsClicked}
+                  className="select-btn disabled"
                   onClick={() => {
-                    setDocsClicked(true)
                     docsInputRef.current?.click()
                   }}
                   disabled={true}
                   title="文档上传功能即将推出"
-                  style={{ opacity: 0.5, cursor: 'not-allowed' }}
                 >
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '0.5rem'}} strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   选择文档（即将推出）
                 </button>
@@ -621,22 +723,11 @@ const Upload = () => {
         </div>
 
         {/* Action Bar */}
-        <div className="action-bar" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="action-bar" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}>
           {isAnalyzing ? (
             <button 
               onClick={handleCancelUpload}
-              className="neo-btn"
-              style={{
-                width: '100%',
-                maxWidth: '400px',
-                fontSize: '1.25rem',
-                padding: '1.25rem',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                border: '2px solid #000',
-                boxShadow: '4px 4px 0 #000',
-                alignSelf: 'center'
-              }}
+              className="neo-btn neo-btn-cancel"
             >
               取消任务
             </button>
@@ -644,14 +735,7 @@ const Upload = () => {
             <button 
               onClick={handleUpload}
               disabled={isAnalyzing || files.length === 0}
-              className="neo-btn neo-btn-orange" 
-              style={{ 
-                width: '100%', 
-                maxWidth: '400px', 
-                fontSize: '1rem', 
-                padding: '1.25rem',
-                alignSelf: 'center'
-              }}
+              className="neo-btn neo-btn-primary" 
             >
               开始识别题目
             </button>
