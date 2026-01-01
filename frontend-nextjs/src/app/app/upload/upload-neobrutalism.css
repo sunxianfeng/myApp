@@ -165,15 +165,13 @@
 .mode-btn.disabled {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
-  background-color: var(--neo-white) !important;
+  background-color: #F5F5F5 !important;
   color: #9CA3AF !important;
-  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3) !important;
 }
 
 .mode-btn.disabled:hover {
   transform: none !important;
-  background-color: var(--neo-white) !important;
-  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3) !important;
+  background-color: #F5F5F5 !important;
 }
 
 /* ========================================
@@ -579,9 +577,10 @@ button.neo-btn-primary:disabled {
   padding: 3rem 2rem !important;
   width: 100% !important;
   margin: 0 auto !important;
-  background: #F9FAFB !important;
-  border: 2px dashed #D1D5DB !important;
+  background: var(--neo-white) !important;
+  border: 3px solid var(--neo-black) !important;
   border-radius: 1rem !important;
+  box-shadow: var(--neo-shadow-medium) !important;
   position: relative !important;
 }
 
@@ -595,6 +594,8 @@ button.neo-btn-primary:disabled {
   text-align: center !important;
 }
 
+.ocr-processing-container .ocr-processing-visual,
+.upload-container .ocr-processing-visual,
 .ocr-processing-visual {
   position: relative !important;
   width: 180px !important;
@@ -602,12 +603,13 @@ button.neo-btn-primary:disabled {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin: 0 auto 2rem auto !important;
-  background-color: var(--neo-yellow) !important;
+  margin: 0 auto 1rem auto !important;
+  background-color: #A3E635 !important;
   border-radius: 1rem !important;
-  border: none !important;
-  box-shadow: var(--neo-shadow) !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
   padding: 20px !important;
+  overflow: hidden !important;
 }
 
 .ocr-processing-svg {
@@ -621,22 +623,31 @@ button.neo-btn-primary:disabled {
   z-index: 10 !important;
 }
 
+.ocr-processing-container .ocr-scan-line,
+.upload-container .ocr-scan-line,
 .ocr-scan-line {
   position: absolute !important;
   left: 50% !important;
-  width: 60% !important;
-  height: 3px !important;
-  background: linear-gradient(90deg, 
-    rgba(99, 102, 241, 0) 0%, 
-    rgba(99, 102, 241, 0.8) 50%, 
-    rgba(99, 102, 241, 0) 100%) !important;
-  border-radius: 999px !important;
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4), 
-              0 0 6px rgba(99, 102, 241, 0.6) !important;
+  width: 70% !important;
+  height: 12px !important;
+  background: linear-gradient(to bottom, 
+    transparent 0%,
+    transparent 20%,
+    rgba(163, 230, 53, 0.3) 40%, 
+    rgba(163, 230, 53, 0.9) 60%,
+    #A3E635 80%,
+    rgba(163, 230, 53, 0.6) 90%,
+    transparent 100%) !important;
+  border-radius: 4px !important;
+  box-shadow: 
+    0 0 8px rgba(163, 230, 53, 0.8),
+    0 0 16px rgba(163, 230, 53, 0.6),
+    0 0 24px rgba(163, 230, 53, 0.4),
+    0 0 32px rgba(163, 230, 53, 0.2) !important;
   z-index: 25 !important;
   pointer-events: none !important;
   transform: translateX(-50%) !important;
-  animation: scanMove 2s ease-in-out infinite !important;
+  animation: scanMove 2.5s ease-in-out infinite !important;
 }
 
 @keyframes scanMove {
@@ -654,15 +665,18 @@ button.neo-btn-primary:disabled {
   }
 }
 
+.ocr-processing-container .ocr-scan-corner,
+.upload-container .ocr-scan-corner,
 .ocr-scan-corner {
   position: absolute !important;
   width: 20px !important;
   height: 20px !important;
-  border: 3px solid #6366F1 !important;
+  border: 3px solid #A3E635 !important;
   box-sizing: border-box !important;
   background: transparent !important;
   z-index: 20 !important;
   border-radius: 2px !important;
+  box-shadow: 0 0 4px rgba(163, 230, 53, 0.5) !important;
 }
 
 .corner-top-left {
@@ -739,7 +753,9 @@ button.neo-btn-primary:disabled {
   .ocr-scan-line {
     animation: none !important;
     top: 50% !important;
-    opacity: 0.5 !important;
+    opacity: 0.8 !important;
+    background: #A3E635 !important;
+    box-shadow: 0 0 8px rgba(163, 230, 53, 0.6) !important;
   }
 }
 
@@ -1139,32 +1155,45 @@ button.neo-btn-primary:disabled {
   margin-top: 1.5rem;
 }
 
+.ocr-processing-container .ocr-processing-label.primary,
+.upload-container .ocr-processing-label.primary,
 .ocr-processing-label.primary {
-  color: var(--neo-black) !important;
-  font-size: 1.125rem !important;
-  font-weight: 600 !important;
-  margin: 0 !important;
+  color: #000000 !important;
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 2rem 0 0.5rem 0 !important;
+  line-height: 1.2 !important;
 }
 
+.ocr-processing-container .ocr-processing-label.secondary,
+.upload-container .ocr-processing-label.secondary,
 .ocr-processing-label.secondary {
-  color: var(--neo-orange) !important;
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  margin: 0 0 0.5rem 0 !important;
+  color: #000000 !important;
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 2rem 0 0.5rem 0 !important;
+  line-height: 1.2 !important;
 }
 
+.ocr-processing-container .ocr-processing-label.success,
+.upload-container .ocr-processing-label.success,
 .ocr-processing-label.success {
   color: #10B981 !important;
-  font-size: 1.125rem !important;
-  font-weight: 600 !important;
-  margin: 0 0 0.5rem 0 !important;
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 2rem 0 0.5rem 0 !important;
+  line-height: 1.2 !important;
 }
 
+.ocr-processing-container .ocr-processing-sublabel,
+.upload-container .ocr-processing-sublabel,
 .ocr-processing-sublabel {
   color: #6B7280 !important;
-  font-size: 0.875rem !important;
-  font-weight: 400 !important;
-  margin: 0 !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  margin: 0 0 0.5rem 0 !important;
+  letter-spacing: 0.025em !important;
+  line-height: 1.5 !important;
 }
 
 .ocr-waiting-message {
@@ -1318,4 +1347,56 @@ button.neo-btn-primary:disabled {
   transform: translate(2px, 2px) !important;
   box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
   background-color: #DC2626 !important;
+}
+
+/* ========================================
+   CRITICAL: HIGHEST PRIORITY COLOR OVERRIDES
+   Force lime green laser scanning animation
+   ======================================== */
+
+/* Ensure visual container has overflow hidden for laser effect */
+div[class*="ocr"] .ocr-processing-visual,
+.ocr-processing-container .ocr-processing-visual {
+  overflow: hidden !important;
+  background-color: #A3E635 !important;
+  border: 3px solid #000000 !important;
+}
+
+/* Enhanced Lime Green Laser Scanner */
+div[class*="ocr"] .ocr-scan-line,
+.ocr-processing-visual .ocr-scan-line,
+*[class*="scan-line"] {
+  width: 70% !important;
+  height: 12px !important;
+  background: linear-gradient(to bottom, 
+    transparent 0%,
+    transparent 20%,
+    rgba(163, 230, 53, 0.3) 40%, 
+    rgba(163, 230, 53, 0.9) 60%,
+    #A3E635 80%,
+    rgba(163, 230, 53, 0.6) 90%,
+    transparent 100%) !important;
+  box-shadow: 
+    0 0 8px rgba(163, 230, 53, 0.8),
+    0 0 16px rgba(163, 230, 53, 0.6),
+    0 0 24px rgba(163, 230, 53, 0.4),
+    0 0 32px rgba(163, 230, 53, 0.2) !important;
+  border-radius: 4px !important;
+  animation: scanMove 2.5s ease-in-out infinite !important;
+}
+
+/* Enhanced scan corners with glow */
+div[class*="ocr"] .ocr-scan-corner,
+.ocr-processing-visual .ocr-scan-corner,
+*[class*="scan-corner"] {
+  border-color: #A3E635 !important;
+  box-shadow: 0 0 4px rgba(163, 230, 53, 0.5) !important;
+}
+
+/* Ensure processing labels are always black, never orange */
+div[class*="ocr"] .ocr-processing-label,
+.ocr-processing-container .ocr-processing-label,
+*[class*="processing-label"] {
+  color: #000000 !important;
+  font-weight: 900 !important;
 }

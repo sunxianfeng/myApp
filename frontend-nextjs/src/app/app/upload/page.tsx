@@ -451,7 +451,7 @@ const Upload = () => {
       <style jsx>{`
         @keyframes scanMove {
           0% {
-            top: 30%;
+            top: 15%;
             opacity: 0.5;
           }
           50% {
@@ -459,7 +459,7 @@ const Upload = () => {
             opacity: 1;
           }
           100% {
-            top: 70%;
+            top: 85%;
             opacity: 0.5;
           }
         }
@@ -473,6 +473,46 @@ const Upload = () => {
             transform: translateX(0);
             opacity: 1;
           }
+        }
+        
+        /* Enhanced Lime Green Laser Scanner */
+        .ocr-processing-visual {
+          overflow: hidden !important;
+        }
+        
+        .ocr-scan-line {
+          position: absolute !important;
+          left: 50% !important;
+          width: 70% !important;
+          height: 12px !important;
+          transform: translateX(-50%) !important;
+          z-index: 25 !important;
+          pointer-events: none !important;
+          animation: scanMove 2.5s ease-in-out infinite !important;
+          
+          /* Enhanced Lime Green Laser Effect */
+          background: linear-gradient(to bottom, 
+            transparent 0%,
+            transparent 20%,
+            rgba(163, 230, 53, 0.3) 40%, 
+            rgba(163, 230, 53, 0.9) 60%,
+            #A3E635 80%,
+            rgba(163, 230, 53, 0.6) 90%,
+            transparent 100%) !important;
+          
+          /* Strong Green Glow */
+          box-shadow: 
+            0 0 8px rgba(163, 230, 53, 0.8),
+            0 0 16px rgba(163, 230, 53, 0.6),
+            0 0 24px rgba(163, 230, 53, 0.4),
+            0 0 32px rgba(163, 230, 53, 0.2) !important;
+          
+          border-radius: 4px !important;
+        }
+        
+        .ocr-scan-corner {
+          border-color: #A3E635 !important;
+          box-shadow: 0 0 4px rgba(163, 230, 53, 0.5) !important;
         }
       `}</style>
       <div className="upload-container">
@@ -529,8 +569,8 @@ const Upload = () => {
                   >
                     <defs>
                       <linearGradient id="scanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="rgba(99, 102, 241, 0.15)" />
-                        <stop offset="100%" stopColor="rgba(99, 102, 241, 0.45)" />
+                        <stop offset="0%" stopColor="rgba(163, 230, 53, 0.15)" />
+                        <stop offset="100%" stopColor="rgba(163, 230, 53, 0.45)" />
                       </linearGradient>
                     </defs>
                     {/* Card background */}
@@ -542,14 +582,14 @@ const Upload = () => {
                     <rect x="50" y="95" width="70" height="8" rx="4" fill="#6B7280" opacity="0.35" />
                     
                     {/* OCR detection indicator (arrow/pointer) */}
-                    <path d="M65 120 L85 120 L75 135 Z" fill="rgba(14, 165, 233, 0.35)" />
+                    <path d="M65 120 L85 120 L75 135 Z" fill="rgba(163, 230, 53, 0.6)" />
                     
                     {/* Question marks or detected elements */}
-                    <rect x="50" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.35)" />
-                    <rect x="90" y="135" width="30" height="6" rx="3" fill="rgba(99, 102, 241, 0.25)" />
+                    <rect x="50" y="135" width="30" height="6" rx="3" fill="rgba(163, 230, 53, 0.5)" />
+                    <rect x="90" y="135" width="30" height="6" rx="3" fill="rgba(163, 230, 53, 0.3)" />
                     
                     {/* Scanning overlay gradient */}
-                    <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.35" />
+                    <rect x="30" y="30" width="120" height="120" rx="18" fill="url(#scanGradient)" opacity="0.25" />
                   </svg>
                   <div className="ocr-scan-line" />
                   <span className="ocr-scan-corner corner-top-left" />
@@ -562,7 +602,7 @@ const Upload = () => {
                 <div className="ocr-processing-messages">
                   {!showWaitingMessage && (
                     <p className="ocr-processing-label primary">
-                      图片解析中...
+                      正在识别题目中...
                     </p>
                   )}
 
@@ -574,7 +614,7 @@ const Upload = () => {
                       <p className="ocr-processing-sublabel">
                         正在分析图片内容，预计需要 5-30 秒
                       </p>
-                      <p className="ocr-processing-sublabel" style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#666' }}>
+                      <p className="ocr-processing-sublabel">
                         您可以离开此页面，任务将继续在后台运行
                       </p>
                     </div>
