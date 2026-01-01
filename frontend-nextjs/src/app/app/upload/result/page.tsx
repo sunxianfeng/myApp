@@ -26,7 +26,13 @@ const questionTypeMap: Record<string, string> = {
   essay: '解答题',
 }
 
-const UploadResultPage = () => {
+// Accept Next.js 16 page props to prevent hydration mismatch
+interface PageProps {
+  params?: Promise<any> | any
+  searchParams?: Promise<any> | any
+}
+
+const UploadResultPage = (props: PageProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const router = useRouter()
   const resultFromStore = useSelector((state: RootState) => state.upload.latestResult)
@@ -47,12 +53,19 @@ const UploadResultPage = () => {
   }
 
   // Use `undefined` as "initializing" state to avoid briefly rendering the empty-state.
-  // IMPORTANT: initialize from store synchronously to prevent hydration mismatch
-  // (server HTML is generated without store data; client may have it on first render).
-  const [result, setResult] = useState<any>(() => resultFromStore ?? undefined)
+  // IMPORTANT: Always initialize with undefined to match server-side rendering
+  // and prevent hydration mismatch. Load data in useEffect after mount.
+  const [result, setResult] = useState<any>(undefined)
 
   // Poll for background task completion
   useEffect(() => {
+    // First, check if we have a result from Redux store
+    if (resultFromStore && !hasRealResultRef.current) {
+      hasRealResultRef.current = true
+      setResult(normalizeResultShape(resultFromStore))
+      return
+    }
+
     // Check if there's a background task running (or completed) - prefer authoritative task store
     const taskStatus = loadFromStorage(STORAGE_KEYS.TASK_STATUS)
     const taskId = loadFromStorage(STORAGE_KEYS.TASK_ID)
@@ -226,7 +239,7 @@ const UploadResultPage = () => {
 
       return () => window.clearInterval(intervalId)
     }
-  }, [])
+  }, [resultFromStore]) // Add resultFromStore as dependency
 
   useEffect(() => {
     // Prefer store result when available
@@ -265,14 +278,6 @@ const UploadResultPage = () => {
 
     // If we still have a taskId and it's not expired, don't show the empty-state yet.
     // This prevents flicker/false-negative when STORAGE_KEYS are briefly missing.
-    if (!isTaskExpired && typeof taskId === 'string' && taskId) {
-      return
-    }
-
-    // If result is not in store (e.g. direct navigation), check if we should use mock data.
-    // This logic runs only on the client, avoiding hydration mismatch.
-    // IMPORTANT: mock data should be opt-in only.
-    // Defaulting to mock would hide real backend results when storage isn't ready.
     const mockParam = new URLSearchParams(window.location.search).get('mock')
     const enableMock = mockParam === '1' || mockParam === 'true'
     if (enableMock) {
@@ -536,16 +541,18 @@ const UploadResultPage = () => {
 
   return (
     <div className="result-page" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Compact Header */}
-      <header className="result-hero" style={{ padding: '1.5rem 2rem', marginBottom: '1rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: '900' }}>确认题目</h1>
-          <p style={{ fontWeight: '500', color: '#4B5563', lineHeight: '1.6' }}>
-            找到 <span style={{ fontWeight: '900', color: '#000000' }}>{totalQuestions}</span> 道题目，点击"快速修改"可编辑内容
-          </p>
-        </div>
-        <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>重新上传</button>
-      </header>
+      {/* File Folder Header Card */}
+      <div className="result-hero-container">
+        <header className="result-hero-header">
+          <div>
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: '900' }}>确认题目</h1>
+            <p style={{ fontWeight: '500', color: '#1F2937', lineHeight: '1.6' }}>
+              找到 <span style={{ fontWeight: '900', color: '#000000' }}>{totalQuestions}</span> 道题目，点击"快速修改"可编辑内容
+            </p>
+          </div>
+          <button className="neo-btn neo-btn-white" onClick={handleReturnToUpload}>重新上传</button>
+        </header>
+      </div>
 
       {/* Questions List */}
       <main className="questions-grid">
@@ -593,7 +600,6 @@ const UploadResultPage = () => {
                 <textarea
                   value={item.draftContent}
                   onChange={e => updateDraftContent(item.id, e.target.value)}
-                  className="edit-textarea"
                   placeholder="输入题目内容（支持LaTeX公式，如 $x^2$）"
                 />
                 {item.draftOptions.length > 0 && (
@@ -604,12 +610,11 @@ const UploadResultPage = () => {
                         <textarea
                           value={opt.content}
                           onChange={e => updateDraftOption(item.id, idx, e.target.value)}
-                          className="edit-option-textarea"
                           placeholder={`输入选项 ${opt.label} 的内容（支持换行和LaTeX公式）`}
                           rows={2}
                         />
                         {/* Live math preview for option */}
-                        <div className="option-preview" style={{ marginTop: '6px', background: '#fffbe6', border: '1px dashed #eab308', padding: '6px 10px', borderRadius: '6px' }}>
+                        <div className="option-preview">
                           <MathRenderer content={opt.content} />
                         </div>
                       </div>
@@ -672,7 +677,7 @@ const UploadResultPage = () => {
         backgroundColor: '#A3E635',
         border: '4px solid black',
         borderRadius: '1rem', /* rounded-2xl - Soft but Sturdy */
-        boxShadow: '8px 8px 0px black',
+        boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)',
         padding: '1.25rem 2rem',
         display: 'flex',
         justifyContent: 'space-between',
