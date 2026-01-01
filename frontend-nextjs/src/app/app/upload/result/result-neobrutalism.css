@@ -140,8 +140,18 @@
 }
 
 .result-page .question-card:hover { transform: translate(-2px, -2px) !important; box-shadow: 10px 10px 0px 0px rgba(0,0,0,1) !important; }
-.result-page .question-card.selected { border: 3px solid #A3E635 !important; box-shadow: 8px 8px 0px 0px rgba(163,230,53,0.5) !important; background-color: #F7FEE7 !important; }
-.result-page .question-card.selected:hover { transform: translate(-2px, -2px) !important; box-shadow: 10px 10px 0px 0px rgba(163,230,53,0.6) !important; }
+
+/* Selected State - Maintain Black Borders & Shadows (Neobrutalism Core) */
+.result-page .question-card.selected { 
+  border: 3px solid #000000 !important; /* MUST stay black */
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important; /* MUST stay hard black shadow */
+  background-color: #ECFCCB !important; /* Pale lime green bg (lime-50) */
+}
+.result-page .question-card.selected:hover { 
+  transform: translate(-2px, -2px) !important; 
+  box-shadow: 10px 10px 0px 0px rgba(0,0,0,1) !important; /* Keep hard black shadow on hover */
+}
+
 .result-page .question-card-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 1.25rem !important; gap: 1rem !important; }
 .result-page .question-info { display: flex !important; align-items: center !important; gap: 0.75rem !important; flex-wrap: wrap !important; }
 .result-page .question-number { font-size: 1.1rem !important; font-weight: 900 !important; margin: 0 !important; color: #000000 !important; }
@@ -167,8 +177,26 @@
 }
 
 .result-page .checkbox-btn:hover,
-.result-page .expand-btn:hover { background-color: #f9fafb !important; transform: translate(2px, 2px) !important; box-shadow: 1px 1px 0px 0px rgba(0,0,0,1) !important; }
-.result-page .checkbox-btn.checked { background-color: #A3E635 !important; color: #000000 !important; border-color: #000000 !important; }
+.result-page .expand-btn:hover { 
+  background-color: #f9fafb !important; 
+  transform: translate(2px, 2px) !important; 
+  box-shadow: 1px 1px 0px 0px rgba(0,0,0,1) !important; 
+}
+
+/* Checkbox Selected State - Vivid Lime Green with Black Structure */
+.result-page .checkbox-btn.checked { 
+  background-color: #A3E635 !important; /* Vivid lime green */
+  color: #000000 !important; 
+  border: 2px solid #000000 !important; /* MUST stay black */
+  box-shadow: 3px 3px 0px 0px rgba(0,0,0,1) !important; /* Keep hard shadow */
+}
+
+.result-page .checkbox-btn.checked:hover {
+  background-color: #84CC16 !important; /* Slightly darker on hover */
+  transform: translate(2px, 2px) !important; 
+  box-shadow: 1px 1px 0px 0px rgba(0,0,0,1) !important;
+}
+
 .result-page .empty-box { width: 20px !important; height: 20px !important; border: 3px solid #000000 !important; border-radius: 0.25rem !important; }
 
 /* Question Content */
