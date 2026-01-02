@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux'
+import './collections-neobrutalism.css'
 import type { AppDispatch } from '@/lib/store'
 import {
   fetchCollections,
@@ -31,6 +32,7 @@ export default function CollectionsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState<string>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   
   // 新建错题本表单
@@ -98,46 +100,56 @@ export default function CollectionsPage() {
     router.push(`/app/collections/${collectionId}`)
   }
   
-  const filteredCollections = selectedCategory
+  const filteredCollectionsBase = selectedCategory
     ? collections.filter(c => c.category_id === selectedCategory)
     : collections
 
+  const filteredCollections = searchQuery.trim()
+    ? filteredCollectionsBase.filter((c) => {
+        const q = searchQuery.trim().toLowerCase()
+        return (
+          (c.title || '').toLowerCase().includes(q) ||
+          (c.description || '').toLowerCase().includes(q)
+        )
+      })
+    : filteredCollectionsBase
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="collections-page-container min-h-screen bg-transparent p-8">
       <div className="max-w-7xl mx-auto">
         {/* 头部 */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">我的错题本</h1>
-          <p className="text-gray-600">系统化管理和复习你的错题</p>
+          <h1 className="text-3xl font-black text-black mb-2">我的错题本</h1>
+          <p className="text-gray-600 font-medium">系统化管理和复习你的错题</p>
         </div>
         
-        {/* 统计卡片 */}
+        {/* 统计卡片 - Neobrutalism Style */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">错题本总数</div>
-              <div className="text-3xl font-bold text-blue-600">{stats.total_collections}</div>
+            <div className="neo-stats-card p-6">
+              <div className="text-sm text-gray-600 mb-1 font-bold uppercase tracking-wide">错题本总数</div>
+              <div className="text-3xl font-black text-blue-600">{stats.total_collections}</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">题目总数</div>
-              <div className="text-3xl font-bold text-green-600">{stats.total_questions}</div>
+            <div className="neo-stats-card p-6">
+              <div className="text-sm text-gray-600 mb-1 font-bold uppercase tracking-wide">题目总数</div>
+              <div className="text-3xl font-black text-green-600">{stats.total_questions}</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">练习次数</div>
-              <div className="text-3xl font-bold text-purple-600">{stats.total_practiced}</div>
+            <div className="neo-stats-card p-6">
+              <div className="text-sm text-gray-600 mb-1 font-bold uppercase tracking-wide">练习次数</div>
+              <div className="text-3xl font-black text-purple-600">{stats.total_practiced}</div>
             </div>
           </div>
         )}
         
-        {/* 工具栏 */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        {/* 工具栏 - Floating Dock Style */}
+        <div className="neo-toolbar-container p-4 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              {/* 分类筛选 */}
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* 分类筛选 - Pill Shape */}
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="neo-search-select"
               >
                 <option value="">全部分类</option>
                 {categories.map(cat => (
@@ -146,18 +158,26 @@ export default function CollectionsPage() {
                   </option>
                 ))}
               </select>
-              
-              {/* 视图切换 */}
-              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+
+              {/* 搜索 - Pill Shape */}
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜索错题本…"
+                className="neo-search-input"
+              />
+
+              {/* 视图切换 - Rounded Pill Container */}
+              <div className="neo-view-toggle-container">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-4 py-2 ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}
+                  className={`neo-view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
                 >
                   卡片
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}
+                  className={`neo-view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
                 >
                   列表
                 </button>
@@ -167,13 +187,13 @@ export default function CollectionsPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowCategoryModal(true)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                className="neo-action-btn secondary"
               >
                 新建分类
               </button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                className="neo-action-btn primary"
               >
                 + 新建错题本
               </button>
@@ -181,97 +201,136 @@ export default function CollectionsPage() {
           </div>
         </div>
         
-        {/* 错误提示 */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
-        
-        {/* 加载状态 */}
-        {isLoading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-gray-600">加载中...</p>
-          </div>
-        )}
-        
-        {/* 错题本列表 - 卡片视图 */}
+        {/* 错题本列表 - 卡片视图 - Collection Folders */}
         {!isLoading && viewMode === 'grid' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCollections.map(collection => (
-              <div
-                key={collection.id}
-                onClick={() => handleCollectionClick(collection.id)}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition cursor-pointer overflow-hidden"
-              >
-                {/* 封面 */}
-                <div className="h-32 bg-gradient-to-br from-blue-400 to-purple-500 relative">
-                  {collection.is_favorite && (
-                    <div className="absolute top-3 right-3 text-yellow-400 text-2xl">⭐</div>
-                  )}
-                </div>
+            {filteredCollections.map(collection => {
+              const category = categories.find(c => c.id === collection.category_id)
+              
+              // Determine folder color based on category
+              let headerColor = 'from-blue-400 to-purple-500'
+              let bodyColor = 'bg-blue-50'
+              
+              if (category?.color) {
+                // Map hex colors to Tailwind classes for better consistency
+                const colorMap: {[key: string]: {header: string, body: string}} = {
+                  '#3B82F6': { header: 'from-blue-400 to-blue-600', body: 'bg-blue-50' },
+                  '#8B5CF6': { header: 'from-purple-400 to-purple-600', body: 'bg-purple-50' },
+                  '#10B981': { header: 'from-green-400 to-green-600', body: 'bg-green-50' },
+                  '#F59E0B': { header: 'from-yellow-400 to-yellow-600', body: 'bg-yellow-50' },
+                  '#EF4444': { header: 'from-red-400 to-red-600', body: 'bg-red-50' },
+                  '#06B6D4': { header: 'from-cyan-400 to-cyan-600', body: 'bg-cyan-50' },
+                }
                 
-                {/* 内容 */}
-                <div className="p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
-                    {collection.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {collection.description || '暂无描述'}
-                  </p>
+                const colorScheme = colorMap[category.color] || { header: 'from-gray-400 to-gray-600', body: 'bg-gray-50' }
+                headerColor = colorScheme.header
+                bodyColor = colorScheme.body
+              }
+              
+              return (
+                <div
+                  key={collection.id}
+                  onClick={() => handleCollectionClick(collection.id)}
+                  className={`neo-collection-card ${bodyColor} cursor-pointer flex flex-col h-full`}
+                >
+                  {/* 封面 Header - Fixed Height */}
+                  <div className={`h-32 bg-gradient-to-br ${headerColor} relative flex-shrink-0`}>
+                    {collection.is_favorite && (
+                      <div className="absolute top-3 right-3 text-yellow-400 text-3xl drop-shadow-lg">⭐</div>
+                    )}
+                    {category && (
+                      <div className="absolute top-3 left-3 text-white text-2xl drop-shadow-lg">
+                        {category.icon}
+                      </div>
+                    )}
+                  </div>
                   
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{collection.question_count} 道题目</span>
-                    <span>{new Date(collection.updated_at).toLocaleDateString()}</span>
+                  {/* 内容 - Flex Grow to Push Footer Down */}
+                  <div className="p-5 flex-grow flex flex-col">
+                    <h3 className="text-lg font-black text-black mb-2 line-clamp-1 flex-shrink-0">
+                      {collection.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow font-medium">
+                      {collection.description || '暂无描述'}
+                    </p>
+                  </div>
+                  
+                  {/* Footer Section - Fixed Height for Alignment */}
+                  <div className="card-footer h-12 flex items-center justify-between px-5 flex-shrink-0">
+                    <span className="text-sm font-bold text-black">{collection.question_count} 道题目</span>
+                    <span className="text-xs font-medium text-gray-500">{new Date(collection.updated_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             
             {filteredCollections.length === 0 && (
-              <div className="col-span-full text-center py-12 text-gray-500">
-                暂无错题本，点击右上角创建一个吧
+              <div className="col-span-full">
+                <div className="neo-empty-state p-12 text-center">
+                  <div className="text-6xl mb-4">📂</div>
+                  <h3 className="text-2xl font-black text-black mb-4">暂无错题本</h3>
+                  <p className="text-gray-600 mb-6 font-medium">点击右上角创建一个吧</p>
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="neo-action-btn primary"
+                  >
+                    + 新建错题本
+                  </button>
+                </div>
               </div>
             )}
           </div>
         )}
         
-        {/* 错题本列表 - 列表视图 */}
+        {/* 错题本列表 - 列表视图 - Neobrutalism Table */}
         {!isLoading && viewMode === 'list' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="neo-table-container">
+            <table className="min-w-full">
+              <thead className="bg-black text-white">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">名称</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分类</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">题目数</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">更新时间</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                  <th className="px-6 py-4 text-left text-sm font-black uppercase tracking-wide">名称</th>
+                  <th className="px-6 py-4 text-left text-sm font-black uppercase tracking-wide">分类</th>
+                  <th className="px-6 py-4 text-left text-sm font-black uppercase tracking-wide">题目数</th>
+                  <th className="px-6 py-4 text-left text-sm font-black uppercase tracking-wide">更新时间</th>
+                  <th className="px-6 py-4 text-left text-sm font-black uppercase tracking-wide">操作</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCollections.map(collection => {
+              <tbody className="bg-white">
+                {filteredCollections.map((collection, index) => {
                   const category = categories.find(c => c.id === collection.category_id)
                   return (
-                    <tr key={collection.id} className="hover:bg-gray-50 cursor-pointer">
+                    <tr 
+                      key={collection.id} 
+                      className={`hover:bg-lime-50 cursor-pointer transition-colors duration-150 ${
+                        index !== filteredCollections.length - 1 ? 'border-b-[2px] border-black' : ''
+                      }`}
+                    >
                       <td 
                         className="px-6 py-4"
                         onClick={() => handleCollectionClick(collection.id)}
                       >
-                        <div className="flex items-center">
-                          {collection.is_favorite && <span className="mr-2">⭐</span>}
-                          <span className="font-medium text-gray-900">{collection.title}</span>
+                        <div className="flex items-center gap-3">
+                          {collection.is_favorite && <span className="text-yellow-400 text-xl">⭐</span>}
+                          <span className="font-bold text-black text-lg">{collection.title}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {category ? `${category.icon} ${category.name}` : '-'}
+                      <td className="px-6 py-4">
+                        {category ? (
+                          <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 border-[2px] border-black rounded-full font-bold text-sm">
+                            <span className="text-lg">{category.icon}</span>
+                            {category.name}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 font-medium">-</span>
+                        )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {collection.question_count}
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-black">{collection.question_count}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {new Date(collection.updated_at).toLocaleDateString()}
+                      <td className="px-6 py-4">
+                        <span className="font-medium text-gray-600">
+                          {new Date(collection.updated_at).toLocaleDateString()}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <button 
@@ -279,7 +338,7 @@ export default function CollectionsPage() {
                             e.stopPropagation()
                             handleCollectionClick(collection.id)
                           }}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="neo-table-btn"
                         >
                           查看详情
                         </button>
@@ -290,8 +349,17 @@ export default function CollectionsPage() {
                 
                 {filteredCollections.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                      暂无错题本
+                    <td colSpan={5} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="text-6xl">📂</div>
+                        <p className="text-gray-600 font-bold text-lg">暂无错题本</p>
+                        <button
+                          onClick={() => setShowCreateModal(true)}
+                          className="neo-action-btn primary"
+                        >
+                          + 新建错题本
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -301,47 +369,47 @@ export default function CollectionsPage() {
         )}
       </div>
       
-      {/* 新建错题本弹窗 */}
+      {/* 新建错题本弹窗 - Neobrutalism Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">新建错题本</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="neo-modal">
+            <h2 className="text-2xl font-black mb-6 text-black">新建错题本</h2>
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-black mb-2 uppercase tracking-wide">
                   错题本名称 *
                 </label>
                 <input
                   type="text"
                   value={newCollection.title}
                   onChange={(e) => setNewCollection({...newCollection, title: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border-[2px] border-black rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-black font-medium bg-white"
                   placeholder="例如：数学错题集"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-black mb-2 uppercase tracking-wide">
                   描述
                 </label>
                 <textarea
                   value={newCollection.description}
                   onChange={(e) => setNewCollection({...newCollection, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border-[2px] border-black rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-black font-medium bg-white resize-none"
                   rows={3}
                   placeholder="简单描述一下这个错题本..."
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-black mb-2 uppercase tracking-wide">
                   分类
                 </label>
                 <select
                   value={newCollection.category_id}
                   onChange={(e) => setNewCollection({...newCollection, category_id: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border-[2px] border-black rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-black font-medium bg-white"
                 >
                   <option value="">不选择分类</option>
                   {categories.map(cat => (
@@ -358,23 +426,23 @@ export default function CollectionsPage() {
                     type="checkbox"
                     checked={newCollection.is_favorite}
                     onChange={(e) => setNewCollection({...newCollection, is_favorite: e.target.checked})}
-                    className="mr-2"
+                    className="mr-3 w-5 h-5 text-lime-400 border-[2px] border-black rounded focus:ring-lime-400"
                   />
-                  <span className="text-sm text-gray-700">标记为收藏</span>
+                  <span className="text-sm font-bold text-black">⭐ 标记为收藏</span>
                 </label>
               </div>
             </div>
             
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-4 mt-8">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                className="neo-action-btn secondary"
               >
                 取消
               </button>
               <button
                 onClick={handleCreateCollection}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                className="neo-action-btn primary"
               >
                 创建
               </button>
@@ -383,34 +451,34 @@ export default function CollectionsPage() {
         </div>
       )}
       
-      {/* 新建分类弹窗 */}
+      {/* 新建分类弹窗 - Neobrutalism Modal */}
       {showCategoryModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">新建分类</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="neo-modal">
+            <h2 className="text-2xl font-black mb-6 text-black">新建分类</h2>
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-black mb-2 uppercase tracking-wide">
                   分类名称 *
                 </label>
                 <input
                   type="text"
                   value={newCategory.name}
                   onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border-[2px] border-black rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-black font-medium bg-white"
                   placeholder="例如：数学"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-black mb-2 uppercase tracking-wide">
                   分类类型
                 </label>
                 <select
                   value={newCategory.category_type}
                   onChange={(e) => setNewCategory({...newCategory, category_type: e.target.value as any})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border-[2px] border-black rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-black font-medium bg-white"
                 >
                   <option value="subject">科目</option>
                   <option value="grade">年级</option>
@@ -420,42 +488,48 @@ export default function CollectionsPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-black mb-2 uppercase tracking-wide">
                   图标（Emoji）
                 </label>
                 <input
                   type="text"
                   value={newCategory.icon}
                   onChange={(e) => setNewCategory({...newCategory, icon: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border-[2px] border-black rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-black font-medium bg-white text-2xl text-center"
                   placeholder="📁"
                   maxLength={2}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-black mb-2 uppercase tracking-wide">
                   颜色
                 </label>
-                <input
-                  type="color"
-                  value={newCategory.color}
-                  onChange={(e) => setNewCategory({...newCategory, color: e.target.value})}
-                  className="w-20 h-10 border border-gray-300 rounded-lg cursor-pointer"
-                />
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={newCategory.color}
+                    onChange={(e) => setNewCategory({...newCategory, color: e.target.value})}
+                    className="w-16 h-12 border-[3px] border-black rounded-xl cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  />
+                  <div 
+                    className="flex-1 h-12 rounded-xl border-[2px] border-black"
+                    style={{ backgroundColor: newCategory.color }}
+                  />
+                </div>
               </div>
             </div>
             
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-4 mt-8">
               <button
                 onClick={() => setShowCategoryModal(false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                className="neo-action-btn secondary"
               >
                 取消
               </button>
               <button
                 onClick={handleCreateCategory}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                className="neo-action-btn primary"
               >
                 创建
               </button>

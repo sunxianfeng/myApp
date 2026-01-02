@@ -1,0 +1,226 @@
+/* Collections Page - Neobrutalism Override Styles */
+/* High specificity CSS to force neobrutalism design */
+
+.collections-page-container {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* Statistics Cards - Force Black Borders */
+.neo-stats-card {
+  border: 3px solid black !important;
+  border-radius: 1rem !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  background-color: white !important;
+  transition: all 0.2s ease !important;
+}
+
+.neo-stats-card:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 10px 10px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* Toolbar Container */
+.neo-toolbar-container {
+  border: 3px solid black !important;
+  border-radius: 1rem !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  background-color: white !important;
+}
+
+.neo-toolbar-container:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 7px 7px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* Search Select - Pill Shape */
+.neo-search-select {
+  border-radius: 9999px !important;
+  border: 3px solid black !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  background-color: white !important;
+  font-weight: 700 !important;
+  padding: 0.75rem 1.5rem !important;
+}
+
+.neo-search-select:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* Search Input - Pill Shape */
+.neo-search-input {
+  border-radius: 9999px !important;
+  border: 3px solid black !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  background-color: white !important;
+  font-weight: 700 !important;
+  padding: 0.75rem 1.25rem !important;
+  min-width: 220px !important;
+  outline: none !important;
+}
+
+.neo-search-input::placeholder {
+  color: #6b7280 !important;
+  font-weight: 600 !important;
+}
+
+.neo-search-input:focus {
+  box-shadow: 0 0 0 4px rgba(163, 230, 53, 0.35), 6px 6px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.neo-search-input:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+}
+
+@media (max-width: 640px) {
+  .neo-search-input {
+    min-width: 160px !important;
+    width: 100% !important;
+  }
+}
+
+/* View Toggle Container */
+.neo-view-toggle-container {
+  border-radius: 9999px !important;
+  border: 3px solid black !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  overflow: hidden !important;
+  display: flex !important;
+}
+
+/* View Toggle Buttons */
+.neo-view-toggle-btn {
+  border-radius: 0 !important;
+  border: none !important;
+  color: black !important;
+  font-weight: 700 !important;
+  padding: 0.75rem 1.5rem !important;
+}
+
+.neo-view-toggle-btn.active {
+  background-color: #A3E635 !important;
+}
+
+.neo-view-toggle-btn:not(.active) {
+  background-color: white !important;
+}
+
+.neo-view-toggle-btn:not(.active):hover {
+  background-color: #f9fafb !important;
+}
+
+.neo-view-toggle-btn:nth-child(2) {
+  border-left: 2px solid black !important;
+}
+
+/* Action Buttons */
+.neo-action-btn {
+  border-radius: 9999px !important;
+  border: 2px solid black !important;
+  box-shadow: 3px 3px 0px 0px rgba(0,0,0,1) !important;
+  font-weight: 700 !important;
+  padding: 0.75rem 1.5rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.neo-action-btn.primary {
+  background-color: #A3E635 !important;
+  color: black !important;
+  font-weight: 900 !important;
+}
+
+.neo-action-btn.secondary {
+  background-color: white !important;
+  color: black !important;
+}
+
+.neo-action-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.neo-action-btn.primary:hover {
+  background-color: #84CC16 !important;
+  transform: scale(1.05) !important;
+}
+
+/* Collection Cards */
+.neo-collection-card {
+  border: 3px solid black !important;
+  border-radius: 1rem !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  transition: all 0.2s ease !important;
+  overflow: hidden !important;
+}
+
+.neo-collection-card:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 10px 10px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.neo-collection-card .card-footer {
+  border-top: 3px solid black !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* List Table */
+.neo-table-container {
+  border: 3px solid black !important;
+  border-radius: 1rem !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  overflow: hidden !important;
+  background-color: white !important;
+}
+
+.neo-table-btn {
+  border-radius: 9999px !important;
+  border: 2px solid black !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+  background-color: #A3E635 !important;
+  color: black !important;
+  font-weight: 700 !important;
+  padding: 0.5rem 1rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.neo-table-btn:hover {
+  background-color: #84CC16 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 1px 1px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* Modal Containers */
+.neo-modal {
+  border: 4px solid black !important;
+  border-radius: 1rem !important;
+  box-shadow: 12px 12px 0px 0px rgba(0,0,0,1) !important;
+  background-color: white !important;
+  padding: 2rem !important;
+  width: 100% !important;
+  max-width: 28rem !important;
+  margin: 0 1rem !important;
+}
+
+/* Empty State */
+.neo-empty-state {
+  border: 3px solid black !important;
+  border-radius: 1rem !important;
+  box-shadow: 8px 8px 0px 0px rgba(0,0,0,1) !important;
+  background-color: white !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .neo-stats-card,
+  .neo-collection-card,
+  .neo-empty-state {
+    box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  }
+  
+  .neo-toolbar-container {
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  }
+}
