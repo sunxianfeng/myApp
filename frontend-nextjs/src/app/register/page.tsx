@@ -9,10 +9,11 @@ import Link from 'next/link'
 import { AppLogo } from '@/components/common/Icons'
 
 export default function RegisterPage() {
-  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -24,19 +25,20 @@ export default function RegisterPage() {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('两次输入的密码不一致')
       return
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long')
+      setError('密码长度至少为8个字符')
       return
     }
 
     setLoading(true)
 
     try {
-      await dispatch(registerUser({ name, email, password })).unwrap()
+      // 使用邮箱作为name
+      await dispatch(registerUser({ name: email, email, password })).unwrap()
       router.push('/login')
     } catch (err: any) {
       setError(err.message || '注册失败，请重试')
@@ -66,6 +68,29 @@ export default function RegisterPage() {
           justify-content: center;
           position: relative;
           flex-direction: column;
+          overflow: hidden;
+        }
+
+        /* Giant outline typography background - on body level */
+        body::before {
+          content: 'NOTEBOOK';
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-12deg);
+          font-size: clamp(8rem, 20vw, 24rem);
+          font-weight: 900;
+          color: transparent;
+          -webkit-text-stroke: 3px rgba(0, 0, 0, 0.12);
+          text-stroke: 3px rgba(0, 0, 0, 0.12);
+          text-transform: uppercase;
+          letter-spacing: -0.02em;
+          opacity: 1;
+          line-height: 0.9;
+          white-space: nowrap;
+          pointer-events: none;
+          user-select: none;
+          z-index: 0;
         }
 
         .main-container {
@@ -78,6 +103,8 @@ export default function RegisterPage() {
           border-radius: 12px;
           box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
           overflow: hidden;
+          position: relative;
+          z-index: 10;
           animation: formEntry 600ms ease-out;
           margin: 0 auto;
         }
@@ -92,6 +119,41 @@ export default function RegisterPage() {
           align-items: center;
           text-align: center;
           border-right: 3px solid #000000;
+        }
+
+        .cat-silhouette {
+          width: 120px;
+          height: 120px;
+          margin-bottom: 2rem;
+          animation: logoEntry 800ms ease-out;
+        }
+
+        .cat-silhouette svg {
+          width: 100%;
+          height: 100%;
+          filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 0.3));
+        }
+
+        .app-logo-inline {
+          width: 230px;
+          height: 230px;
+          background-color: #FFD100;
+          border: 3px solid #000000;
+          border-radius: 8px;
+          box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 2rem;
+          position: relative;
+        }
+
+        .app-logo-inline::before {
+          content: '';
+          position: absolute;
+          inset: 4px;
+          border: 1px dashed rgba(0, 0, 0, 0.2);
+          border-radius: 4px;
         }
 
         .logo-container {
@@ -151,6 +213,37 @@ export default function RegisterPage() {
         .form-group {
           margin-bottom: 1.75rem;
           position: relative;
+        }
+
+        .password-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .password-toggle {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #6B7280;
+          transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+          color: #000000;
+        }
+
+        .form-group input[type="password"],
+        .form-group input[type="text"].password-field {
+          padding-right: 48px;
         }
 
         .form-group label {
@@ -243,15 +336,23 @@ export default function RegisterPage() {
         }
 
         .login-link a {
-          color: #3B82F6;
-          text-decoration: none;
+          color: #000000;
+          text-decoration: underline;
+          text-decoration-thickness: 2px;
+          text-underline-offset: 3px;
           font-weight: 700;
-          transition: all 0.15s ease;
+          transition: all 0.2s ease;
           margin-left: 0.25rem;
+          padding: 4px 8px;
+          border-radius: 4px;
+          display: inline-block;
         }
 
         .login-link a:hover {
-          text-decoration: underline;
+          background-color: #bef264;
+          text-decoration: none;
+          box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+          transform: translate(-1px, -1px);
         }
 
         .error-message {
@@ -365,38 +466,34 @@ export default function RegisterPage() {
 
       <div className="main-container">
         <div className="left-panel">
-          <div className="logo-container">
-            <AppLogo className="w-16 h-16 logo" />
+          <div className="cat-silhouette">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M100 180C144.183 180 180 144.183 180 100C180 55.8172 144.183 20 100 20C55.8172 20 20 55.8172 20 100C20 144.183 55.8172 180 100 180Z" fill="#000000" fillOpacity="0.9"/>
+              <ellipse cx="75" cy="90" rx="8" ry="12" fill="#FFD100"/>
+              <ellipse cx="125" cy="90" rx="8" ry="12" fill="#FFD100"/>
+              <path d="M85 65L70 50M115 65L130 50" stroke="#000000" strokeWidth="6" strokeLinecap="round"/>
+              <path d="M80 120C80 120 90 130 100 130C110 130 120 120 120 120" stroke="#FFD100" strokeWidth="3" strokeLinecap="round"/>
+              <circle cx="60" cy="100" r="3" fill="#000000"/>
+              <circle cx="140" cy="100" r="3" fill="#000000"/>
+            </svg>
           </div>
-          <h1>Join Our Community</h1>
-          <p>Create an account to unlock exclusive features and content.</p>
+          <h1>加入我们的社区</h1>
+          <p>创建账户以解锁独家功能和内容</p>
         </div>
 
         <div className="right-panel">
-          <h2>Create an account</h2>
-          <p className="subtitle">Start your journey with us today</p>
+          <h2>创建账户</h2>
+          <p className="subtitle">立即开始您的学习之旅</p>
 
           {(error || reduxError) && <div className="error-message">{error || reduxError}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="name">Full name</label>
-              <input
-                type="text"
-                id="name"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">Email address</label>
+              <label htmlFor="email">电子邮箱</label>
               <input
                 type="email"
                 id="email"
-                placeholder="name@company.com"
+                placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -404,36 +501,78 @@ export default function RegisterPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                placeholder="••••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <small className="password-hint">At least 8 characters</small>
+              <label htmlFor="password">密码</label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  className="password-field"
+                  placeholder="••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="切换密码可见性"
+                >
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <small className="password-hint">至少8个字符</small>
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirm-password">Confirm Password</label>
-              <input
-                type="password"
-                id="confirm-password"
-                placeholder="••••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
+              <label htmlFor="confirm-password">确认密码</label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirm-password"
+                  className="password-field"
+                  placeholder="••••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label="切换密码可见性"
+                >
+                  {showConfirmPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading || isLoading}>
-              {loading || isLoading ? 'Creating account...' : 'Create account'}
+              {loading || isLoading ? '创建中...' : '创建账户'}
             </button>
 
             <div className="login-link">
-              Already have an account?<Link href="/login">Sign in</Link>
+              已有账户？<Link href="/login">立即登录</Link>
             </div>
           </form>
         </div>
