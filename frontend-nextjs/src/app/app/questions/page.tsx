@@ -1018,30 +1018,74 @@ const QuestionsContent = () => {
           <div className="relative" style={{ flex: 1, maxWidth: '400px' }}>
             <IconSearch 
               size={16} 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" 
-              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+              style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#6B7280', pointerEvents: 'none' }}
             />
             <input
               type="text"
               placeholder="搜索..."
-              className="w-full pl-10 pr-4 py-2 border-2 border-black rounded-lg bg-white outline-none focus:border-gray-600 transition-colors"
               style={{
                 width: '100%',
-                paddingLeft: '2.5rem',
+                paddingLeft: '2.75rem',
                 paddingRight: '1rem',
                 paddingTop: '0.5rem',
                 paddingBottom: '0.5rem',
-                border: '2px solid black',
-                borderRadius: '8px',
+                border: '3px solid black',
+                borderRadius: '9999px',
                 backgroundColor: 'white',
                 outline: 'none',
                 fontSize: '0.875rem',
+                fontWeight: '700',
+                boxShadow: '4px 4px 0px 0px #000',
               }}
             />
           </div>
           
-          {/* View Mode Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Right Side Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Create Button with Dropdown - Moved from FAB */}
+            {mounted && (
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button 
+                    className="neo-create-btn"
+                    aria-label="Create new"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '0.5rem 1.25rem',
+                      borderRadius: '9999px',
+                      border: '3px solid black',
+                      backgroundColor: '#A3E635',
+                      color: 'black',
+                      fontWeight: '700',
+                      fontSize: '0.875rem',
+                      boxShadow: '4px 4px 0px 0px #000',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <IconPlus size={18} />
+                    <span>新建</span>
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content className="card-dropdown-content" sideOffset={8} align="end">
+                    <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('question')}>
+                      <IconEdit />
+                      <span>New Question</span>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('collection')}>
+                      <IconFolder size={14} />
+                      <span>New Collection</span>
+                    </DropdownMenu.Item>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            )}
+
+            {/* View Mode Toggle */}
             <div
               className="neo-toggle-group"
               style={{
@@ -1074,7 +1118,7 @@ const QuestionsContent = () => {
                 List
               </button>
             </div>
-           </div>
+          </div>
         </div>
       </header>
 
@@ -1309,27 +1353,7 @@ const QuestionsContent = () => {
         </div>
       )}
 
-      {mounted && (
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button className="fab" aria-label="Create new">
-              <IconPlus size={24} />
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content className="card-dropdown-content" sideOffset={15} align="end">
-              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('question')}>
-                <IconEdit />
-                <span>New Question</span>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('collection')}>
-                <IconFolder size={14} />
-                <span>New Collection</span>
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-      )}
+      {/* NOTE: Floating Action Button (FAB) has been moved to the top toolbar */}
 
       {/* Question Detail Modal */}
       <QuestionDetailModal

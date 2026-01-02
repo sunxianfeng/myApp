@@ -402,7 +402,20 @@
   transform: translateY(1px) translateX(1px);
 }
 
-/* FAB (Floating Action Button) */
+/* Create Button (Toolbar - Moved from FAB) */
+.neo-create-btn:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px #000 !important;
+}
+
+.neo-create-btn:active {
+  transform: translate(3px, 3px) !important;
+  box-shadow: 1px 1px 0px 0px #000 !important;
+}
+
+/* FAB (Floating Action Button) - DEPRECATED: Moved to toolbar */
+/* Keeping for reference, but no longer used */
+/*
 .fab {
   position: fixed;
   bottom: 30px;
@@ -425,6 +438,7 @@
   transform: translateY(-2px) translateX(-2px);
   box-shadow: 6px 6px 0 0 var(--neo-shadow-color);
 }
+*/
 
 /* Empty State */
 .questions-empty {
@@ -530,14 +544,14 @@
 }
 
 .neo-toggle-btn.active {
-  background: #FFD028; /* Brand Yellow active */
+  background: #A3E635; /* Lime green active - unified with create button */
   color: #000;
   box-shadow: inset 2px 2px 0 0 rgba(0,0,0,0.12);
   transform: translateY(1px) translateX(1px);
 }
 
 .neo-toggle-btn:focus {
-  outline: 3px solid rgba(255,208,40,0.15);
+  outline: 3px solid rgba(163,230,53,0.25);
   outline-offset: 2px;
 }
 
