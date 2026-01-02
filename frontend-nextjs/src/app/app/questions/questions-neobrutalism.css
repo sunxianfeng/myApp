@@ -27,7 +27,7 @@
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   color: var(--text-color) !important;
   padding: 2rem !important;
-  min-height: 100vh !important;
+  min-height: auto !important;
 }
 
 .unified-header {

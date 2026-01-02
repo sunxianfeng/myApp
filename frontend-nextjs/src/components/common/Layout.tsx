@@ -96,7 +96,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col text-sm w-screen min-h-screen bg-yellow-300 overflow-hidden">
+    <div className="flex flex-col text-sm w-full h-screen bg-yellow-300 overflow-hidden">
       {/* Full-Width Top Header - Seamless Butter Yellow Background */}
       <header className="w-full h-16 bg-yellow-300 border-0 shadow-none flex items-center justify-between px-8 flex-shrink-0" suppressHydrationWarning>
         {/* Left: Logo - Text-based with small icon square */}
@@ -132,9 +132,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content Area: Sidebar + Main Content with Floating Islands */}
-      <div className="flex flex-1 overflow-hidden gap-8 p-6 bg-transparent">
+      <div className="flex flex-1 gap-8 p-6 bg-transparent overflow-hidden">
         {/* Sidebar - Floating White Island with Enhanced Shadow for Pale Background */}
-        <aside className="sidebar w-64 flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-hidden" style={{ border: 'none' }}>
+        <aside className="sidebar w-64 flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-y-auto" style={{ border: 'none' }}>
           {/* Navigation - All items in one list */}
           <nav className="flex flex-col space-y-2 p-4">
             {/* 首页 */}
@@ -176,7 +176,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </aside>
 
         {/* Main Content Area - Right Side - Floating White Island with Enhanced Shadow for Pale Background */}
-        <main className="flex-1 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-auto p-8" style={{ border: 'none' }}>
+        <main className="flex-1 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] p-8 overflow-y-auto" style={{ border: 'none' }}>
           {children}
         </main>
       </div>
