@@ -96,9 +96,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col text-sm w-full h-screen bg-yellow-300 overflow-hidden">
+    <div className="flex flex-col text-sm w-full h-screen overflow-hidden" style={{
+      background: '#FDE047',
+      backgroundImage: 'radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
+      backgroundSize: '20px 20px'
+    }}>
       {/* Full-Width Top Header - Seamless Butter Yellow Background */}
-      <header className="w-full h-16 bg-yellow-300 border-0 shadow-none flex items-center justify-between px-8 flex-shrink-0" suppressHydrationWarning>
+      <header className="w-full h-16 border-0 shadow-none flex items-center justify-between px-8 flex-shrink-0" style={{
+        background: '#FDE047',
+        backgroundImage: 'radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
+        backgroundSize: '20px 20px'
+      }} suppressHydrationWarning>
         {/* Left: Logo - Text-based with small icon square */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-black rounded-md flex items-center justify-center flex-shrink-0">

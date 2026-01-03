@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
 @import '../styles/dashboard-theme.css';
 @tailwind base;
 @tailwind components;
@@ -568,7 +569,7 @@ body {
   box-shadow:0 2px 6px rgba(240,128,128,0.07) !important;
   transition: background .18s ease, transform .18s ease, box-shadow .18s ease, color .18s ease !important;
 }
-.correction-btn:hover { background: linear-gradient(135deg, rgba(250,160,160,0.98) 0%, rgba(240,128,128,0.98) 55%, rgba(225,100,100,0.98) 100%) !important; box-shadow:0 10px 18px rgba(240,128,128,0.22) !important; transform:translateY(-2px) !important; color: #fff !important; }
+.correction-btn:hover { background: linear-gradient(135deg, rgba(250,160,160,0.98) 0%, rgba(240,128,128,0.98) 55%, rgba(225,100,100,0.98) 100%) !important; box-shadow: 0 6px 14px rgba(240,128,128,0.3) !important; transform:translateY(-2px) !important; color: #fff !important; }
 .correction-btn:active { transform:translateY(0) !important; }
 
 .question-card-header {
@@ -1270,23 +1271,24 @@ body {
   font-weight: 700 !important;
   border-radius: 9999px !important; /* Keep pill shape */
   border: none !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important; /* Strong shadow */
-  transform: none !important;
+  /* Neo-Brutalism Hard Shadow + Offset */
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 0.8) !important;
+  transform: translate(-2px, -2px) !important; /* Offset for brutalism effect */
 }
 
 .sidebar-item.active:hover {
   background: #1F2937 !important; /* Slightly lighter black on hover */
-  transform: translateX(4px) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  transform: translate(-2px, -2px) translateX(4px) !important; /* Keep offset + slide */
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.9) !important; /* Stronger shadow on hover */
 }
 
-/* Sidebar icon styling - softer approach */
+/* Sidebar icon styling - bolder stroke */
 .sidebar-item svg {
   width: 1.25rem !important;
   height: 1.25rem !important;
   margin-right: 0.75rem !important;
   transition: transform 0.2s ease !important;
-  stroke-width: 2 !important; /* Softer stroke */
+  stroke-width: 3 !important; /* Thicker stroke for brutalism */
 }
 
 .sidebar-item:hover svg {
@@ -1296,7 +1298,7 @@ body {
 .sidebar-item.active svg {
   filter: none !important;
   stroke: #FFFFFF !important; /* White stroke for active state */
-  stroke-width: 2.5 !important; /* Slightly bolder when active */
+  stroke-width: 3.5 !important; /* Even bolder when active */
 }
 
 /* 移除软性分割线 */
@@ -1447,9 +1449,18 @@ input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus {
-  border-color: #7986cb !important;
+  border-color: #000000 !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.search-input-no-blue:focus,
+.search-input-no-blue:focus-visible,
+.search-input-no-blue:active {
+  border-color: #000000 !important;
+  outline: none !important;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 /* ============== ANIMATIONS ============== */
@@ -1666,4 +1677,23 @@ textarea:focus {
   background: linear-gradient(140deg, rgba(250,170,170,0.98) 0%, rgba(240,128,128,0.98) 55%, rgba(225,105,105,0.96) 100%) !important;
   box-shadow: 0 6px 14px rgba(240,128,128,0.3) !important;
   color: #fff !important;
+}
+
+/* ============== FORCE OVERRIDE FOR NEO-BRUTALISM SEARCH INPUT ============== */
+/* This is to absolutely ensure no default blue focus ring appears */
+.search-input-no-blue:focus,
+.search-input-no-blue:focus-visible,
+.search-input-no-blue:active {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-color: transparent !important;
+  border-color: #000000 !important;
+  /* Removed box-shadow !important to allow inline styles to work */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-color: transparent !important;
 }

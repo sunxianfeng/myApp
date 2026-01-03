@@ -34,7 +34,7 @@ export default function LoginPage() {
   }
 
   return (
-    <>
+    <div suppressHydrationWarning>
       <style jsx global>{`
         html,
         body {
@@ -538,6 +538,6 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
-    </>
+    </div>
   )
 }
