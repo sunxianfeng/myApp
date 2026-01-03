@@ -4,9 +4,16 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 // Search Icon Component
-function SearchIcon({ className }: { className?: string }) {
+function SearchIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <svg 
+      className={className} 
+      style={style}
+      fill="none" 
+      viewBox="0 0 24 24" 
+      stroke="currentColor" 
+      strokeWidth="2.5"
+    >
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.35-4.35" strokeLinecap="round" />
     </svg>
@@ -16,6 +23,10 @@ function SearchIcon({ className }: { className?: string }) {
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
+  const [isHoveringInput, setIsHoveringInput] = useState(false)
+  const [isFocusedInput, setIsFocusedInput] = useState(false)
+  const [isHoveringButton, setIsHoveringButton] = useState(false)
+  const [hoveredTip, setHoveredTip] = useState<string | null>(null)
   const router = useRouter()
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -34,206 +45,185 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-4">
-      <style jsx global>{`
-        /* Google-style Search with Rounded Neo-Brutalism */
-        
-        .home-search-container {
-          width: 100%;
-          max-width: 580px;
-          margin: 0 auto;
-        }
-
-        .home-logo {
-          font-size: 4rem;
-          font-weight: 900;
-          text-align: center;
-          margin-bottom: 2.5rem;
-          letter-spacing: -0.03em;
-          color: #000000;
-        }
-
-        .home-logo-accent {
-          color: #FBBF24;
-        }
-
-        /* Rounded Neo-Brutalism Search Box */
-        .search-box-wrapper {
-          position: relative;
-          width: 100%;
-        }
-
-        .search-box {
-          width: 100%;
-          height: 56px;
-          padding: 0 60px 0 52px;
-          font-size: 1rem;
-          font-weight: 500;
-          color: #000000;
-          background: #FFFFFF;
-          border: 3px solid #000000;
-          border-radius: 28px;
-          box-shadow: 4px 4px 0px 0px #000000;
-          outline: none;
-          transition: all 0.15s ease;
-        }
-
-        .search-box::placeholder {
-          color: #9CA3AF;
-          font-weight: 400;
-        }
-
-        .search-box:hover {
-          box-shadow: 5px 5px 0px 0px #000000;
-          transform: translate(-1px, -1px);
-        }
-
-        .search-box:focus {
-          box-shadow: 6px 6px 0px 0px #000000;
-          transform: translate(-2px, -2px);
-          border-color: #FBBF24;
-        }
-
-        .search-icon-left {
-          position: absolute;
-          left: 18px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 22px;
-          height: 22px;
-          color: #9CA3AF;
-          pointer-events: none;
-          transition: color 0.15s ease;
-        }
-
-        .search-box:focus ~ .search-icon-left,
-        .search-box-wrapper:hover .search-icon-left {
-          color: #FBBF24;
-        }
-
-        .search-btn-submit {
-          position: absolute;
-          right: 6px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 44px;
-          height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #FBBF24;
-          border: 2px solid #000000;
-          border-radius: 50%;
-          box-shadow: 2px 2px 0px 0px #000000;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-
-        .search-btn-submit:hover:not(:disabled) {
-          background: #F59E0B;
-          box-shadow: 3px 3px 0px 0px #000000;
-          transform: translateY(-50%) translate(-1px, -1px);
-        }
-
-        .search-btn-submit:active:not(:disabled) {
-          box-shadow: 1px 1px 0px 0px #000000;
-          transform: translateY(-50%) translate(0, 0);
-        }
-
-        .search-btn-submit:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .search-btn-submit svg {
-          width: 20px;
-          height: 20px;
-          color: #000000;
-        }
-
-        /* Tips */
-        .search-tips {
-          margin-top: 1.5rem;
-          text-align: center;
-          font-size: 0.875rem;
-          color: #6B7280;
-        }
-
-        .search-tips span {
-          display: inline-block;
-          padding: 0.25rem 0.75rem;
-          margin: 0.25rem;
-          background: #FEF3C7;
-          border: 2px solid #000000;
-          border-radius: 9999px;
-          font-weight: 600;
-          color: #000000;
-          cursor: pointer;
-          transition: all 0.15s ease;
-          box-shadow: 2px 2px 0px 0px #000000;
-        }
-
-        .search-tips span:hover {
-          background: #FBBF24;
-          transform: translate(-1px, -1px);
-          box-shadow: 3px 3px 0px 0px #000000;
-        }
-
-        /* Loading spinner */
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        .loading-spinner {
-          animation: spin 1s linear infinite;
-        }
-      `}</style>
-
-      {/* Main Search Area - Google Style */}
-      <div className="home-search-container">
-        {/* Logo Title */}
-        <h1 className="home-logo">
-          题<span className="home-logo-accent">宝</span>
+    <div style={{
+      minHeight: 'calc(100vh - 200px)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '0 1rem'
+    }}>
+      {/* Main Search Area - Rounded Neo-Brutalism */}
+      <div style={{
+        width: '100%',
+        maxWidth: '48rem',
+        margin: '0 auto'
+      }}>
+        {/* Logo Title - Comic Book Style */}
+        <h1 style={{
+          fontSize: '6rem',
+          fontWeight: 900,
+          textAlign: 'center',
+          marginBottom: '2.5rem',
+          letterSpacing: '-0.03em',
+          color: '#FBBF24',
+          WebkitTextStroke: '3px black',
+          filter: 'drop-shadow(4px 4px 0px rgba(0,0,0,1))',
+          textTransform: 'uppercase'
+        }}>
+          题宝
         </h1>
 
         {/* Search Form */}
         <form onSubmit={handleSearch}>
-          <div className="search-box-wrapper">
-            <SearchIcon className="search-icon-left" />
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            width: '100%',
+            maxWidth: '48rem',
+            margin: '0 auto'
+          }}>
+            {/* Input Field - Rounded Neo-Brutalism */}
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsFocusedInput(true)}
+              onBlur={() => setIsFocusedInput(false)}
+              onMouseEnter={() => setIsHoveringInput(true)}
+              onMouseLeave={() => setIsHoveringInput(false)}
               placeholder="搜索题目..."
-              className="search-box"
               disabled={isSearching}
+              style={{
+                flex: 1,
+                width: '100%',
+                height: '4rem',
+                padding: '0 1.5rem',
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: '#000000',
+                background: '#FFFFFF',
+                border: isFocusedInput ? '4px solid #000000' : '4px solid #000000',
+                borderRadius: '1rem',
+                boxShadow: isFocusedInput 
+                  ? '6px 6px 0px 0px rgba(0,0,0,1)' 
+                  : isHoveringInput 
+                    ? '5px 5px 0px 0px rgba(0,0,0,1)' 
+                    : '4px 4px 0px 0px rgba(0,0,0,1)',
+                outline: 'none',
+                transition: 'all 0.15s ease',
+                transform: isFocusedInput 
+                  ? 'translate(-2px, -2px)' 
+                  : isHoveringInput 
+                    ? 'translate(-1px, -1px)' 
+                    : 'none'
+              }}
             />
+            
+            {/* Submit Button - Black with White Text */}
             <button
               type="submit"
               disabled={isSearching || !searchQuery.trim()}
-              className="search-btn-submit"
+              onMouseEnter={() => setIsHoveringButton(true)}
+              onMouseLeave={() => setIsHoveringButton(false)}
               aria-label="搜索"
+              style={{
+                flexShrink: 0,
+                width: '4rem',
+                height: '4rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: (isSearching || !searchQuery.trim()) 
+                  ? '#000000' 
+                  : isHoveringButton 
+                    ? '#FDE047' 
+                    : '#000000',
+                color: (isSearching || !searchQuery.trim()) 
+                  ? '#FFFFFF' 
+                  : isHoveringButton 
+                    ? '#000000' 
+                    : '#FFFFFF',
+                border: '2px solid #000000',
+                borderRadius: '1rem',
+                boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)',
+                cursor: (isSearching || !searchQuery.trim()) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.15s ease',
+                transform: isHoveringButton && !isSearching && searchQuery.trim() 
+                  ? 'translate(-1px, -5px)' 
+                  : 'none',
+                opacity: (isSearching || !searchQuery.trim()) ? 0.7 : 1
+              }}
             >
               {isSearching ? (
-                <svg className="loading-spinner" fill="none" viewBox="0 0 24 24">
+                <svg 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  style={{ 
+                    width: '1.5rem', 
+                    height: '1.5rem',
+                    animation: 'spin 1s linear infinite',
+                    stroke: 'currentColor'
+                  }}
+                >
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
                   <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                 </svg>
               ) : (
-                <SearchIcon className="w-5 h-5" />
+                <SearchIcon style={{ width: '1.5rem', height: '1.5rem', color: 'currentColor' }} />
               )}
             </button>
           </div>
         </form>
 
-        {/* Search Tips */}
-        <div className="search-tips">
-          <p style={{ marginBottom: '0.5rem', color: '#9CA3AF' }}>试试搜索：</p>
-          <span onClick={() => setSearchQuery('二次函数')}>二次函数</span>
-          <span onClick={() => setSearchQuery('物理力学')}>物理力学</span>
-          <span onClick={() => setSearchQuery('化学反应')}>化学反应</span>
+        {/* Search Tips - Clean White Buttons */}
+        <div style={{
+          marginTop: '2rem',
+          textAlign: 'center',
+          fontSize: '0.875rem',
+          color: '#000000'
+        }}>
+          <p style={{ marginBottom: '0.75rem', color: '#000000', fontWeight: 600 }}>试试搜索：</p>
+          <div>
+            {['二次函数', '物理力学', '化学反应'].map((tip) => (
+              <span
+                key={tip}
+                onClick={() => setSearchQuery(tip)}
+                onMouseEnter={() => setHoveredTip(tip)}
+                onMouseLeave={() => setHoveredTip(null)}
+                style={{
+                  display: 'inline-block',
+                  padding: '0.5rem 1rem',
+                  margin: '0.25rem',
+                  background: hoveredTip === tip ? '#FEF08A' : '#FFFFFF',
+                  border: '2px solid #000000',
+                  borderRadius: '0.75rem',
+                  fontWeight: 700,
+                  color: '#000000',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: hoveredTip === tip 
+                    ? '4px 4px 0px 0px rgba(0,0,0,1)' 
+                    : '2px 2px 0px 0px rgba(0,0,0,1)',
+                  transform: hoveredTip === tip ? 'translate(-1px, -1px)' : 'none'
+                }}
+              >
+                {tip}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* Keyframes for spinner */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `
+      }} />
     </div>
   )
 }
