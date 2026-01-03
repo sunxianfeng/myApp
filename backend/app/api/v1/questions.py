@@ -136,23 +136,44 @@ async def global_search(
     q: str = Query(..., description="Search query for natural language search"),
     skip: int = 0,
     limit: int = 20,
+    use_vector: bool = Query(False, description="Use vector-based semantic search (experimental)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
     全局语义搜索 - Global natural language search across all questions.
     This is for the homepage search feature (Google-style search).
+    Supports both vector-based semantic search and traditional keyword search.
+    
+    Note: Vector search is currently disabled by default to avoid blocking.
     """
     try:
         question_service = get_question_service(db)
         
-        # For MVP, use simple SQL LIKE search on question content
-        # TODO: Upgrade to vector search later
-        questions = question_service.search_questions(
-            keyword=q.strip(),
-            skip=skip,
-            limit=limit,
-        )
+        # Use vector search if enabled, otherwise fall back to keyword search
+        if use_vector:
+            try:
+                # Use async version to avoid blocking
+                questions = await question_service.semantic_search_questions_async(
+                    query_text=q.strip(),
+                    limit=limit,
+                    created_by=str(current_user.id)
+                )
+                logger.info(f"Vector search returned {len(questions)} results for query: {q}")
+            except Exception as e:
+                logger.warning(f"Vector search failed, falling back to keyword search: {e}")
+                questions = question_service.search_questions(
+                    keyword=q.strip(),
+                    skip=skip,
+                    limit=limit,
+                )
+        else:
+            # Default to keyword search (faster, non-blocking)
+            questions = question_service.search_questions(
+                keyword=q.strip(),
+                skip=skip,
+                limit=limit,
+            )
         
         return QuestionListResponse(
             questions=[QuestionResponse.from_orm(q) for q in questions],

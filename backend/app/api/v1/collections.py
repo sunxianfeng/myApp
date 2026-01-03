@@ -541,52 +541,74 @@ async def get_collections_with_questions(
     """Return all collections for current user, each including its questions.
 
     This is optimized for the "Question Management" unified view.
+    Uses eager loading to avoid N+1 query problem.
     """
     try:
+        # 优化：使用单个查询获取所有数据，避免 N+1 问题
+        from sqlalchemy.orm import joinedload
+        
+        # 获取所有 collections（预加载 questions 关系）
         collections = db.query(Collection).filter(
             Collection.user_id == current_user.id,
             Collection.is_active == True
-        ).order_by(Collection.sort_order, desc(Collection.updated_at)).all()
+        ).options(
+            joinedload(Collection.questions)  # 预加载关联的题目
+        ).order_by(
+            Collection.sort_order, 
+            desc(Collection.updated_at)
+        ).all()
 
+        if not collections:
+            return []
+
+        # 收集所有 collection IDs
+        collection_ids = [c.id for c in collections]
+
+        # 一次性查询所有关联数据（避免循环查询）
+        questions_mapping = {}
+        question_relations = db.query(
+            question_collection.c.collection_id,
+            Question,
+            question_collection.c.added_at,
+            question_collection.c.notes,
+            question_collection.c.mastery_level,
+            question_collection.c.times_practiced,
+            question_collection.c.last_practiced_at
+        ).join(
+            Question,
+            Question.id == question_collection.c.question_id
+        ).filter(
+            question_collection.c.collection_id.in_(collection_ids)
+        ).all()
+
+        # 组织数据结构
+        for col_id, q, added_at, notes, mastery_level, times_practiced, last_practiced_at in question_relations:
+            if col_id not in questions_mapping:
+                questions_mapping[col_id] = []
+            
+            questions_mapping[col_id].append({
+                **q.to_dict(),
+                'added_at': added_at.isoformat() if added_at else None,
+                'notes': notes,
+                'mastery_level': mastery_level,
+                'times_practiced': times_practiced,
+                'last_practiced_at': last_practiced_at.isoformat() if last_practiced_at else None,
+            })
+
+        # 构建响应
         results: List[CollectionWithQuestionsResponse] = []
         for collection in collections:
             result = CollectionWithQuestionsResponse(
                 **{k: v for k, v in collection.__dict__.items() if not k.startswith('_')},
-                questions=[]
+                questions=questions_mapping.get(collection.id, [])
             )
-
-            questions_data = db.query(
-                Question,
-                question_collection.c.added_at,
-                question_collection.c.notes,
-                question_collection.c.mastery_level,
-                question_collection.c.times_practiced,
-                question_collection.c.last_practiced_at
-            ).join(
-                question_collection,
-                Question.id == question_collection.c.question_id
-            ).filter(
-                question_collection.c.collection_id == collection.id
-            ).all()
-
-            result.questions = [
-                {
-                    **q.to_dict(),
-                    'added_at': added_at.isoformat() if added_at else None,
-                    'notes': notes,
-                    'mastery_level': mastery_level,
-                    'times_practiced': times_practiced,
-                    'last_practiced_at': last_practiced_at.isoformat() if last_practiced_at else None,
-                }
-                for q, added_at, notes, mastery_level, times_practiced, last_practiced_at in questions_data
-            ]
-
             results.append(result)
 
+        logger.info(f"Loaded {len(results)} collections with questions for user {current_user.id}")
         return results
 
     except Exception as e:
-        logger.error(f"Failed to get collections with questions: {e}")
+        logger.error(f"Failed to get collections with questions: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get collections with questions: {str(e)}"

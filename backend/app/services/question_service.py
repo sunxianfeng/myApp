@@ -7,17 +7,135 @@ from sqlalchemy import and_, or_
 import logging
 from datetime import datetime
 import uuid
+import hashlib
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from app.models.question import Question, Document
 from app.database import get_db
+from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Conditional import for vector store (requires chromadb which needs Python <=3.12)
+try:
+    from app.services.vector_store import get_vector_store
+    VECTOR_STORE_AVAILABLE = True
+except ImportError:
+    VECTOR_STORE_AVAILABLE = False
+    logger.warning("ChromaDB not available - vector search will be disabled")
+
+logger = logging.getLogger(__name__)
+
+# 全局线程池用于向量存储操作
+_vector_store_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="vector_store")
 
 class QuestionService:
     """题目数据库服务"""
     
     def __init__(self, db: Session):
         self.db = db
+    
+    def _build_question_text(self, question: Question) -> str:
+        """
+        构建用于向量搜索的题目文本
+        
+        Args:
+            question: 题目对象
+            
+        Returns:
+            拼接后的题目文本
+        """
+        text_parts = []
+        
+        # 添加题干
+        if question.content:
+            text_parts.append(question.content)
+        
+        # 如果是选择题，添加选项
+        if question.question_type in ['single_choice', 'multiple_choice', 'choice'] and question.options:
+            for i, option in enumerate(question.options):
+                text_parts.append(f"{chr(65+i)}. {option}")  # A. B. C. D.
+        
+        return " ".join(text_parts)
+    
+    def _generate_embedding(self, text: str) -> List[float]:
+        """
+        使用简单的文本哈希生成伪向量（临时方案）
+        
+        TODO: 升级为真实的 embedding 模型，如 sentence-transformers
+        
+        Args:
+            text: 输入文本
+            
+        Returns:
+            向量表示（384维）
+        """
+        # 简单的哈希方案：将文本的多个哈希值组合成向量
+        # 这只是一个占位实现，实际应该使用 embedding 模型
+        hash_obj = hashlib.sha256(text.encode('utf-8'))
+        hash_bytes = hash_obj.digest()
+        
+        # 生成384维向量（ChromaDB默认维度）
+        vector = []
+        for i in range(384):
+            # 使用不同的种子生成不同的哈希
+            seed_text = f"{text}_{i}"
+            seed_hash = hashlib.md5(seed_text.encode('utf-8')).digest()
+            # 归一化到 [-1, 1]
+            value = (int.from_bytes(seed_hash[:4], 'big') % 1000) / 500.0 - 1.0
+            vector.append(value)
+        
+        return vector
+    
+    def _add_question_to_vector_store(self, question: Question, vector_store) -> bool:
+        """
+        将题目添加到向量存储
+        
+        Args:
+            question: 题目对象
+            vector_store: 向量存储实例
+            
+        Returns:
+            是否添加成功
+        """
+        try:
+            # 构建题目文本
+            question_text = self._build_question_text(question)
+            
+            if not question_text.strip():
+                logger.warning(f"Question {question.id} has no content, skipping vector store")
+                return False
+            
+            # 生成向量
+            vector = self._generate_embedding(question_text)
+            
+            # 准备元数据
+            metadata = {
+                "question_id": str(question.id),
+                "question_type": question.question_type or "unknown",
+                "created_by": str(question.created_by),
+                "created_at": question.created_at.isoformat() if question.created_at else "",
+                "source_document_id": str(question.source_document_id) if question.source_document_id else "",
+                "has_images": question.has_images or False,
+            }
+            
+            # 添加到向量存储
+            success = vector_store.add_vector(
+                id=str(question.id),
+                vector=vector,
+                metadata=metadata,
+                document=question_text
+            )
+            
+            if success:
+                logger.debug(f"Added question {question.id} to vector store")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"Failed to add question {question.id} to vector store: {e}")
+            return False
     
     def create_document(self, title: str, filename: str, file_path: str = None, 
                      file_url: str = None, file_size: int = None, 
@@ -176,6 +294,33 @@ class QuestionService:
                 self.db.refresh(question)
 
             logger.info(f"Created {len(created_questions)} questions for document {document_id}")
+            
+            # 将题目内容存入 ChromaDB（异步执行，避免阻塞）
+            # 注意：向量存储失败不影响主流程
+            if created_questions and settings.VECTOR_STORE_ENABLED and VECTOR_STORE_AVAILABLE:
+                # 在后台线程中执行向量存储操作
+                import threading
+                def add_to_vector_store():
+                    try:
+                        vector_store = get_vector_store(
+                            persist_dir=settings.VECTOR_STORE_DIR,
+                            collection_name="questions"
+                        )
+                        success_count = 0
+                        for question in created_questions:
+                            if self._add_question_to_vector_store(question, vector_store):
+                                success_count += 1
+                        logger.info(f"Added {success_count}/{len(created_questions)} questions to vector store")
+                    except Exception as e:
+                        logger.warning(f"Background vector store operation failed: {e}")
+                
+                # 启动后台线程（daemon=True 确保主程序退出时线程也退出）
+                thread = threading.Thread(target=add_to_vector_store, daemon=True)
+                thread.start()
+                logger.debug("Started background thread for vector store operation")
+            elif created_questions and settings.VECTOR_STORE_ENABLED and not VECTOR_STORE_AVAILABLE:
+                logger.warning("Vector store is enabled but ChromaDB is not available - skipping vector storage")
+            
             return created_questions
 
         except Exception as e:
@@ -344,6 +489,139 @@ class QuestionService:
         except Exception as e:
             logger.error(f"Failed to search questions: {e}")
             raise
+    
+    def semantic_search_questions(self, query_text: str, limit: int = 20, 
+                                 created_by: str = None) -> List[Question]:
+        """
+        使用向量相似度进行语义搜索（同步版本，不推荐在 API 中直接使用）
+        
+        Args:
+            query_text: 搜索文本
+            limit: 返回结果数量
+            created_by: 可选，仅搜索特定用户创建的题目
+            
+        Returns:
+            相关题目列表
+        """
+        if not VECTOR_STORE_AVAILABLE:
+            logger.warning("Vector search not available - falling back to keyword search")
+            return self.search_questions(keyword=query_text, limit=limit)
+        
+        try:
+            # 生成查询向量
+            query_vector = self._generate_embedding(query_text)
+            
+            # 从向量存储中搜索
+            vector_store = get_vector_store(collection_name="questions")
+            results = vector_store.search_vector(query_vector, limit=limit * 2)  # 多获取一些，便于过滤
+            
+            if not results or not results.get('ids') or not results['ids'][0]:
+                logger.info("No results from vector search")
+                return []
+            
+            # 提取题目ID
+            question_ids = results['ids'][0]  # ChromaDB返回的是嵌套列表
+            
+            # 从数据库中获取完整题目信息
+            question_id_uuids = []
+            for qid in question_ids:
+                try:
+                    question_id_uuids.append(uuid.UUID(qid))
+                except (ValueError, AttributeError):
+                    logger.warning(f"Invalid question ID in vector store: {qid}")
+                    continue
+            
+            query = self.db.query(Question).filter(
+                Question.id.in_(question_id_uuids),
+                Question.is_active == True
+            )
+            
+            # 如果指定了创建者，添加过滤
+            if created_by:
+                created_by_uuid = created_by if isinstance(created_by, uuid.UUID) else uuid.UUID(str(created_by))
+                query = query.filter(Question.created_by == created_by_uuid)
+            
+            questions = query.limit(limit).all()
+            
+            # 按照向量搜索的顺序排序
+            question_order = {str(qid): i for i, qid in enumerate(question_ids)}
+            questions.sort(key=lambda q: question_order.get(str(q.id), 999))
+            
+            logger.info(f"Semantic search returned {len(questions)} questions")
+            return questions
+            
+        except Exception as e:
+            logger.error(f"Semantic search failed: {e}")
+            # 降级到普通搜索
+            return self.search_questions(keyword=query_text, limit=limit)
+    
+    async def semantic_search_questions_async(self, query_text: str, limit: int = 20, 
+                                             created_by: str = None) -> List[Question]:
+        """
+        使用向量相似度进行语义搜索（异步版本，推荐在 API 中使用）
+        
+        Args:
+            query_text: 搜索文本
+            limit: 返回结果数量
+            created_by: 可选，仅搜索特定用户创建的题目
+            
+        Returns:
+            相关题目列表
+        """
+        if not VECTOR_STORE_AVAILABLE:
+            logger.warning("Vector search not available - falling back to keyword search")
+            return self.search_questions(keyword=query_text, limit=limit)
+        
+        try:
+            # 在线程池中执行向量搜索（避免阻塞事件循环）
+            loop = asyncio.get_event_loop()
+            
+            def vector_search_task():
+                query_vector = self._generate_embedding(query_text)
+                vector_store = get_vector_store(collection_name="questions")
+                return vector_store.search_vector(query_vector, limit=limit * 2)
+            
+            results = await loop.run_in_executor(_vector_store_executor, vector_search_task)
+            
+            if not results or not results.get('ids') or not results['ids'][0]:
+                logger.info("No results from vector search")
+                return []
+            
+            # 提取题目ID
+            question_ids = results['ids'][0]
+            
+            # 从数据库中获取完整题目信息
+            question_id_uuids = []
+            for qid in question_ids:
+                try:
+                    question_id_uuids.append(uuid.UUID(qid))
+                except (ValueError, AttributeError):
+                    logger.warning(f"Invalid question ID in vector store: {qid}")
+                    continue
+            
+            query = self.db.query(Question).filter(
+                Question.id.in_(question_id_uuids),
+                Question.is_active == True
+            )
+            
+            # 如果指定了创建者，添加过滤
+            if created_by:
+                created_by_uuid = created_by if isinstance(created_by, uuid.UUID) else uuid.UUID(str(created_by))
+                query = query.filter(Question.created_by == created_by_uuid)
+            
+            questions = query.limit(limit).all()
+            
+            # 按照向量搜索的顺序排序
+            question_order = {str(qid): i for i, qid in enumerate(question_ids)}
+            questions.sort(key=lambda q: question_order.get(str(q.id), 999))
+            
+            logger.info(f"Async semantic search returned {len(questions)} questions")
+            return questions
+            
+        except Exception as e:
+            logger.error(f"Async semantic search failed: {e}")
+            # 降级到普通搜索
+            return self.search_questions(keyword=query_text, limit=limit)
 
     def get_all_questions(
         self,
