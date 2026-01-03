@@ -131,6 +131,78 @@ async def upload_and_process(
         )
 
 
+@router.get("/search", response_model=QuestionListResponse)
+async def global_search(
+    q: str = Query(..., description="Search query for natural language search"),
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    全局语义搜索 - Global natural language search across all questions.
+    This is for the homepage search feature (Google-style search).
+    """
+    try:
+        question_service = get_question_service(db)
+        
+        # For MVP, use simple SQL LIKE search on question content
+        # TODO: Upgrade to vector search later
+        questions = question_service.search_questions(
+            keyword=q.strip(),
+            skip=skip,
+            limit=limit,
+        )
+        
+        return QuestionListResponse(
+            questions=[QuestionResponse.from_orm(q) for q in questions],
+            total=len(questions),
+            skip=skip,
+            limit=limit,
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to perform global search: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to search: {str(e)}",
+        )
+
+
+@router.get("/recent", response_model=QuestionListResponse)
+async def get_recent_questions(
+    limit: int = 5,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    获取最近的题目 - Get recently uploaded questions for the homepage.
+    """
+    try:
+        question_service = get_question_service(db)
+        
+        # Get latest questions for current user
+        questions = question_service.get_all_questions(
+            created_by=str(current_user.id),
+            skip=0,
+            limit=limit,
+        )
+        
+        return QuestionListResponse(
+            questions=[QuestionResponse.from_orm(q) for q in questions],
+            total=len(questions),
+            skip=0,
+            limit=limit,
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to get recent questions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get recent questions: {str(e)}",
+        )
+
+
 @router.get("/document/{document_id}/questions", response_model=QuestionListResponse)
 async def get_questions_by_document(
     document_id: str,

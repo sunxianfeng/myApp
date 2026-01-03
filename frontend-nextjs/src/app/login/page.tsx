@@ -218,27 +218,33 @@ export default function LoginPage() {
 
         .form-group input {
           width: 100%;
-          padding: 1rem 1.25rem;
+          padding: 0 1.25rem;
           border: 2px solid #000000;
-          border-radius: 6px;
+          border-radius: 12px;
           background-color: #FFFFFF;
           color: #000000;
           font-size: 1rem;
           transition: all 0.2s ease-out;
           box-sizing: border-box;
           font-weight: 600;
-        }
-
-        .form-group input:focus {
+          height: 48px;
+          line-height: 1.5;
+          -webkit-appearance: none;
+          appearance: none;
           outline: none;
-          border-color: #000000;
-          box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
-          transform: translate(-2px, -2px);
         }
 
-        .form-group input::placeholder {
-          color: #9CA3AF;
-          font-weight: 500;
+        .form-group input:focus,
+        .form-group input:focus-visible {
+          outline: none !important;
+          box-shadow: none;
+          border: 4px solid #000000 !important;
+          box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+
+        /* Kill any UA focus ring (esp. Safari) */
+        .form-group input::-moz-focus-inner {
+          border: 0;
         }
 
         .forgot-password {

@@ -87,7 +87,9 @@ class QuestionService:
             更新后的文档对象
         """
         try:
-            document = self.db.query(Document).filter(Document.id == document_id).first()
+            # Convert string to UUID if needed
+            document_id_uuid = document_id if isinstance(document_id, uuid.UUID) else uuid.UUID(str(document_id))
+            document = self.db.query(Document).filter(Document.id == document_id_uuid).first()
             if not document:
                 logger.warning(f"Document not found: {document_id}")
                 return None
@@ -196,7 +198,9 @@ class QuestionService:
             题目列表
         """
         try:
-            query = self.db.query(Question).filter(Question.source_document_id == document_id)
+            # Convert string to UUID if needed
+            document_id_uuid = document_id if isinstance(document_id, uuid.UUID) else uuid.UUID(str(document_id))
+            query = self.db.query(Question).filter(Question.source_document_id == document_id_uuid)
             
             if question_type:
                 query = query.filter(Question.question_type == question_type)
@@ -219,7 +223,9 @@ class QuestionService:
             题目对象
         """
         try:
-            question = self.db.query(Question).filter(Question.id == question_id).first()
+            # Convert string to UUID if needed
+            question_id_uuid = question_id if isinstance(question_id, uuid.UUID) else uuid.UUID(str(question_id))
+            question = self.db.query(Question).filter(Question.id == question_id_uuid).first()
             return question
             
         except Exception as e:
@@ -238,7 +244,9 @@ class QuestionService:
             更新后的题目对象
         """
         try:
-            question = self.db.query(Question).filter(Question.id == question_id).first()
+            # Convert string to UUID if needed
+            question_id_uuid = question_id if isinstance(question_id, uuid.UUID) else uuid.UUID(str(question_id))
+            question = self.db.query(Question).filter(Question.id == question_id_uuid).first()
             if not question:
                 logger.warning(f"Question not found: {question_id}")
                 return None
@@ -278,7 +286,9 @@ class QuestionService:
             是否删除成功
         """
         try:
-            question = self.db.query(Question).filter(Question.id == question_id).first()
+            # Convert string to UUID if needed
+            question_id_uuid = question_id if isinstance(question_id, uuid.UUID) else uuid.UUID(str(question_id))
+            question = self.db.query(Question).filter(Question.id == question_id_uuid).first()
             if not question:
                 logger.warning(f"Question not found: {question_id}")
                 return False
@@ -343,7 +353,18 @@ class QuestionService:
     ) -> List[Question]:
         """Return latest active questions created by the given user."""
         try:
-            created_by_uuid = created_by if isinstance(created_by, uuid.UUID) else uuid.UUID(str(created_by))
+            # More robust UUID conversion with better error handling
+            if isinstance(created_by, uuid.UUID):
+                created_by_uuid = created_by
+            else:
+                # Clean the string - remove any whitespace or special characters
+                created_by_str = str(created_by).strip()
+                try:
+                    created_by_uuid = uuid.UUID(created_by_str)
+                except (ValueError, AttributeError) as e:
+                    logger.error(f"Invalid UUID format for created_by: {created_by_str}, error: {e}")
+                    # Return empty list instead of raising error
+                    return []
 
             query = (
                 self.db.query(Question)

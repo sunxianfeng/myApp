@@ -1,133 +1,237 @@
 'use client'
 
-import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-function Icon({ name, className }: { name: 'db' | 'file' | 'fileplus' | 'upload' | 'zap' | 'fileup' | 'plus'; className?: string }) {
-  // Minimal inline icons to avoid lucide-react (Turbopack HMR instability)
-  const common = { className, fill: 'none', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', 'aria-hidden': true }
-  switch (name) {
-    case 'db':
-      return (
-        <svg {...common}>
-          <ellipse cx="12" cy="5" rx="8" ry="3" stroke="currentColor" strokeWidth="2" />
-          <path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5" stroke="currentColor" strokeWidth="2" />
-          <path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" stroke="currentColor" strokeWidth="2" />
-        </svg>
-      )
-    case 'file':
-      return (
-        <svg {...common}>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'fileplus':
-      return (
-        <svg {...common}>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M12 12v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M9 15h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      )
-    case 'upload':
-      return (
-        <svg {...common}>
-          <path d="M12 16V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M8 11l4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'zap':
-      return (
-        <svg {...common}>
-          <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'fileup':
-      return (
-        <svg {...common}>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M12 18V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M9 15l3-3 3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'plus':
-      return (
-        <svg {...common}>
-          <path d="M12 5v14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      )
-    default:
-      return null
-  }
+// Search Icon Component
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" strokeLinecap="round" />
+    </svg>
+  )
 }
 
-export default function Dashboard() {
+export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const router = useRouter()
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!searchQuery.trim()) return
+
+    setIsSearching(true)
+    try {
+      router.push(`/app/questions?search=${encodeURIComponent(searchQuery.trim())}`)
+    } catch (error) {
+      console.error('Search failed:', error)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
   return (
-    <div>
-      {/* Core Data Section */}
-      <div className="card p-6 mb-4 fade-in-up stagger-1">
-        <h3 className="text-base font-semibold mb-6 flex items-center text-gray-800">
-          <Icon name="db" className="w-4 h-4 mr-2" />
-          核心数据
-        </h3>
-        <div className="grid grid-cols-3 gap-6">
-          {/* Metric 1: 总题目数 */}
-          <div className="flex items-center space-x-3">
-            <Icon name="file" className="w-8 h-8 text-gray-400" />
-            <div>
-              <p className="text-xs text-gray-500 mb-1">总题目数</p>
-              <p className="text-2xl font-bold text-gray-800">89</p>
-            </div>
+    <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-4">
+      <style jsx global>{`
+        /* Google-style Search with Rounded Neo-Brutalism */
+        
+        .home-search-container {
+          width: 100%;
+          max-width: 580px;
+          margin: 0 auto;
+        }
+
+        .home-logo {
+          font-size: 4rem;
+          font-weight: 900;
+          text-align: center;
+          margin-bottom: 2.5rem;
+          letter-spacing: -0.03em;
+          color: #000000;
+        }
+
+        .home-logo-accent {
+          color: #FBBF24;
+        }
+
+        /* Rounded Neo-Brutalism Search Box */
+        .search-box-wrapper {
+          position: relative;
+          width: 100%;
+        }
+
+        .search-box {
+          width: 100%;
+          height: 56px;
+          padding: 0 60px 0 52px;
+          font-size: 1rem;
+          font-weight: 500;
+          color: #000000;
+          background: #FFFFFF;
+          border: 3px solid #000000;
+          border-radius: 28px;
+          box-shadow: 4px 4px 0px 0px #000000;
+          outline: none;
+          transition: all 0.15s ease;
+        }
+
+        .search-box::placeholder {
+          color: #9CA3AF;
+          font-weight: 400;
+        }
+
+        .search-box:hover {
+          box-shadow: 5px 5px 0px 0px #000000;
+          transform: translate(-1px, -1px);
+        }
+
+        .search-box:focus {
+          box-shadow: 6px 6px 0px 0px #000000;
+          transform: translate(-2px, -2px);
+          border-color: #FBBF24;
+        }
+
+        .search-icon-left {
+          position: absolute;
+          left: 18px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 22px;
+          height: 22px;
+          color: #9CA3AF;
+          pointer-events: none;
+          transition: color 0.15s ease;
+        }
+
+        .search-box:focus ~ .search-icon-left,
+        .search-box-wrapper:hover .search-icon-left {
+          color: #FBBF24;
+        }
+
+        .search-btn-submit {
+          position: absolute;
+          right: 6px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #FBBF24;
+          border: 2px solid #000000;
+          border-radius: 50%;
+          box-shadow: 2px 2px 0px 0px #000000;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .search-btn-submit:hover:not(:disabled) {
+          background: #F59E0B;
+          box-shadow: 3px 3px 0px 0px #000000;
+          transform: translateY(-50%) translate(-1px, -1px);
+        }
+
+        .search-btn-submit:active:not(:disabled) {
+          box-shadow: 1px 1px 0px 0px #000000;
+          transform: translateY(-50%) translate(0, 0);
+        }
+
+        .search-btn-submit:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .search-btn-submit svg {
+          width: 20px;
+          height: 20px;
+          color: #000000;
+        }
+
+        /* Tips */
+        .search-tips {
+          margin-top: 1.5rem;
+          text-align: center;
+          font-size: 0.875rem;
+          color: #6B7280;
+        }
+
+        .search-tips span {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          margin: 0.25rem;
+          background: #FEF3C7;
+          border: 2px solid #000000;
+          border-radius: 9999px;
+          font-weight: 600;
+          color: #000000;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          box-shadow: 2px 2px 0px 0px #000000;
+        }
+
+        .search-tips span:hover {
+          background: #FBBF24;
+          transform: translate(-1px, -1px);
+          box-shadow: 3px 3px 0px 0px #000000;
+        }
+
+        /* Loading spinner */
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .loading-spinner {
+          animation: spin 1s linear infinite;
+        }
+      `}</style>
+
+      {/* Main Search Area - Google Style */}
+      <div className="home-search-container">
+        {/* Logo Title */}
+        <h1 className="home-logo">
+          题<span className="home-logo-accent">宝</span>
+        </h1>
+
+        {/* Search Form */}
+        <form onSubmit={handleSearch}>
+          <div className="search-box-wrapper">
+            <SearchIcon className="search-icon-left" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="搜索题目..."
+              className="search-box"
+              disabled={isSearching}
+            />
+            <button
+              type="submit"
+              disabled={isSearching || !searchQuery.trim()}
+              className="search-btn-submit"
+              aria-label="搜索"
+            >
+              {isSearching ? (
+                <svg className="loading-spinner" fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <SearchIcon className="w-5 h-5" />
+              )}
+            </button>
           </div>
+        </form>
 
-          {/* Metric 2: 生成试卷 */}
-          <div className="flex items-center space-x-3">
-            <Icon name="fileplus" className="w-8 h-8 text-gray-400" />
-            <div>
-              <p className="text-xs text-gray-500 mb-1">生成试卷</p>
-              <p className="text-2xl font-bold text-gray-800">25</p>
-            </div>
-          </div>
-
-          {/* Metric 3: 上传文档 */}
-          <div className="flex items-center space-x-3">
-            <Icon name="upload" className="w-8 h-8 text-gray-400" />
-            <div>
-              <p className="text-xs text-gray-500 mb-1">上传文档</p>
-              <p className="text-2xl font-bold text-gray-800">4</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions Section */}
-      <div className="card p-6 fade-in-up stagger-2">
-        <h3 className="text-base font-semibold mb-6 flex items-center text-gray-800">
-          <Icon name="zap" className="w-4 h-4 mr-2" />
-          快速操作
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Action 1: Upload Document */}
-          <Link
-            href="/app/upload"
-            className="btn-action border-2 border-solid border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-500 hover:border-gray-400 hover:shadow-md transition-all duration-200"
-          >
-            <Icon name="fileup" className="w-10 h-10 mb-3" />
-            <span className="font-semibold text-sm">上传新文档</span>
-          </Link>
-
-          {/* Action 2: Generate Exam */}
-          <Link
-            href="/app/papers"
-            className="btn-action border-2 border-solid border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-500 hover:border-gray-400 hover:shadow-md transition-all duration-200"
-          >
-            <Icon name="fileplus" className="w-10 h-10 mb-3" />
-            <span className="font-semibold text-sm">生成试卷</span>
-          </Link>
+        {/* Search Tips */}
+        <div className="search-tips">
+          <p style={{ marginBottom: '0.5rem', color: '#9CA3AF' }}>试试搜索：</p>
+          <span onClick={() => setSearchQuery('二次函数')}>二次函数</span>
+          <span onClick={() => setSearchQuery('物理力学')}>物理力学</span>
+          <span onClick={() => setSearchQuery('化学反应')}>化学反应</span>
         </div>
       </div>
     </div>

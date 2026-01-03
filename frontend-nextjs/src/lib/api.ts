@@ -218,6 +218,19 @@ export const generateDocument = async (questionIds: string[]): Promise<any> => {
   return await api.post('/v1/documents/generate', { questionIds })
 }
 
+// 全局搜索相关 API
+export const globalSearch = async (params: {
+  q: string;
+  skip?: number;
+  limit?: number;
+}): Promise<any> => {
+  return await api.get('/v1/questions/search', { params })
+}
+
+export const getRecentQuestions = async (limit: number = 5): Promise<any> => {
+  return await api.get('/v1/questions/recent', { params: { limit } })
+}
+
 // 统计相关 API
 export const getDashboardStats = async (): Promise<any> => {
   return await api.get('/v1/stats/dashboard')
