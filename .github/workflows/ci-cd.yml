@@ -63,6 +63,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "bash -lc '
             echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
             cd ${{ secrets.DEPLOY_PATH }} && \
+            ls -la && \
             docker-compose pull && \
             docker-compose up -d --remove-orphans && \
             docker logout ghcr.io
