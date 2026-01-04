@@ -66,4 +66,4 @@ jobs:
             docker-compose pull && \
             docker-compose up -d --remove-orphans && \
             docker logout ghcr.io
-          '",
+          '"
