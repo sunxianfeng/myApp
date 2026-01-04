@@ -11,8 +11,11 @@ RUN apt-get update && apt-get install -y \
 # 安装 uv
 RUN pip install uv
 
-# 复制依赖文件
+# 复制依赖文件（不要依赖 README 必须存在）
 COPY pyproject.toml uv.lock ./
+
+# 如果仓库没有 README，创建一个占位文件以避免某些构建工具报错
+RUN [ -f README.md ] || echo "# placeholder README" > README.md
 
 # 安装依赖（使用锁文件确保一致性）
 RUN uv sync --frozen --no-dev
