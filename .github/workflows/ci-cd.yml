@@ -46,10 +46,16 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Generate .env.production from secret
+        run: |
+          echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
 
       - name: Copy compose and .env to server (optional)
         run: |
