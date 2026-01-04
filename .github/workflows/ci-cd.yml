@@ -1,0 +1,69 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  BACKEND_IMAGE: ghcr.io/sunxianfeng/myapp-backend
+  FRONTEND_IMAGE: ghcr.io/sunxianfeng/myapp-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend-nextjs
+          file: ./frontend-nextjs/Dockerfile
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy compose and .env to server (optional)
+        run: |
+          scp -o StrictHostKeyChecking=no -r ./docker-compose.prod.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/docker-compose.yml || true
+          scp -o StrictHostKeyChecking=no -r ./.env.production ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/.env || true
+
+      - name: Deploy via SSH (login to GHCR with PAT, pull and up)
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "bash -lc '
+            echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
+            cd ${{ secrets.DEPLOY_PATH }} && \
+            docker-compose pull && \
+            docker-compose up -d --remove-orphans && \
+            docker logout ghcr.io
+          '",

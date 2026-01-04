@@ -2,51 +2,38 @@ version: '3.8'
 
 services:
   # Backend API
-  # 生产环境使用云服务：
-  # - PostgreSQL: Supabase
-  # - Redis: Upstash
-  # - File Storage: Supabase Storage
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: question_backend_prod
+    image: ghcr.io/sunxianfeng/myapp-backend:latest
+    container_name: notebook_backend_prod
     ports:
       - "8000:8000"
     environment:
       # 从 .env 文件读取云服务配置
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-      - SUPABASE_BUCKET=${SUPABASE_BUCKET}
       - ENVIRONMENT=production
       - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./data/generated:/app/generated
     networks:
-      - question_network
+      - notebook_network
     restart: always
 
   # Frontend
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: question_frontend_prod
+    image: ghcr.io/sunxianfeng/myapp-frontend:latest
+    container_name: notebook_frontend_prod
     ports:
-      - "5173:5173"
+      - "3000:3000"
     environment:
       - VITE_API_URL=/api
       - NODE_ENV=production
     networks:
-      - question_network
+      - notebook_network
     restart: always
 
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: question_nginx_prod
+    container_name: notebook_nginx_prod
     ports:
       - "80:80"
       - "443:443"
@@ -55,9 +42,9 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./data/generated:/var/www/generated:ro
     networks:
-      - question_network
+      - notebook_network
     restart: always
 
 networks:
-  question_network:
+  notebook_network:
     driver: bridge
