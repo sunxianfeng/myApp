@@ -1,12 +1,21 @@
+"""Vector store utilities.
+
+This module keeps the existing ChromaDB-backed `VectorStore` implementation,
+and adds a factory `get_vector_store()` that can switch between:
+- ChromaDB (local persistent): settings.VECTOR_STORE_BACKEND == "chroma"
+- Qdrant (cloud): settings.VECTOR_STORE_BACKEND == "qdrant"
 """
-Vector store utility using ChromaDB persistent client.
-Provides a simple wrapper with add_vector and search_vector methods.
-"""
-from typing import Any, Dict, List, Optional
+
+from typing import Any, Dict, List, Optional, Tuple
 import os
 import logging
 
-import chromadb
+from app.config import settings
+
+try:
+    import chromadb  # type: ignore
+except Exception:
+    chromadb = None
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +31,11 @@ class VectorStore:
         when called from async contexts.
         """
         try:
+            if chromadb is None:
+                raise ImportError(
+                    "chromadb is not installed. Install it or switch VECTOR_STORE_BACKEND to 'qdrant'."
+                )
+
             os.makedirs(persist_dir, exist_ok=True)
             
             # Use PersistentClient for better persistence
@@ -88,12 +102,28 @@ class VectorStore:
             return {"ids": [[]], "distances": [[]], "metadatas": [[]], "documents": [[]]}
 
 
-# Simple singleton accessor used by other services
-_vector_store_instance: Optional[VectorStore] = None
+# Cache instances per backend+collection.
+_vector_store_instances: Dict[Tuple[str, str], Any] = {}
 
 
-def get_vector_store(persist_dir: str = "./chroma_db", collection_name: str = "default") -> VectorStore:
-    global _vector_store_instance
-    if _vector_store_instance is None:
-        _vector_store_instance = VectorStore(persist_dir=persist_dir, collection_name=collection_name)
-    return _vector_store_instance
+def get_vector_store(persist_dir: str = "./chroma_db", collection_name: str = "default") -> Any:
+    backend = (getattr(settings, "VECTOR_STORE_BACKEND", "chroma") or "chroma").strip().lower()
+    key = (backend, collection_name)
+    if key in _vector_store_instances:
+        return _vector_store_instances[key]
+
+    if backend == "qdrant":
+        from app.services.qdrant_vector_store import QdrantVectorStore
+
+        instance = QdrantVectorStore(
+            url=settings.QDRANT_URL,
+            api_key=settings.QDRANT_API_KEY or None,
+            collection_name=collection_name or settings.QDRANT_COLLECTION,
+            vector_size=settings.VECTOR_STORE_VECTOR_SIZE,
+            distance=settings.VECTOR_STORE_DISTANCE,
+        )
+    else:
+        instance = VectorStore(persist_dir=persist_dir, collection_name=collection_name)
+
+    _vector_store_instances[key] = instance
+    return instance
