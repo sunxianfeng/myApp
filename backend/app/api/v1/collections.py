@@ -225,8 +225,11 @@ async def get_collection(
             detail="错题本不存在"
         )
     
+    # Exclude 'questions' from the unpacked dict to avoid duplicate keyword argument
+    collection_dict = {k: v for k, v in collection.__dict__.items() 
+                     if not k.startswith('_') and k != 'questions'}
     result = CollectionWithQuestionsResponse(
-        **{k: v for k, v in collection.__dict__.items() if not k.startswith('_')},
+        **collection_dict,
         questions=[]
     )
     
@@ -598,8 +601,11 @@ async def get_collections_with_questions(
         # 构建响应
         results: List[CollectionWithQuestionsResponse] = []
         for collection in collections:
+            # Exclude 'questions' from the unpacked dict to avoid duplicate keyword argument
+            collection_dict = {k: v for k, v in collection.__dict__.items() 
+                             if not k.startswith('_') and k != 'questions'}
             result = CollectionWithQuestionsResponse(
-                **{k: v for k, v in collection.__dict__.items() if not k.startswith('_')},
+                **collection_dict,
                 questions=questions_mapping.get(collection.id, [])
             )
             results.append(result)
