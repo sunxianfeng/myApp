@@ -183,8 +183,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </nav>
         </aside>
 
-        {/* Main Content Area - Right Side - Floating White Island with Enhanced Shadow for Pale Background */}
-        <main className="flex-1 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] p-8 overflow-y-auto" style={{ border: 'none' }}>
+        {/* Main Content Area - Right Side - Floating White Island */}
+        <main className="flex-1 bg-white rounded-3xl p-8 overflow-y-auto" style={{ border: 'none' }}>
           {children}
         </main>
       </div>

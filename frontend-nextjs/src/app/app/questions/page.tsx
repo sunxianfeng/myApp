@@ -1036,7 +1036,7 @@ const QuestionsContent = () => {
                 outline: 'none',
                 fontSize: '0.875rem',
                 fontWeight: '700',
-                boxShadow: '4px 4px 0px 0px #000',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
               }}
             />
           </div>

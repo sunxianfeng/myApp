@@ -126,8 +126,8 @@ body {
   background: #FBBF24 !important; /* Amber-400 - Honey/Toast color */
   color: #000000 !important;
   border: none !important;
-  box-shadow: none !important;
-  transform: translateX(4px) !important; /* Subtle slide effect */
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3), 0 2px 6px rgba(0, 0, 0, 0.15) !important; /* Golden glow + soft shadow */
+  transform: translateX(6px) scale(1.02) !important; /* Enhanced slide + subtle scale */
 }
 
 .sidebar-item.active {
@@ -136,14 +136,20 @@ body {
   font-weight: 700 !important;
   border-radius: 9999px !important; /* Keep pill shape */
   border: none !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important; /* Strong shadow */
-  transform: none !important;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.4), 
+    0 3px 8px rgba(0, 0, 0, 0.25),
+    0 1px 3px rgba(0, 0, 0, 0.15) !important; /* Triple-layer floating shadow */
+  transform: translateY(-1px) !important; /* Lift effect */
 }
 
 .sidebar-item.active:hover {
   background: #1F2937 !important; /* Slightly lighter black on hover */
-  transform: translateX(4px) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  transform: translateX(7px) translateY(-2px) scale(1.02) !important; /* Enhanced slide + lift + scale */
+  box-shadow: 
+    0 10px 28px rgba(0, 0, 0, 0.45), 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.2) !important; /* Stronger triple-layer shadow */
 }
 
 /* Sidebar icon styling - softer approach */
@@ -156,13 +162,17 @@ body {
 }
 
 .sidebar-item:hover svg {
-  transform: scale(1.08) !important;
+  transform: scale(1.1) rotate(2deg) !important; /* Enhanced scale + subtle rotation */
 }
 
 .sidebar-item.active svg {
   filter: none !important;
   stroke: #FFFFFF !important; /* White stroke for active state */
   stroke-width: 2.5 !important; /* Slightly bolder when active */
+}
+
+.sidebar-item.active:hover svg {
+  transform: scale(1.12) rotate(3deg) !important; /* Even more dynamic on hover */
 }
 
 /* 移除软性分割线 */
@@ -308,15 +318,15 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.1) !important;
 }
 
-/* ============== HEADER SEARCH BAR - NEOBRUTALISM ============== */
+/* ============== HEADER SEARCH BAR - SOFT ROUNDED STYLE ============== */
 header .relative input[type="text"] {
   border: 3px solid #000000 !important;
-  border-radius: 0 !important;
+  border-radius: 9999px !important;
   background-color: #FFFFFF !important;
   color: #000000 !important;
   font-weight: 600 !important;
   font-size: 0.875rem !important;
-  box-shadow: 4px 4px 0px 0px #000000 !important;
+  box-shadow: none !important;
   transition: all 0.2s ease !important;
   padding: 0.75rem 1rem 0.75rem 2.75rem !important;
 }
@@ -329,8 +339,8 @@ header .relative input[type="text"]::placeholder {
 header .relative input[type="text"]:focus {
   border-color: #000000 !important;
   outline: none !important;
-  box-shadow: 6px 6px 0px 0px #000000 !important;
-  transform: translate(-2px, -2px) !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1) !important;
+  transform: none !important;
 }
 
 header .relative input[type="text"]:hover {

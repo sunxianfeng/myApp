@@ -23,11 +23,12 @@
 }
 
 .unified-questions-page {
-  background-color: var(--page-bg) !important;
+  background-color: transparent !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   color: var(--text-color) !important;
   padding: 2rem !important;
   min-height: auto !important;
+  border-radius: 1.5rem !important;
 }
 
 .unified-header {
