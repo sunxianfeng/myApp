@@ -1024,19 +1024,10 @@ const QuestionsContent = () => {
             <input
               type="text"
               placeholder="搜索..."
+              className="neo-search-input"
               style={{
                 width: '100%',
                 paddingLeft: '2.75rem',
-                paddingRight: '1rem',
-                paddingTop: '0.5rem',
-                paddingBottom: '0.5rem',
-                border: '3px solid black',
-                borderRadius: '9999px',
-                backgroundColor: 'white',
-                outline: 'none',
-                fontSize: '0.875rem',
-                fontWeight: '700',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
               }}
             />
           </div>

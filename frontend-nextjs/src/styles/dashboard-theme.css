@@ -318,7 +318,7 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.1) !important;
 }
 
-/* ============== HEADER SEARCH BAR - SOFT ROUNDED STYLE ============== */
+/* ============== HEADER SEARCH BAR - NEOBRUTALISM STYLE ============== */
 header .relative input[type="text"] {
   border: 3px solid #000000 !important;
   border-radius: 9999px !important;
@@ -326,7 +326,7 @@ header .relative input[type="text"] {
   color: #000000 !important;
   font-weight: 600 !important;
   font-size: 0.875rem !important;
-  box-shadow: none !important;
+  box-shadow: 4px 4px 0px 0px #000000 !important;
   transition: all 0.2s ease !important;
   padding: 0.75rem 1rem 0.75rem 2.75rem !important;
 }
@@ -339,8 +339,8 @@ header .relative input[type="text"]::placeholder {
 header .relative input[type="text"]:focus {
   border-color: #000000 !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1) !important;
-  transform: none !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+  transform: translate(2px, 2px) !important;
 }
 
 header .relative input[type="text"]:hover {

@@ -1706,3 +1706,14 @@ textarea:focus {
   --tw-ring-shadow: 0 0 #0000 !important;
   --tw-ring-color: transparent !important;
 }
+
+/* ============== SEARCH INPUT NEOBRUTALISM SHADOW - OVERRIDE ============== */
+.neo-search-input {
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+  transition: all 0.15s ease !important;
+}
+
+.neo-search-input:focus {
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+  transform: translate(2px, 2px) !important;
+}
