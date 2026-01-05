@@ -796,7 +796,7 @@ export default function CollectionDetailPage() {
             fontWeight: 700 
           }}>
             <button
-              onClick={() => router.push('/app/questions')}
+              onClick={() => router.push('/questions')}
               style={{
                 color: '#9CA3AF',
                 background: 'none',

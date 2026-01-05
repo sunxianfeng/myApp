@@ -45,8 +45,8 @@ export default function NotificationBar() {
           message: recentCompleted.metadata?.fileName 
             ? `已成功识别 "${recentCompleted.metadata.fileName}"` 
             : '识别任务已完成',
-          actionText: pathname !== '/app/upload/result' ? '查看结果' : undefined,
-          actionUrl: pathname !== '/app/upload/result' ? '/app/upload/result' : undefined,
+          actionText: pathname !== '/upload/result' ? '查看结果' : undefined,
+          actionUrl: pathname !== '/upload/result' ? '/upload/result' : undefined,
         })
         setIsVisible(true)
 

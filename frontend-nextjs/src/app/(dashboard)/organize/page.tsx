@@ -202,7 +202,7 @@ const OrganizeContent = () => {
   }
 
   const handleFinish = () => {
-    router.push('/app/collections')
+    router.push('/collections')
   }
 
   return (
@@ -285,7 +285,7 @@ const OrganizeContent = () => {
                 <button 
                   className="neo-btn" 
                   style={{ marginTop: '1.5rem' }}
-                  onClick={() => router.push('/app/collections')}
+                  onClick={() => router.push('/collections')}
                 >
                   去查看错题本
                 </button>

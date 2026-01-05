@@ -100,3 +100,6 @@ export default function RootLayout({
     </html>
   )
 }
+
+// Note: For authenticated routes like /questions, /collections, etc., 
+// those routes should wrap their content with <Layout> component if they need the app shell

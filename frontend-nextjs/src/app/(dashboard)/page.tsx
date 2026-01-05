@@ -37,7 +37,7 @@ export default function HomePage() {
 
     setIsSearching(true)
     try {
-      router.push(`/app/questions?search=${encodeURIComponent(searchQuery.trim())}`)
+      router.push(`/questions?search=${encodeURIComponent(searchQuery.trim())}`)
     } catch (error) {
       console.error('Search failed:', error)
     } finally {
@@ -387,3 +387,4 @@ export default function HomePage() {
     </div>
   )
 }
+

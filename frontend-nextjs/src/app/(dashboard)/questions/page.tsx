@@ -17,6 +17,10 @@ import {
   ArrowRightLeft as IconMove,
   X as IconX,
   Search as IconSearch,
+  BookOpen as IconBookOpen,
+  Lightbulb as IconLightbulb,
+  Loader2 as IconLoader,
+  Sparkles as IconSparkles,
 } from 'lucide-react'
 
 const IconEdit = () => (
@@ -33,7 +37,7 @@ import {
   selectCollectionLoading,
   addQuestionsToCol,
 } from '@/lib/slices/collectionSlice'
-import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection, getQuestions } from '@/lib/api'
+import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection, getQuestions, generateReferenceAnswer, generateSimilarQuestions } from '@/lib/api'
 
 import './questions-neobrutalism.css'
 
@@ -66,9 +70,74 @@ const QuestionDetailModal = ({
   isOpen: boolean
   onClose: () => void 
 }) => {
+  const [isGeneratingAnswer, setIsGeneratingAnswer] = useState(false)
+  const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false)
+  const [generatedAnswer, setGeneratedAnswer] = useState<string | null>(null)
+  const [similarQuestions, setSimilarQuestions] = useState<any[] | null>(null)
+  
   if (!isOpen || !question) return null
 
   const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+  
+  const handleGetReferenceAnswer = async () => {
+    setIsGeneratingAnswer(true)
+    try {
+      const resp = await generateReferenceAnswer({
+        question: {
+          id: question.id,
+          number: question.number,
+          question_type: question.question_type || question.type,
+          content: question.content,
+          full_content: question.full_content,
+          options: question.options,
+        },
+        language: 'zh',
+      })
+
+      const answerText = [resp?.answer, resp?.explanation].filter(Boolean).join('\n\n')
+      setGeneratedAnswer(answerText || '未生成到答案')
+    } catch (error) {
+      console.error('Failed to generate answer:', error)
+      alert('生成答案失败，请稍后重试')
+    } finally {
+      setIsGeneratingAnswer(false)
+    }
+  }
+  
+  const handleGenerateSimilar = async () => {
+    setIsGeneratingSimilar(true)
+    try {
+      const resp = await generateSimilarQuestions({
+        question: {
+          id: question.id,
+          number: question.number,
+          question_type: question.question_type || question.type,
+          content: question.content,
+          full_content: question.full_content,
+          options: question.options,
+        },
+        count: 2,
+        language: 'zh',
+      })
+
+      const items = Array.isArray(resp?.questions) ? resp.questions : []
+      setSimilarQuestions(
+        items.map((q: any, idx: number) => ({
+          id: q.id || `similar-${idx + 1}`,
+          content: q.content,
+          question_type: q.question_type,
+          answer: q.answer,
+          explanation: q.explanation,
+          options: q.options,
+        }))
+      )
+    } catch (error) {
+      console.error('Failed to generate similar questions:', error)
+      alert('生成相似题目失败，请稍后重试')
+    } finally {
+      setIsGeneratingSimilar(false)
+    }
+  }
 
   return (
     <div 
@@ -275,6 +344,212 @@ const QuestionDetailModal = ({
                 lineHeight: '1.6',
               }}>
                 {question.explanation}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div style={{ 
+            marginBottom: '24px',
+            padding: '20px',
+            backgroundColor: '#F9FAFB',
+            border: '3px solid black',
+            borderRadius: '12px',
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px', 
+              flexWrap: 'wrap' 
+            }}>
+              <button
+                onClick={handleGetReferenceAnswer}
+                disabled={isGeneratingAnswer}
+                className="neo-btn-primary"
+                style={{
+                  padding: '12px 20px',
+                  backgroundColor: isGeneratingAnswer ? '#D1D5DB' : '#10B981',
+                  color: 'white',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: isGeneratingAnswer ? 'not-allowed' : 'pointer',
+                  boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isGeneratingAnswer) {
+                    e.currentTarget.style.transform = 'translate(-2px, -2px)'
+                    e.currentTarget.style.boxShadow = '6px 6px 0 rgba(0,0,0,1)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translate(0, 0)'
+                  e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
+                }}
+              >
+                {isGeneratingAnswer ? (
+                  <>
+                    <IconLoader size={16} className="animate-spin" />
+                    <span>生成中...</span>
+                  </>
+                ) : (
+                  <>
+                    <IconBookOpen size={16} />
+                    <span>获取参考答案</span>
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={handleGenerateSimilar}
+                disabled={isGeneratingSimilar}
+                className="neo-btn-primary"
+                style={{
+                  padding: '12px 20px',
+                  backgroundColor: isGeneratingSimilar ? '#D1D5DB' : '#3B82F6',
+                  color: 'white',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: isGeneratingSimilar ? 'not-allowed' : 'pointer',
+                  boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isGeneratingSimilar) {
+                    e.currentTarget.style.transform = 'translate(-2px, -2px)'
+                    e.currentTarget.style.boxShadow = '6px 6px 0 rgba(0,0,0,1)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translate(0, 0)'
+                  e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
+                }}
+              >
+                {isGeneratingSimilar ? (
+                  <>
+                    <IconLoader size={16} className="animate-spin" />
+                    <span>生成中...</span>
+                  </>
+                ) : (
+                  <>
+                    <IconSparkles size={16} />
+                    <span>举一反三</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Generated Answer */}
+          {generatedAnswer && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ 
+                fontWeight: 900, 
+                marginBottom: '12px', 
+                fontSize: '1.125rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
+                <IconBookOpen size={20} style={{ color: '#10B981' }} />
+                <span>参考答案</span>
+              </h3>
+              <div style={{ 
+                padding: '16px',
+                backgroundColor: '#DCFCE7',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
+                whiteSpace: 'pre-wrap',
+              }}>
+                {generatedAnswer}
+              </div>
+            </div>
+          )}
+
+          {/* Similar Questions */}
+          {similarQuestions && similarQuestions.length > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ 
+                fontWeight: 900, 
+                marginBottom: '12px', 
+                fontSize: '1.125rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
+                <IconSparkles size={20} style={{ color: '#3B82F6' }} />
+                <span>举一反三 - 相似题目</span>
+              </h3>
+              <div style={{ 
+                backgroundColor: '#EFF6FF',
+                border: '3px solid black',
+                borderRadius: '8px',
+                overflow: 'hidden',
+              }}>
+                {similarQuestions.map((simQuestion, index) => (
+                  <div 
+                    key={simQuestion.id} 
+                    style={{ 
+                      padding: '16px',
+                      borderBottom: index < similarQuestions.length - 1 ? '2px solid black' : 'none',
+                    }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'flex-start',
+                      marginBottom: '8px' 
+                    }}>
+                      <span style={{ 
+                        fontWeight: 700, 
+                        fontSize: '0.875rem',
+                        color: '#3B82F6'
+                      }}>
+                        相似题目 {index + 1}
+                      </span>
+                      {simQuestion.question_type && (
+                        <span style={{ 
+                          padding: '2px 8px',
+                          backgroundColor: 'white',
+                          border: '2px solid black',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                        }}>
+                          {simQuestion.question_type}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.95rem',
+                      lineHeight: '1.6',
+                      marginBottom: '8px'
+                    }}>
+                      <MathRenderer content={simQuestion.content} />
+                    </div>
+                    {simQuestion.answer && (
+                      <div style={{
+                        fontSize: '0.875rem',
+                        color: '#059669',
+                        fontWeight: 600,
+                        marginTop: '8px',
+                      }}>
+                        答案: {simQuestion.answer}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -1146,9 +1421,9 @@ const QuestionsContent = () => {
                   }}
                   role="button"
                   tabIndex={0}
-                  onClick={() => router.push(`/app/collections/${cId}`)}
+                  onClick={() => router.push(`/collections/${cId}`)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') router.push(`/app/collections/${cId}`)
+                    if (e.key === 'Enter' || e.key === ' ') router.push(`/collections/${cId}`)
                   }}
                   onDragOver={(e) => {
                     // allow drop
@@ -1221,7 +1496,7 @@ const QuestionsContent = () => {
                 <div
                   key={`list-collection-${cId}-${idx}`}
                   className="list-view-row"
-                  onClick={() => router.push(`/app/collections/${cId}`)}
+                  onClick={() => router.push(`/collections/${cId}`)}
                 >
                   <div className="list-view-icon">
                     <IconFolder size={20} color={generateColorFromString(cId)} />
@@ -1243,7 +1518,7 @@ const QuestionsContent = () => {
                       </DropdownMenu.Trigger>
                       <DropdownMenu.Portal>
                         <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
-                          <DropdownMenu.Item className="card-dropdown-item" onSelect={() => router.push(`/app/collections/${cId}`)}>
+                          <DropdownMenu.Item className="card-dropdown-item" onSelect={() => router.push(`/collections/${cId}`)}>
                             <IconFolder size={14} />
                             <span>Open Collection</span>
                           </DropdownMenu.Item>
@@ -1340,7 +1615,21 @@ const QuestionsContent = () => {
 
       {(isProcessing || isLoading) && (
         <div className="loading-overlay">
-          <div className="animate-bounce">Loading...</div>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: '16px' 
+          }}>
+            <IconLoader size={48} className="animate-spin" style={{ color: '#3B82F6' }} />
+            <div style={{ 
+              fontWeight: 900, 
+              fontSize: '1.25rem',
+              color: '#111827',
+            }}>
+              Loading...
+            </div>
+          </div>
         </div>
       )}
 
@@ -1374,7 +1663,25 @@ const QuestionsContent = () => {
 
 export default function QuestionsPage() {
   return (
-    <Suspense fallback={<div className="loading-overlay">Loading...</div>}>
+    <Suspense fallback={
+      <div className="loading-overlay">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          gap: '16px' 
+        }}>
+          <IconLoader size={48} className="animate-spin" style={{ color: '#3B82F6' }} />
+          <div style={{ 
+            fontWeight: 900, 
+            fontSize: '1.25rem',
+            color: '#111827',
+          }}>
+            Loading...
+          </div>
+        </div>
+      </div>
+    }>
       <QuestionsContent />
     </Suspense>
   )

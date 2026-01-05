@@ -95,7 +95,7 @@ const Upload = () => {
         saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
         console.log('[upload] immediateTask completed, result:', immediateTask.result)
         appendDebug('debug_upload_logs', '[upload] immediateTask completed', immediateTask.result)
-        router.push('/app/upload/result')
+        router.push('/upload/result')
         return
       }
 
@@ -114,7 +114,7 @@ const Upload = () => {
           saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
           console.log('[upload] polled result:', realResult)
           appendDebug('debug_upload_logs', '[upload] polled result', realResult)
-          router.push('/app/upload/result')
+          router.push('/upload/result')
         },
         (error) => {
           saveToStorage(STORAGE_KEYS.TASK_STATUS, 'failed')
@@ -138,7 +138,7 @@ const Upload = () => {
     if (taskStatus === 'completed' && taskResult) {
       console.log('[upload] storage already completed, result:', taskResult)
       appendDebug('debug_upload_logs', '[upload] storage already completed', taskResult)
-      router.push('/app/upload/result')
+      router.push('/upload/result')
       return
     }
 
@@ -163,12 +163,12 @@ const Upload = () => {
         }
 
         // Only redirect if still on upload page AND component is mounted
-        if (pathname === '/app/upload' && mounted) {
+        if (pathname === '/upload' && mounted) {
           // Save result for result page to pick up
           saveToStorage(STORAGE_KEYS.TASK_RESULT, task.result)
           saveToStorage(STORAGE_KEYS.TASK_STATUS, 'completed')
           saveToStorage(STORAGE_KEYS.TASK_TIMESTAMP, Date.now())
-          router.push('/app/upload/result')
+          router.push('/upload/result')
         }
 
         // Reset upload UI - only if mounted

@@ -22,17 +22,17 @@ export const createDynamicComponent = <T extends React.ComponentType<any>>(
 
 // Pre-defined dynamic components for common heavy components
 export const DynamicUpload = createDynamicComponent(
-  () => import('@/app/app/upload/page'),
+  () => import('@/app/upload/page'),
 )
 
 export const DynamicQuestions = createDynamicComponent(
-  () => import('@/app/app/questions/page'),
+  () => import('@/app/questions/page'),
 )
 
 export const DynamicPapers = createDynamicComponent(
-  () => import('@/app/app/papers/page'),
+  () => import('@/app/papers/page'),
 )
 
 export const DynamicSettings = createDynamicComponent(
-  () => import('@/app/app/settings/page'),
+  () => import('@/app/settings/page'),
 )

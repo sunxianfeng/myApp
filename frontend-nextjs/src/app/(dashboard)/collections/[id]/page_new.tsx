@@ -271,7 +271,7 @@ export default function CollectionDetailPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div style={{ textAlign: 'left', flex: 1 }}>
             <button
-              onClick={() => router.push('/app/questions')}
+              onClick={() => router.push('/questions')}
               style={{
                 display: 'flex',
                 alignItems: 'center',

@@ -71,8 +71,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [])
 
   const isActive = (path: string): boolean => {
-    if (path === '/app') {
-      return pathname === '/app'
+    if (path === '/') {
+      return pathname === '/'
     }
     return pathname.startsWith(path)
   }
@@ -84,8 +84,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
 
     let active = false
-    if (path === '/app') {
-      active = pathname === '/app'
+    if (path === '/') {
+      active = pathname === '/'
     } else {
       active = pathname.startsWith(path)
     }
@@ -147,8 +147,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <nav className="flex flex-col space-y-2 p-4">
             {/* 首页 */}
             <Link
-              href="/app"
-              className={getNavItemClassName('/app')}
+              href="/"
+              className={getNavItemClassName('/')}
             >
               <Icon name="dashboard" className="w-5 h-5 mr-3" />
               首页
@@ -156,8 +156,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* 题目解析 */}
             <Link
-              href="/app/upload"
-              className={getNavItemClassName('/app/upload')}
+              href="/upload"
+              className={getNavItemClassName('/upload')}
             >
               <Icon name="upload" className="w-5 h-5 mr-3" />
               题目解析
@@ -165,8 +165,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* 题目管理 */}
             <Link
-              href="/app/questions"
-              className={getNavItemClassName('/app/questions')}
+              href="/questions"
+              className={getNavItemClassName('/questions')}
             >
               <Icon name="file" className="w-5 h-5 mr-3" />
               题目管理
@@ -174,8 +174,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* 设置 - Now a sibling of other nav items */}
             <Link
-              href="/app/settings"
-              className={getNavItemClassName('/app/settings')}
+              href="/settings"
+              className={getNavItemClassName('/settings')}
             >
               <Icon name="settings" className="w-5 h-5 mr-3" />
               设置

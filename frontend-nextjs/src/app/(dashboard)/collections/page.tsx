@@ -97,7 +97,7 @@ export default function CollectionsPage() {
   }
 
   const handleCollectionClick = (collectionId: string) => {
-    router.push(`/app/collections/${collectionId}`)
+    router.push(`/collections/${collectionId}`)
   }
 
   const filteredCollectionsBase = selectedCategory

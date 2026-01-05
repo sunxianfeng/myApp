@@ -397,7 +397,7 @@ const UploadResultPage = (props: PageProps) => {
 
   const handleReturnToUpload = () => {
     dispatch(clearUploadResult())
-    router.push('/app/upload')
+    router.push('/upload')
   }
 
   const successFiles = useMemo(
@@ -512,7 +512,7 @@ const UploadResultPage = (props: PageProps) => {
       // 直接跳转到「题目管理」页面（不弹窗），并携带这次新建的题目 ID
       const ids = Array.isArray(resp.question_ids) ? resp.question_ids : []
       const query = ids.length ? `?ids=${encodeURIComponent(ids.join(','))}` : ''
-      router.push(`/app/questions${query}`)
+      router.push(`/questions${query}`)
     } catch (e: any) {
       setSaveError(e.message || '保存失败')
     } finally {

@@ -25,7 +25,7 @@ export default function LoginPage() {
 
     try {
       await dispatch(loginUser({ email, password })).unwrap()
-      router.push('/app')
+      router.push('/')
     } catch (err: any) {
       setError(err.message || '登录失败，请检查邮箱和密码')
     } finally {

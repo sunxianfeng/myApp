@@ -7,8 +7,8 @@ export default function DashboardRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    // 重定向到 /app 页面
-    router.replace('/app')
+    // 重定向到首页
+    router.replace('/')
   }, [router])
 
   return (
