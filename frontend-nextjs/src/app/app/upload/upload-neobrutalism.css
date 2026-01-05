@@ -1069,7 +1069,8 @@ width: 180px !important;
 }
 
 /* Card header optimizations for better hierarchy */
-.card-header {
+/* Use more specific selector to avoid affecting other pages */
+.upload-page .card-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;

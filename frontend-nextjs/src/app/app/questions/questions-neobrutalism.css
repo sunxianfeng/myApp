@@ -245,13 +245,14 @@
   cursor: pointer;
 }
 
-.card-header {
+/* Use unique class name to avoid conflicts with upload page styles */
+.questions-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 6px 10px;
   border-bottom: 2px solid #000 !important;
-  background-color: var(--neo-bg-offset);
+  /* background-color set via inline styles for dynamic colors */
   font-size: 0.75rem;
 }
 
@@ -571,4 +572,4 @@
   }
 }
 
-/* Cache bust: 1766752440 */
+/* Cache bust: 1736122800 */

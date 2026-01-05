@@ -625,7 +625,7 @@ const QuestionCard = ({
         e.dataTransfer.effectAllowed = 'move'
       }}
     >
-      <div className="card-header">
+      <div className="questions-card-header" style={{ backgroundColor: 'var(--neo-bg-offset)' }}>
         <div className="collection-tag">
           <IconFolder size={14} style={{ marginRight: '6px' }} />
           {collectionTitle}
@@ -1165,7 +1165,7 @@ const QuestionsContent = () => {
                     handleDropQuestionToCollection(cId, qId)
                   }}
                 >
-                  <div className="card-header" style={{ backgroundColor: generateColorFromString(cId), opacity: 0.7 }}>
+                  <div className="questions-card-header" style={{ backgroundColor: generateColorFromString(cId), opacity: 0.7 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <IconFolder size={16} />
                       <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{c.title}</span>
