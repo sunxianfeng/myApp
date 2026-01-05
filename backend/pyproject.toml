@@ -1,5 +1,5 @@
 [project]
-name = "question-generator-backend"
+name = "mistake-notebook-backend"
 version = "1.0.0"
 description = "题宝后端 - FastAPI"
 authors = [
@@ -122,3 +122,6 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.uv]
+index-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
