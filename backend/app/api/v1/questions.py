@@ -12,20 +12,91 @@ from datetime import datetime
 from app.database import get_db
 from app.services.ocr_integration import get_ocr_integration_service
 from app.services.question_service import get_question_service
+import asyncio
+
 from app.schemas.question import (
     QuestionResponse, QuestionUpdate, QuestionSearchRequest, QuestionListResponse,
     DocumentResponse, OCRProcessRequest, OCRProcessResponse,
         ProcessingStatistics, QuestionVerificationRequest, APIResponse,
         QuestionBulkCreateRequest, QuestionBulkCreateResponse, QuestionCreate
 )
+from app.schemas.ai import (
+    ReferenceAnswerRequest,
+    ReferenceAnswerResponse,
+    SimilarQuestionsRequest,
+    SimilarQuestionsResponse,
+    SimilarQuestion,
+)
 from app.utils.auth import get_current_user
 from app.models.user import User
+from app.services.qwen_llm import get_qwen_text_service
 
 logger = logging.getLogger(__name__)
 
 # Use tag only; prefix is added when the router is included in main.py
 # to avoid double-prefix paths like /api/v1/questions/questions
 router = APIRouter(tags=["questions"])
+
+
+@router.post("/ai/reference-answer", response_model=ReferenceAnswerResponse)
+async def generate_reference_answer(
+    payload: ReferenceAnswerRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Generate a reference answer for a question using Qwen."""
+    try:
+        svc = get_qwen_text_service()
+        result = await asyncio.to_thread(
+            svc.generate_reference_answer,
+            payload.question.model_dump(),
+            payload.language,
+        )
+        return ReferenceAnswerResponse(
+            answer=result.answer,
+            explanation=result.explanation,
+            steps=result.steps or [],
+            key_points=result.key_points or [],
+        )
+    except Exception as e:
+        logger.error(f"Failed to generate reference answer: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate reference answer: {str(e)}",
+        )
+
+
+@router.post("/ai/similar-questions", response_model=SimilarQuestionsResponse)
+async def generate_similar_questions(
+    payload: SimilarQuestionsRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Generate similar questions (举一反三) using Qwen."""
+    try:
+        svc = get_qwen_text_service()
+        results = await asyncio.to_thread(
+            svc.generate_similar_questions,
+            payload.question.model_dump(),
+            payload.count,
+            payload.language,
+        )
+        return SimilarQuestionsResponse(
+            questions=[
+                SimilarQuestion(
+                    question_type=r.question_type,
+                    content=r.content,
+                    options=r.options or [],
+                    answer=r.answer,
+                    explanation=r.explanation,
+                )
+                for r in results
+            ]
+        )
+    except Exception as e:
+        logger.error(f"Failed to generate similar questions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate similar questions: {str(e)}",
+        )
 
 
 @router.post("/process-ocr", response_model=OCRProcessResponse)
