@@ -52,12 +52,22 @@ class Settings:
     # Qwen OCR Configuration (Alibaba Cloud DashScope)
     DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "sk-cf7028f008864ce3b4605704f51f7726")
     QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen-vl-max") # qwen-vl-plus  qwen2-vl-72b-instruct
+    # Qwen Text Generation Model
+    QWEN_TEXT_MODEL = os.getenv("QWEN_TEXT_MODEL", "qwen-vl-max")  # qwen-plus / qwen-max
     
     # Vector Store Configuration
     # Note: ChromaDB requires onnxruntime which doesn't support Python 3.14 yet
     # Set to "false" if using Python 3.14, or downgrade to Python 3.12
     VECTOR_STORE_ENABLED = os.getenv("VECTOR_STORE_ENABLED", "false").lower() == "true"
+    VECTOR_STORE_BACKEND = os.getenv("VECTOR_STORE_BACKEND", "chroma").strip().lower()
     VECTOR_STORE_DIR = os.getenv("VECTOR_STORE_DIR", "./chroma_db")
+    VECTOR_STORE_VECTOR_SIZE = int(os.getenv("VECTOR_STORE_VECTOR_SIZE", "384"))
+    VECTOR_STORE_DISTANCE = os.getenv("VECTOR_STORE_DISTANCE", "cosine").strip().lower()
+
+    # Qdrant Cloud
+    QDRANT_URL = os.getenv("QDRANT_URL", "").strip()
+    QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "").strip()
+    QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "questions").strip()
     VECTOR_STORE_ASYNC = True  # Always use async operations to avoid blocking
 
 settings = Settings()

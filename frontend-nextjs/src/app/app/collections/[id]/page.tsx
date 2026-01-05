@@ -46,6 +46,8 @@ const getQuestionContentText = (content: string | { text?: string } | any): stri
   return String(content || '')
 }
 
+import { generateReferenceAnswer, generateSimilarQuestions } from '@/lib/api'
+
 // Question Detail Modal Component
 const QuestionDetailModal = ({ 
   question, 
@@ -70,10 +72,20 @@ const QuestionDetailModal = ({
   const handleGetReferenceAnswer = async () => {
     setIsGeneratingAnswer(true)
     try {
-      // TODO: Implement API call to generate reference answer
-      // For now, show a placeholder
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
-      setGeneratedAnswer("这是一个示例参考答案。实际实现中，这里会调用服务根据题目内容生成详细的答案解析。")
+      const resp = await generateReferenceAnswer({
+        question: {
+          id: question.id,
+          number: question.number,
+          question_type: question.question_type || question.type,
+          content: question.content,
+          full_content: question.full_content,
+          options: question.options,
+        },
+        language: 'zh',
+      })
+
+      const answerText = [resp?.answer, resp?.explanation].filter(Boolean).join('\n\n')
+      setGeneratedAnswer(answerText || '未生成到答案')
     } catch (error) {
       console.error('Failed to generate answer:', error)
       alert('生成答案失败，请稍后重试')
@@ -85,13 +97,30 @@ const QuestionDetailModal = ({
   const handleGenerateSimilar = async () => {
     setIsGeneratingSimilar(true)
     try {
-      // TODO: Implement API call to generate similar questions
-      // For now, show a placeholder
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
-      setSimilarQuestions([
-        { id: 'similar-1', content: '相似题目1：这是一个类似的问题...', question_type: 'multiple_choice' },
-        { id: 'similar-2', content: '相似题目2：这是另一个类似的问题...', question_type: 'multiple_choice' }
-      ])
+      const resp = await generateSimilarQuestions({
+        question: {
+          id: question.id,
+          number: question.number,
+          question_type: question.question_type || question.type,
+          content: question.content,
+          full_content: question.full_content,
+          options: question.options,
+        },
+        count: 2,
+        language: 'zh',
+      })
+
+      const items = Array.isArray(resp?.questions) ? resp.questions : []
+      setSimilarQuestions(
+        items.map((q: any, idx: number) => ({
+          id: q.id || `similar-${idx + 1}`,
+          content: q.content,
+          question_type: q.question_type,
+          answer: q.answer,
+          explanation: q.explanation,
+          options: q.options,
+        }))
+      )
     } catch (error) {
       console.error('Failed to generate similar questions:', error)
       alert('生成相似题目失败，请稍后重试')

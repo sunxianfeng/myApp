@@ -231,6 +231,36 @@ export const getRecentQuestions = async (limit: number = 5): Promise<any> => {
   return await api.get('/v1/questions/recent', { params: { limit } })
 }
 
+// AI 相关 API（参考答案 / 举一反三）
+export const generateReferenceAnswer = async (payload: {
+  question: {
+    id?: string
+    number?: number
+    question_type?: string
+    content: any
+    full_content?: string
+    options?: Array<{ label: string; content: string }>
+  }
+  language?: 'zh' | 'en'
+}): Promise<any> => {
+  return await api.post('/v1/questions/ai/reference-answer', payload)
+}
+
+export const generateSimilarQuestions = async (payload: {
+  question: {
+    id?: string
+    number?: number
+    question_type?: string
+    content: any
+    full_content?: string
+    options?: Array<{ label: string; content: string }>
+  }
+  count?: number
+  language?: 'zh' | 'en'
+}): Promise<any> => {
+  return await api.post('/v1/questions/ai/similar-questions', payload)
+}
+
 // 统计相关 API
 export const getDashboardStats = async (): Promise<any> => {
   return await api.get('/v1/stats/dashboard')
