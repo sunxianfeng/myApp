@@ -13,6 +13,13 @@ import {
   Star as IconStar,
   ArrowLeft as IconArrowLeft,
   X as IconX,
+  FileDown as IconFileDown,
+  Printer as IconPrinter,
+  BookOpen as IconBookOpen,
+  Target as IconTarget,
+  TrendingUp as IconTrendingUp,
+  LayoutGrid as IconLayoutGrid,
+  List as IconList,
 } from 'lucide-react'
 
 import type { AppDispatch } from '@/lib/store'
@@ -713,6 +720,12 @@ export default function CollectionDetailPage() {
     }
   }
   
+  const handleExportPDF = () => {
+    // Open print preview page in new window
+    const printUrl = `/papers/print/${collectionId}`
+    window.open(printUrl, '_blank')
+  }
+  
   const handleAction = (action: string, payload: any) => {
     switch (action) {
       case 'edit':
@@ -748,9 +761,17 @@ export default function CollectionDetailPage() {
   if (isLoading) {
     return (
       <div className="unified-questions-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ display: 'inline-block', animation: 'spin 1s linear infinite', fontSize: '2rem' }}>⏳</div>
-          <p style={{ marginTop: '1rem', fontWeight: 700 }}>Loading...</p>
+        <div style={{ 
+          textAlign: 'center',
+          padding: '40px',
+          backgroundColor: 'white',
+          border: '3px solid black',
+          borderRadius: '16px',
+          boxShadow: '8px 8px 0 rgba(0,0,0,1)',
+        }}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px', animation: 'spin 2s linear infinite' }}>⏳</div>
+          <p style={{ fontWeight: 900, fontSize: '1.25rem', color: '#1F2937' }}>加载中...</p>
+          <p style={{ fontSize: '0.875rem', color: '#6B7280', marginTop: '8px' }}>正在获取题目集数据</p>
         </div>
       </div>
     )
@@ -759,22 +780,57 @@ export default function CollectionDetailPage() {
   if (error || !collection) {
     return (
       <div className="unified-questions-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ color: '#EF4444', marginBottom: '1rem', fontWeight: 700 }}>{error || 'Collection not found'}</p>
+        <div style={{ 
+          textAlign: 'center',
+          padding: '48px',
+          backgroundColor: 'white',
+          border: '3px solid black',
+          borderRadius: '16px',
+          boxShadow: '8px 8px 0 rgba(0,0,0,1)',
+          maxWidth: '500px',
+        }}>
+          <div style={{ fontSize: '4rem', marginBottom: '24px' }}>😢</div>
+          <h2 style={{ 
+            fontWeight: 900, 
+            fontSize: '1.75rem', 
+            marginBottom: '12px',
+            color: '#1F2937'
+          }}>
+            出错了
+          </h2>
+          <p style={{ 
+            color: '#EF4444', 
+            marginBottom: '24px', 
+            fontWeight: 600,
+            fontSize: '1rem',
+            lineHeight: 1.6,
+          }}>
+            {error || '未找到题目集'}
+          </p>
           <button
             onClick={() => router.back()}
             style={{
-              padding: '12px 24px',
+              padding: '12px 28px',
               backgroundColor: '#3B82F6',
               color: 'white',
               border: '3px solid black',
               borderRadius: '8px',
-              fontWeight: 700,
+              fontWeight: 800,
               cursor: 'pointer',
               boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+              transition: 'all 0.2s',
+              fontSize: '1rem',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(2px, 2px)'
+              e.currentTarget.style.boxShadow = '2px 2px 0 rgba(0,0,0,1)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)'
+              e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
             }}
           >
-            Go Back
+            ← 返回
           </button>
         </div>
       </div>
@@ -836,7 +892,7 @@ export default function CollectionDetailPage() {
               flexWrap: 'wrap',
               gap: '12px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, flexWrap: 'wrap' }}>
                 <h1 style={{
                   fontSize: '1.75rem',
                   fontWeight: 900,
@@ -856,53 +912,160 @@ export default function CollectionDetailPage() {
                     ⭐
                   </span>
                 )}
-                <span style={{ 
-                  padding: '4px 12px', 
-                  backgroundColor: '#E5E7EB', 
-                  border: '2px solid black', 
-                  borderRadius: '20px', 
-                  fontSize: '0.75rem', 
-                  fontWeight: 900 
-                }}>
-                  {filteredQuestions.length} ITEMS
-                </span>
+                {/* Integrated Stats - Unified Style */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ 
+                    padding: '4px 12px', 
+                    backgroundColor: 'white', 
+                    border: '2px solid black', 
+                    borderRadius: '20px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 900,
+                    color: '#111827',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                  }}>
+                    {filteredQuestions.length} ITEMS
+                  </span>
+                  <span style={{ 
+                    padding: '4px 12px', 
+                    backgroundColor: 'white', 
+                    border: '2px solid black', 
+                    borderRadius: '20px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 900,
+                    color: '#111827',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                  }}>
+                    <IconBookOpen size={14} />
+                    {collection.question_count || 0} 题
+                  </span>
+                  <span style={{ 
+                    padding: '4px 12px', 
+                    backgroundColor: 'white', 
+                    border: '2px solid black', 
+                    borderRadius: '20px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 900,
+                    color: '#111827',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                  }}>
+                    <IconTarget size={14} />
+                    {collection.total_practiced || 0} 练习
+                  </span>
+                  <span style={{ 
+                    padding: '4px 12px', 
+                    backgroundColor: 'white', 
+                    border: '2px solid black', 
+                    borderRadius: '20px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 900,
+                    color: '#111827',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                  }}>
+                    <IconTrendingUp size={14} />
+                    {sortedQuestions.length > 0 
+                      ? (sortedQuestions.reduce((sum, q) => sum + (q.mastery_level || 0), 0) / sortedQuestions.length).toFixed(1)
+                      : '0.0'} 掌握
+                  </span>
+                </div>
               </div>
               
-              <button
-                onClick={handleToggleFavorite}
-                style={{
-                  padding: '8px 16px',
-                  border: '2px solid black',
-                  borderRadius: '8px',
-                  backgroundColor: collection.is_favorite ? '#FEF3C7' : 'white',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  boxShadow: '3px 3px 0 rgba(0,0,0,1)',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  flexShrink: 0,
-                  fontSize: '0.875rem',
-                }}
-              >
-                {collection.is_favorite ? (
-                  <>
-                    <IconStar size={16} fill="currentColor" />
-                    <span>Unfavorite</span>
-                  </>
-                ) : (
-                  <>
-                    <IconStar size={16} />
-                    <span>Favorite</span>
-                  </>
-                )}
-              </button>
+              <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                <button
+                  onClick={handleExportPDF}
+                  style={{
+                    padding: '8px 16px',
+                    border: '2px solid black',
+                    borderRadius: '8px',
+                    backgroundColor: '#A3E635',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '3px 3px 0 rgba(0,0,0,1)',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '0.875rem',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#84CC16'
+                    e.currentTarget.style.transform = 'translate(1px, 1px)'
+                    e.currentTarget.style.boxShadow = '2px 2px 0 rgba(0,0,0,1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#A3E635'
+                    e.currentTarget.style.transform = 'translate(0, 0)'
+                    e.currentTarget.style.boxShadow = '3px 3px 0 rgba(0,0,0,1)'
+                  }}
+                >
+                  <IconFileDown size={16} />
+                  <span>导出 PDF</span>
+                </button>
+                
+                <button
+                  onClick={handleToggleFavorite}
+                  style={{
+                    padding: '8px 16px',
+                    border: '2px solid black',
+                    borderRadius: '8px',
+                    backgroundColor: collection.is_favorite ? '#FFD100' : 'white',
+                    color: 'black',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '3px 3px 0 rgba(0,0,0,1)',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '0.875rem',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!collection.is_favorite) {
+                      e.currentTarget.style.backgroundColor = '#FEF3C7'
+                    }
+                    e.currentTarget.style.transform = 'translate(1px, 1px)'
+                    e.currentTarget.style.boxShadow = '2px 2px 0 rgba(0,0,0,1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = collection.is_favorite ? '#FFD100' : 'white'
+                    e.currentTarget.style.transform = 'translate(0, 0)'
+                    e.currentTarget.style.boxShadow = '3px 3px 0 rgba(0,0,0,1)'
+                  }}
+                >
+                  {collection.is_favorite ? (
+                    <>
+                      <IconStar size={16} fill="currentColor" />
+                      <span>Unfavorite</span>
+                    </>
+                  ) : (
+                    <>
+                      <IconStar size={16} />
+                      <span>Favorite</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* 底栏：紧凑型控制器 */}
             <div style={{
-              padding: '12px 24px',
+              padding: '16px 24px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -910,84 +1073,103 @@ export default function CollectionDetailPage() {
               flexWrap: 'wrap',
               gap: '16px'
             }}>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  style={{
-                    padding: '6px 10px',
-                    border: '2px solid black',
-                    borderRadius: '6px',
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    backgroundColor: 'white',
-                  }}
-                >
-                  <option value="added">Recently Added</option>
-                  <option value="mastery">Mastery Level</option>
-                  <option value="practiced">Practice Count</option>
-                </select>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#6B7280' }}>排序:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    style={{
+                      padding: '8px 12px',
+                      border: '2px solid black',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      backgroundColor: 'white',
+                      boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <option value="added">最近添加</option>
+                    <option value="mastery">掌握程度</option>
+                    <option value="practiced">练习次数</option>
+                  </select>
+                </div>
 
-                <select
-                  value={filterMastery}
-                  onChange={(e) => setFilterMastery(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-                  style={{
-                    padding: '6px 10px',
-                    border: '2px solid black',
-                    borderRadius: '6px',
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    backgroundColor: 'white',
-                  }}
-                >
-                  <option value="all">All Mastery</option>
-                  <option value="0">Level 0</option>
-                  <option value="1">Level 1</option>
-                  <option value="2">Level 2</option>
-                  <option value="3">Level 3</option>
-                  <option value="4">Level 4</option>
-                  <option value="5">Level 5</option>
-                </select>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#6B7280' }}>筛选:</span>
+                  <select
+                    value={filterMastery}
+                    onChange={(e) => setFilterMastery(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                    style={{
+                      padding: '8px 12px',
+                      border: '2px solid black',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      backgroundColor: 'white',
+                      boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <option value="all">所有掌握度</option>
+                    <option value="0">⭐ 未掌握</option>
+                    <option value="1">⭐ 初步理解</option>
+                    <option value="2">⭐⭐ 基本掌握</option>
+                    <option value="3">⭐⭐⭐ 熟练掌握</option>
+                    <option value="4">⭐⭐⭐⭐ 精通</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 完美</option>
+                  </select>
+                </div>
               </div>
 
               <div style={{ 
                 display: 'flex', 
                 border: '2px solid black', 
-                borderRadius: '6px', 
+                borderRadius: '8px', 
                 overflow: 'hidden',
+                boxShadow: '2px 2px 0 rgba(0,0,0,1)',
               }}>
                 <button
                   onClick={() => setViewMode('card')}
                   style={{
-                    padding: '6px 16px',
-                    backgroundColor: viewMode === 'card' ? '#3B82F6' : 'white',
-                    color: viewMode === 'card' ? 'white' : 'black',
+                    padding: '8px 20px',
+                    backgroundColor: viewMode === 'card' ? '#A3E635' : 'white',
+                    color: 'black',
                     border: 'none',
                     fontWeight: 800,
                     fontSize: '0.875rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}
                 >
-                  Card
+                  <IconLayoutGrid size={16} />
+                  卡片
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
                   style={{
-                    padding: '6px 16px',
-                    backgroundColor: viewMode === 'list' ? '#3B82F6' : 'white',
-                    color: viewMode === 'list' ? 'white' : 'black',
+                    padding: '8px 20px',
+                    backgroundColor: viewMode === 'list' ? '#A3E635' : 'white',
+                    color: 'black',
                     border: 'none',
                     borderLeft: '2px solid black',
                     fontWeight: 800,
                     fontSize: '0.875rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}
                 >
-                  List
+                  <IconList size={16} />
+                  列表
                 </button>
               </div>
             </div>
@@ -995,12 +1177,21 @@ export default function CollectionDetailPage() {
 
           {/* Description - only if exists and not the default Chinese text */}
           {collection.description && collection.description !== '从题目管理页面创建' && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ 
+              marginBottom: '24px',
+              padding: '20px',
+              backgroundColor: '#F3F4F6',
+              border: '2px solid #D1D5DB',
+              borderRadius: '12px',
+            }}>
+              <div style={{ fontSize: '0.875rem', fontWeight: 800, color: '#374151', marginBottom: '8px' }}>
+                📝 描述
+              </div>
               <p style={{
                 fontSize: '1rem',
-                color: '#6B7280',
+                color: '#4B5563',
                 lineHeight: 1.6,
-                maxWidth: '800px',
+                margin: 0,
               }}>
                 {collection.description}
               </p>
@@ -1027,13 +1218,62 @@ export default function CollectionDetailPage() {
           
           {filteredQuestions.length === 0 && (
             <div style={{ 
-              gridColumn: '1 / -1', 
-              textAlign: 'center', 
-              padding: '4rem',
-              color: '#6B7280',
+              gridColumn: '1 / -1',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '4rem 2rem',
+              backgroundColor: 'white',
+              border: '3px dashed #D1D5DB',
+              borderRadius: '16px',
+              textAlign: 'center',
             }}>
-              <p style={{ fontWeight: 900, fontSize: '1.25rem', marginBottom: '8px' }}>No questions found</p>
-              <p>Try adjusting your filters or add some questions to this collection.</p>
+              <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>📝</div>
+              <p style={{ 
+                fontWeight: 900, 
+                fontSize: '1.5rem', 
+                marginBottom: '12px',
+                color: '#1F2937'
+              }}>
+                暂无题目
+              </p>
+              <p style={{ 
+                fontSize: '1rem', 
+                color: '#6B7280',
+                marginBottom: '1.5rem',
+                maxWidth: '500px',
+                lineHeight: 1.6,
+              }}>
+                {filterMastery !== 'all' 
+                  ? '当前筛选条件下没有找到题目，尝试调整筛选条件。'
+                  : '这个题目集还没有添加题目，去题目库添加一些吧！'}
+              </p>
+              <button
+                onClick={() => router.push('/questions')}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#A3E635',
+                  color: 'black',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+                  transition: 'all 0.2s',
+                  fontSize: '0.95rem',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translate(2px, 2px)'
+                  e.currentTarget.style.boxShadow = '2px 2px 0 rgba(0,0,0,1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translate(0, 0)'
+                  e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
+                }}
+              >
+                前往题目库
+              </button>
             </div>
           )}
         </main>
@@ -1129,9 +1369,40 @@ export default function CollectionDetailPage() {
               
               {filteredQuestions.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#6B7280' }}>
-                    <p style={{ fontWeight: 900, fontSize: '1.25rem', marginBottom: '8px' }}>No questions found</p>
-                    <p>Try adjusting your filters.</p>
+                  <td colSpan={6} style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ fontSize: '3rem', opacity: 0.5 }}>📝</div>
+                      <p style={{ 
+                        fontWeight: 900, 
+                        fontSize: '1.25rem', 
+                        marginBottom: '8px',
+                        color: '#1F2937'
+                      }}>
+                        暂无题目
+                      </p>
+                      <p style={{ color: '#6B7280', maxWidth: '400px', lineHeight: 1.6 }}>
+                        {filterMastery !== 'all' 
+                          ? '当前筛选条件下没有找到题目，尝试调整筛选条件。'
+                          : '这个题目集还没有添加题目，去题目库添加一些吧！'}
+                      </p>
+                      <button
+                        onClick={() => router.push('/questions')}
+                        style={{
+                          marginTop: '12px',
+                          padding: '10px 20px',
+                          backgroundColor: '#A3E635',
+                          color: 'black',
+                          border: '2px solid black',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          boxShadow: '3px 3px 0 rgba(0,0,0,1)',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        前往题目库
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}

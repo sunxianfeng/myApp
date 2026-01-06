@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { AppLogo } from './Icons'
 
-function Icon({ name, className }: { name: 'dashboard' | 'file' | 'upload' | 'settings' | 'search' | 'chevronDown'; className?: string }) {
+function Icon({ name, className }: { name: 'dashboard' | 'file' | 'upload' | 'settings' | 'search' | 'chevronDown' | 'menu' | 'chevronLeft' | 'chevronRight'; className?: string }) {
   // Slightly thicker stroke so icons appear bold and consistent with neobrutalism
   const common = { className, fill: 'none', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', 'aria-hidden': true, strokeWidth: '3' }
   switch (name) {
@@ -53,6 +53,24 @@ function Icon({ name, className }: { name: 'dashboard' | 'file' | 'upload' | 'se
           <path d="M6 9l6 6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
+    case 'menu':
+      return (
+        <svg {...common}>
+          <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'chevronLeft':
+      return (
+        <svg {...common}>
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'chevronRight':
+      return (
+        <svg {...common}>
+          <path d="M9 18l6-6-6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
     default:
       return null
   }
@@ -65,10 +83,28 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    // Load collapsed state from localStorage
+    const savedState = localStorage.getItem('sidebarCollapsed')
+    if (savedState !== null) {
+      setIsCollapsed(savedState === 'true')
+    }
   }, [])
+
+  // Close profile dropdown when route changes
+  useEffect(() => {
+    setIsProfileOpen(false)
+  }, [pathname])
+
+  const toggleSidebar = () => {
+    const newState = !isCollapsed
+    setIsCollapsed(newState)
+    localStorage.setItem('sidebarCollapsed', String(newState))
+  }
 
   const isActive = (path: string): boolean => {
     if (path === '/') {
@@ -102,83 +138,200 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       backgroundSize: '20px 20px'
     }}>
       {/* Full-Width Top Header - Seamless Butter Yellow Background */}
-      <header className="w-full h-16 border-0 shadow-none flex items-center justify-between px-8 flex-shrink-0" style={{
+      <header className="w-full h-20 border-0 shadow-none flex items-center justify-between flex-shrink-0" style={{
         background: '#FDE047',
         backgroundImage: 'radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
-        backgroundSize: '20px 20px'
+        backgroundSize: '20px 20px',
+        paddingTop: '8px',
+        paddingBottom: '8px',
+        paddingLeft: '2rem',
+        paddingRight: '2.5rem'
       }} suppressHydrationWarning>
         {/* Left: Logo - Text-based with small icon square */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-black rounded-md flex items-center justify-center flex-shrink-0">
-            <AppLogo className="w-5 h-5 text-yellow-300" />
-          </div>
-          <h1 className="text-lg font-black text-black">题宝 OCR</h1>
+        <div className="flex items-center gap-2.5">
+          <AppLogo className="w-11 h-11" />
+          <h1 className="text-2xl font-black text-black tracking-tight">题宝</h1>
         </div>
 
-        {/* Right: User Profile */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-black">
-            <img
-              src={
-                'data:image/svg+xml;utf8,' +
-                encodeURIComponent(
-                  `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><rect width=\"32\" height=\"32\" rx=\"16\" fill=\"#E5E7EB\"/><circle cx=\"16\" cy=\"13\" r=\"6\" fill=\"#9CA3AF\"/><path d=\"M6.5 28c2.5-6 16.5-6 19 0\" fill=\"#9CA3AF\"/></svg>`
-                )
-              }
-              alt="User Avatar"
-              className="w-full h-full object-cover"
+        {/* Right: User Profile with Dropdown */}
+        <div 
+          className="relative"
+          onMouseLeave={() => setIsProfileOpen(false)}
+        >
+          <button 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="profile-button flex items-center gap-3 bg-white rounded-full px-4 py-2 border-3 border-black transition-all duration-200 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+            style={{
+              boxShadow: '3px 3px 0px 0px rgba(0,0,0,1)'
+            }}
+          >
+            <div className="w-9 h-9 rounded-full overflow-hidden ring-3 ring-black flex-shrink-0">
+              <img
+                src={
+                  'data:image/svg+xml;utf8,' +
+                  encodeURIComponent(
+                    `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"36\" height=\"36\" viewBox=\"0 0 36 36\"><rect width=\"36\" height=\"36\" rx=\"18\" fill=\"#FBBF24\"/><circle cx=\"18\" cy=\"15\" r=\"7\" fill=\"#000000\"/><path d=\"M5 33c3-7 21-7 26 0\" fill=\"#000000\"/></svg>`
+                  )
+                }
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="hidden sm:flex sm:flex-col text-left">
+              <p className="font-black text-black text-sm leading-tight">Username</p>
+              <p className="text-xs text-gray-600 font-semibold">高级会员</p>
+            </div>
+
+            <Icon 
+              name="chevronDown" 
+              className={`w-4 h-4 text-black transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} 
             />
-          </div>
+          </button>
 
-          <div className="hidden sm:flex sm:flex-col">
-            <p className="font-black text-black text-sm">Username</p>
-            <p className="text-xs text-black font-semibold">高级会员</p>
-          </div>
+          {/* Dropdown Menu - Neobrutalism Style */}
+          {isProfileOpen && (
+            <>
+              {/* Backdrop to close dropdown when clicking outside */}
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setIsProfileOpen(false)}
+              />
+              
+              <div 
+                className="profile-dropdown absolute mt-3 bg-white rounded-2xl border-3 border-black z-50"
+                style={{
+                  boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)',
+                  right: '0',
+                  maxHeight: 'calc(100vh - 120px)',
+                  overflowY: 'auto',
+                  minWidth: '210px',
+                  width: 'max-content',
+                  maxWidth: '240px'
+                }}
+              >
+                {/* User Info Section - Email Focused */}
+                <div className="px-6 py-4 border-b-3 border-black bg-gradient-to-br from-yellow-50 to-amber-50">
+                  <div className="space-y-2.5">
+                    <p className="text-base text-gray-700 font-bold break-all leading-relaxed">user@example.com</p>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black text-white rounded-full text-xs font-bold shadow-sm">
+                      <span className="text-sm">⭐</span>
+                      <span>高级会员</span>
+                    </div>
+                  </div>
+                </div>
 
-          <Icon name="chevronDown" className="w-4 h-4 text-black" />
+                {/* Menu Items - Simplified & Clean */}
+                <div className="py-2">
+                  <Link
+                    href="/"
+                    className="profile-menu-item flex items-center gap-3.5 px-6 py-3.5 hover:bg-yellow-50 active:bg-yellow-100 transition-all duration-150"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                      <Icon name="dashboard" className="w-4 h-4 text-black" />
+                    </div>
+                    <span className="font-bold text-black text-sm">首页</span>
+                  </Link>
+                  
+                  <Link
+                    href="/settings"
+                    className="profile-menu-item flex items-center gap-3.5 px-6 py-3.5 hover:bg-yellow-50 active:bg-yellow-100 transition-all duration-150"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                      <Icon name="settings" className="w-4 h-4 text-black" />
+                    </div>
+                    <span className="font-bold text-black text-sm">账户设置</span>
+                  </Link>
+
+                  <div className="border-t-2 border-gray-200 my-1.5 mx-4"></div>
+
+                  <button
+                    className="profile-menu-item w-full flex items-center gap-3.5 px-6 py-3.5 hover:bg-red-50 active:bg-red-100 transition-all duration-150 text-left group"
+                    onClick={() => {
+                      // Add logout logic here
+                      setIsProfileOpen(false)
+                    }}
+                  >
+                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-red-600 group-hover:text-red-700 transition-colors" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" strokeWidth="2.5">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeLinecap="round" />
+                        <path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <span className="font-bold text-red-600 group-hover:text-red-700 transition-colors text-sm">退出登录</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </header>
 
       {/* Main Content Area: Sidebar + Main Content with Floating Islands */}
       <div className="flex flex-1 gap-8 p-6 bg-transparent overflow-hidden">
         {/* Sidebar - Floating White Island with Enhanced Shadow for Pale Background */}
-        <aside className="sidebar w-64 flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-y-auto" style={{ border: 'none' }}>
+        <aside 
+          className={`sidebar flex flex-col flex-shrink-0 bg-white rounded-3xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-y-auto transition-all duration-300 ${
+            isCollapsed ? 'w-20' : 'w-64'
+          }`} 
+          style={{ border: 'none' }}
+        >
+          {/* Collapse Toggle Button */}
+          <div className="flex items-center justify-end p-4 pb-2">
+            <button
+              onClick={toggleSidebar}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label={isCollapsed ? '展开侧边栏' : '折叠侧边栏'}
+            >
+              <Icon 
+                name={isCollapsed ? 'chevronRight' : 'chevronLeft'} 
+                className="w-5 h-5 text-gray-600" 
+              />
+            </button>
+          </div>
+
           {/* Navigation - All items in one list */}
-          <nav className="flex flex-col space-y-2 p-4">
+          <nav className="flex flex-col space-y-2 px-4 pb-4">
             {/* 首页 */}
             <Link
               href="/"
               className={getNavItemClassName('/')}
+              title={isCollapsed ? '首页' : ''}
             >
-              <Icon name="dashboard" className="w-5 h-5 mr-3" />
-              首页
+              <Icon name="dashboard" className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
+              {!isCollapsed && <span>首页</span>}
             </Link>
 
             {/* 题目解析 */}
             <Link
               href="/upload"
               className={getNavItemClassName('/upload')}
+              title={isCollapsed ? '题目解析' : ''}
             >
-              <Icon name="upload" className="w-5 h-5 mr-3" />
-              题目解析
+              <Icon name="upload" className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
+              {!isCollapsed && <span>题目解析</span>}
             </Link>
 
             {/* 题目管理 */}
             <Link
               href="/questions"
               className={getNavItemClassName('/questions')}
+              title={isCollapsed ? '题目管理' : ''}
             >
-              <Icon name="file" className="w-5 h-5 mr-3" />
-              题目管理
+              <Icon name="file" className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
+              {!isCollapsed && <span>题目管理</span>}
             </Link>
 
             {/* 设置 - Now a sibling of other nav items */}
             <Link
               href="/settings"
               className={getNavItemClassName('/settings')}
+              title={isCollapsed ? '设置' : ''}
             >
-              <Icon name="settings" className="w-5 h-5 mr-3" />
-              设置
+              <Icon name="settings" className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
+              {!isCollapsed && <span>设置</span>}
             </Link>
           </nav>
         </aside>

@@ -1,0 +1,479 @@
+/* 打印专用样式 - Print Styles */
+
+/* ===== 基础样式 ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.6;
+  color: #1a1a1a;
+  background: #FEFDFB !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ===== 容器样式 ===== */
+.print-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #FEFDFB;
+  min-height: 100vh;
+}
+
+/* ===== 控制栏 (不打印) ===== */
+.print-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 12px;
+}
+
+.print-control-btn {
+  padding: 12px 24px;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  background: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8);
+}
+
+.print-control-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+.print-control-btn.primary {
+  background: #A3E635;
+  font-weight: 900;
+  color: #1a1a1a;
+}
+
+.print-control-btn.primary:hover {
+  background: #84CC16;
+}
+
+/* ===== 加载状态 ===== */
+.print-loading,
+.print-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.print-loading-spinner {
+  font-size: 1.5rem;
+  font-weight: 700;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.print-error h2 {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+  color: #EF4444;
+}
+
+.print-back-btn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: #3B82F6;
+  color: white;
+  border: 3px solid black;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
+}
+
+/* ===== 打印页面内容 ===== */
+.print-page {
+  background: #FEFDFB;
+  padding: 40px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100vh;
+}
+
+/* ===== 试卷头部 ===== */
+.print-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.print-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin: 0 0 16px 0;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+.print-description {
+  font-size: 1.125rem;
+  color: #6B7280;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+.print-meta {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+.print-meta-item {
+  display: flex;
+  gap: 8px;
+}
+
+.print-meta-label {
+  font-weight: 700;
+  color: #6B7280;
+}
+
+.print-meta-value {
+  font-weight: 900;
+  color: #000;
+}
+
+.print-divider {
+  height: 2px;
+  background: #D1D5DB;
+  margin: 24px 0;
+}
+
+/* ===== 题目列表 ===== */
+.print-questions {
+  margin-bottom: 48px;
+}
+
+.print-question {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px dashed #E5E7EB;
+  page-break-inside: avoid;
+}
+
+.print-question:last-child {
+  border-bottom: none;
+}
+
+.print-question-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.print-question-number {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  min-width: 40px;
+}
+
+.print-question-type {
+  padding: 4px 12px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1E40AF;
+}
+
+.print-question-difficulty {
+  padding: 4px 12px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #92400E;
+}
+
+.print-question-content {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  margin-bottom: 16px;
+  color: #1a1a1a;
+  padding-left: 40px;
+  font-weight: 500;
+}
+
+/* ===== 题目选项 ===== */
+.print-question-options {
+  padding-left: 40px;
+  margin-bottom: 16px;
+}
+
+.print-option {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  align-items: flex-start;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.print-option-label {
+  font-weight: 900;
+  color: #1a1a1a;
+  min-width: 28px;
+}
+
+.print-option-text {
+  flex: 1;
+  color: #374151;
+}
+
+/* ===== 答题空间 ===== */
+.print-answer-space {
+  margin: 20px 0;
+  padding: 16px;
+  padding-left: 40px;
+  background: #F9FAFB;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  min-height: 120px;
+}
+
+.print-answer-lines {
+  height: 32px;
+  border-bottom: 1px solid #D1D5DB;
+  margin-bottom: 8px;
+}
+
+/* ===== 题目备注 ===== */
+.print-question-notes {
+  padding-left: 40px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #FEF3C7;
+  border-left: 4px solid #F59E0B;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #78350F;
+  line-height: 1.6;
+}
+
+/* ===== 答案页 ===== */
+.print-answers-section {
+  margin-top: 48px;
+  padding-top: 32px;
+}
+
+.print-answers-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0 0 24px 0;
+  text-align: center;
+  color: #1a1a1a;
+}
+
+.print-answer-item {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #E5E7EB;
+  page-break-inside: avoid;
+}
+
+.print-answer-item:last-child {
+  border-bottom: none;
+}
+
+.print-answer-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.print-answer-number {
+  font-size: 1.125rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  min-width: 40px;
+}
+
+.print-answer-text {
+  flex: 1;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+
+.print-answer-text strong {
+  color: #10B981;
+  margin-right: 8px;
+}
+
+.print-answer-explanation {
+  padding-left: 40px;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4B5563;
+  padding: 12px;
+  background: #F0FDF4;
+  border-left: 3px solid #10B981;
+  border-radius: 4px;
+}
+
+.print-answer-explanation strong {
+  color: #059669;
+  margin-right: 8px;
+}
+
+/* ===== 页脚 ===== */
+.print-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 2px solid #E5E7EB;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+/* ===== 打印媒体查询 ===== */
+@media print {
+  /* 隐藏不需要打印的元素 */
+  .no-print,
+  .print-controls {
+    display: none !important;
+  }
+
+  /* 重置页面样式 */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .print-container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .print-page {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 20mm;
+  }
+
+  /* 页面设置 */
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  /* 强制分页 */
+  .page-break {
+    page-break-before: always;
+    break-before: always;
+  }
+
+  /* 避免元素被拆分 */
+  .print-question,
+  .print-answer-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 打印时的标题 */
+  .print-title {
+    font-size: 2.2rem;
+  }
+
+  .print-question-content {
+    font-size: 1.05rem;
+  }
+
+  /* 简化边框样式用于打印 */
+  .print-question-type,
+  .print-question-difficulty {
+    border: 1px solid #000;
+  }
+
+  /* 打印时的背景颜色 */
+  .print-answer-space,
+  .print-question-notes,
+  .print-answer-explanation {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 确保链接显示完整URL */
+  a[href]:after {
+    content: none;
+  }
+
+  /* 移除阴影效果 */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
+
+/* ===== 响应式设计 ===== */
+@media screen and (max-width: 768px) {
+  .print-container {
+    padding: 12px;
+  }
+
+  .print-page {
+    padding: 20px;
+  }
+
+  .print-title {
+    font-size: 1.75rem;
+  }
+
+  .print-question-number {
+    font-size: 1.125rem;
+  }
+
+  .print-question-content {
+    font-size: 1rem;
+    padding-left: 20px;
+  }
+
+  .print-question-options {
+    padding-left: 20px;
+  }
+
+  .print-meta {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .print-control-btn {
+    font-size: 0.875rem;
+    padding: 8px 16px;
+  }
+}
+
+/* 深色模式被移除 - 打印页面始终使用浅色背景 */
+

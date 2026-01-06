@@ -1,0 +1,1478 @@
+/* ========================================
+   NEOBRUTALISM DESIGN SYSTEM - UPLOAD PAGES - ROUNDED NEOBRUTALISM THEME
+   ======================================== */
+
+/* Root Variables */
+:root {
+  --neo-yellow: #FACC15;
+  --neo-lime: #A3E635;
+  --neo-orange: #FF7A00;
+  --neo-purple: #6366f1;
+  --neo-cyan: #22D3EE;
+  --neo-pink: #FF6B9D;
+  --neo-black: #000000;
+  --neo-white: #FFFFFF;
+  --neo-gray: #F9FAFB;
+  --neo-light-gray: #F3F4F6;
+  --neo-pale-yellow: #FFFBEB;
+  --neo-error: #FF4444;
+  --neo-shadow-hard: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+  --neo-shadow-medium: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  --neo-shadow-small: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  --neo-transition: all 0.15s ease;
+  --neo-border: 3px;
+}
+
+/* ========================================
+   BASE LAYOUT
+   ======================================== */
+
+.upload-page {
+  min-height: 100vh !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.upload-container {
+  max-width: 900px !important;
+  margin: 2rem auto !important;
+  background-color: var(--neo-white) !important;
+  border: 4px solid var(--neo-black) !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  padding: 2.5rem !important;
+  border-radius: 1.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.upload-container:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+/* Page wrapper: content already within the white floating island from Layout */
+.upload-neobrutalism-page {
+  margin: 0;
+  max-width: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+/* The framed card (the "frame") - Already provided by Layout's main element */
+.upload-neobrutalism-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Inner content spacing (if card has inner content wrapper) */
+.upload-neobrutalism-card .content {
+  padding: 0;
+}
+
+/* Make headings and controls breathe */
+.upload-neobrutalism-card h1,
+.upload-neobrutalism-card h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.upload-neobrutalism-card .controls {
+  margin-top: 16px;
+}
+
+/* ========================================
+   HEADER SECTION
+   ======================================== */
+
+.upload-header {
+  background-color: transparent !important;
+  border-bottom: none !important;
+  padding: 0 0 2rem 0 !important;
+  text-align: left !important;
+}
+
+.upload-header h1 {
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  color: var(--neo-black) !important;
+  margin: 0 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.upload-header p {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: #6B7280 !important;
+  margin: 0.5rem 0 0 0 !important;
+}
+
+/* ========================================
+   MODE SELECTOR
+   ======================================== */
+
+.upload-section {
+  padding: 0 !important;
+  margin-top: 2rem !important;
+}
+
+.mode-selector {
+  display: flex !important;
+  gap: 0.75rem !important;
+  justify-content: flex-start !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.mode-btn {
+  padding: 0.625rem 1.25rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  border: 2px solid var(--neo-black) !important;
+  border-radius: 9999px !important;
+  background-color: var(--neo-white) !important;
+  color: #6B7280 !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.mode-btn:hover:not(.disabled) {
+  background-color: var(--neo-light-gray) !important;
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.mode-btn:active:not(.disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: none !important;
+}
+
+.mode-btn.active {
+  background-color: var(--neo-yellow) !important;
+  color: var(--neo-black) !important;
+  font-weight: 700 !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.mode-btn.active:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+/* Disabled button state */
+.mode-btn.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #F5F5F5 !important;
+  color: #9CA3AF !important;
+}
+
+.mode-btn.disabled:hover {
+  transform: none !important;
+  background-color: #F5F5F5 !important;
+}
+
+/* ========================================
+   DROP ZONE
+   ======================================== */
+
+.drop-zone {
+  border: 3px dashed var(--neo-black) !important;
+  background-color: #FEFCE8 !important;
+  border-radius: 1rem !important;
+  padding: 3rem 2rem !important;
+  text-align: center !important;
+  transition: var(--neo-transition) !important;
+  position: relative !important;
+}
+
+.drop-zone::before {
+  display: none !important;
+}
+
+.drop-zone.drag-over {
+  background-color: #FEF08A !important;
+  border-color: var(--neo-black) !important;
+  border-style: solid !important;
+  border-width: 3px !important;
+  transform: scale(1.01) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.2) !important;
+}
+
+.drop-zone:hover {
+  background-color: #FEF08A !important;
+}
+
+.drop-zone-icon {
+  margin-bottom: 1.5rem !important;
+  display: inline-block !important;
+}
+
+.drop-zone-icon svg {
+  width: 64px !important;
+  height: 64px !important;
+  stroke: var(--neo-black) !important;
+  stroke-width: 2.5 !important;
+}
+
+.drop-zone p {
+  font-size: 1.125rem !important;
+  font-weight: 500 !important;
+  color: #6B7280 !important;
+  margin-bottom: 1.5rem !important;
+  letter-spacing: 0 !important;
+}
+
+.drop-zone > div {
+  display: flex !important;
+  gap: 1rem !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ========================================
+   SELECT BUTTONS
+   ======================================== */
+
+.select-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  border: 2px solid var(--neo-black) !important;
+  border-radius: 9999px !important;
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+  cursor: pointer !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: var(--neo-transition) !important;
+  white-space: nowrap !important;
+}
+
+/* Force black background in ALL states */
+.select-btn:link,
+.select-btn:visited,
+.select-btn:focus,
+.select-btn:active:not(.disabled),
+.select-btn[data-clicked="true"],
+.select-btn[data-clicked="false"] {
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+}
+
+.select-btn:hover:not(.disabled) {
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.select-btn:active:not(.disabled) {
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+  transform: translate(3px, 3px) !important;
+  box-shadow: none !important;
+}
+
+.select-btn.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+}
+
+.select-btn svg {
+  margin-right: 0.5rem !important;
+  stroke-width: 2.5 !important;
+}
+
+/* ========================================
+   FILE QUEUE
+   ======================================== */
+
+.file-queue {
+  padding: 1.5rem 0 0 0 !important;
+  background-color: transparent !important;
+}
+
+.file-queue h3 {
+  font-size: 1.125rem !important;
+  font-weight: 900 !important;
+  color: var(--neo-black) !important;
+  margin-bottom: 1rem !important;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+.file-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: 1rem !important;
+  background-color: var(--neo-white) !important;
+  border: 3px solid var(--neo-black) !important;
+  border-radius: 1rem !important;
+  margin-bottom: 0.75rem !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: var(--neo-transition) !important;
+}
+
+.file-item:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.file-preview {
+  width: 64px !important;
+  height: 64px !important;
+  border: 2px solid var(--neo-black) !important;
+  border-radius: 0.5rem !important;
+  background-color: #FEFCE8 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.file-preview img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.file-preview svg {
+  stroke: var(--neo-black) !important;
+  stroke-width: 2.5 !important;
+}
+
+.file-details {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+  min-width: 0 !important;
+}
+
+.file-details p {
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  color: var(--neo-black) !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.file-details span {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: #6B7280 !important;
+}
+
+.remove-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9999px !important;
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+  border: 2px solid var(--neo-black) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.remove-btn:hover {
+  background-color: #EF4444 !important;
+  border-color: #EF4444 !important;
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.remove-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: none !important;
+}
+
+.remove-btn svg {
+  stroke: currentColor !important;
+  stroke-width: 2.5 !important;
+}
+
+.clear-all-btn {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  border: 2px solid var(--neo-black) !important;
+  border-radius: 9999px !important;
+  background-color: #EF4444 !important;
+  color: var(--neo-white) !important;
+  cursor: pointer !important;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: var(--neo-transition) !important;
+}
+
+.clear-all-btn:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.clear-all-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: none !important;
+}
+
+/* Thumbnail overlay for better visibility */
+.file-preview::after {
+  display: none !important;
+}
+
+.progress {
+  height: 100% !important;
+  background-color: var(--neo-yellow) !important;
+  transition: width 0.3s ease !important;
+  position: relative !important;
+  border-radius: 0.25rem !important;
+}
+
+.progress::after {
+  display: none !important;
+}
+
+.remove-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  background-color: var(--neo-white) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.remove-btn:hover {
+  background-color: #FEE2E2 !important;
+  transform: scale(1.1) !important;
+}
+
+.remove-btn svg {
+  stroke: #EF4444 !important;
+  stroke-width: 2.5 !important;
+}
+
+/* ========================================
+   ACTION BAR
+   ======================================== */
+
+.action-bar {
+  padding: 0 !important;
+  margin-top: 2rem !important;
+  background-color: transparent !important;
+  border-top: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+.neo-btn-primary,
+.neo-btn.neo-btn-primary,
+button.neo-btn-primary {
+  width: 100% !important;
+  max-width: 400px !important;
+  padding: 1rem 3rem !important;
+  font-size: 1.125rem !important;
+  font-weight: 900 !important;
+  border: 3px solid var(--neo-black) !important;
+  border-radius: 9999px !important;
+  background-color: var(--neo-lime) !important;
+  color: var(--neo-black) !important;
+  cursor: pointer !important;
+  box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: var(--neo-transition) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.neo-btn-primary:hover:not(:disabled),
+.neo-btn.neo-btn-primary:hover:not(:disabled),
+button.neo-btn-primary:hover:not(:disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.neo-btn-primary:active:not(:disabled),
+.neo-btn.neo-btn-primary:active:not(:disabled),
+button.neo-btn-primary:active:not(:disabled) {
+  transform: translate(5px, 5px) !important;
+  box-shadow: none !important;
+}
+
+.neo-btn-primary:disabled,
+.neo-btn.neo-btn-primary:disabled,
+button.neo-btn-primary:disabled {
+  background-color: #E5E7EB !important;
+  color: #6B7280 !important;
+  cursor: not-allowed !important;
+  border: 3px solid var(--neo-black) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.neo-btn-cancel {
+  width: 100% !important;
+  max-width: 400px !important;
+  padding: 1rem 3rem !important;
+  font-size: 1.125rem !important;
+  font-weight: 900 !important;
+  border: 3px solid var(--neo-black) !important;
+  border-radius: 9999px !important;
+  background-color: #EF4444 !important;
+  color: var(--neo-white) !important;
+  cursor: pointer !important;
+  box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: var(--neo-transition) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.neo-btn-cancel:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.neo-btn-cancel:active {
+  transform: translate(5px, 5px) !important;
+  box-shadow: none !important;
+}
+
+/* ========================================
+   OCR PROCESSING INDICATOR (IMPROVED v3 - FLOATING ISLANDS)
+   ======================================== */
+
+.ocr-processing-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2rem !important;
+  padding: 3rem 2rem !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  background: var(--neo-white) !important;
+  border: 3px solid var(--neo-black) !important;
+  border-radius: 1rem !important;
+  box-shadow: var(--neo-shadow-medium) !important;
+  position: relative !important;
+}
+
+.ocr-processing-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  flex: 1 !important;
+  text-align: center !important;
+}
+
+.ocr-processing-container .ocr-processing-visual,
+.upload-container .ocr-processing-visual,
+.ocr-processing-visual {
+  position: relative !important;
+  /* ========================================
+   RETRO FLOATING TOAST OVERRIDES
+   ======================================== */
+
+/* Enhanced retro toast styling for perfect neobrutalism integration */
+.retro-toast {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.retro-toast .toast-icon {
+  font-weight: 900 !important;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2) !important;
+}
+
+.retro-toast .toast-title {
+  letter-spacing: -0.01em !important;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1) !important;
+}
+
+.retro-toast .action-btn {
+  text-transform: none !important;
+  letter-spacing: -0.005em !important;
+  font-family: inherit !important;
+}
+
+.retro-toast .action-btn:hover {
+  background-color: #F9FAFB !important;
+}
+
+/* Success toast specific styling */
+.retro-toast[style*="#A3E635"] .toast-icon {
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: #000000 !important;
+}
+
+/* Error toast specific styling */  
+.retro-toast[style*="#EF4444"] .toast-icon {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+/* Info toast specific styling */
+.retro-toast[style*="#22D3EE"] .toast-icon {
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: #000000 !important;
+}
+
+/* Mobile responsiveness for retro toast */
+@media (max-width: 768px) {
+  .retro-toast {
+    margin: 0 1rem !important;
+    min-width: auto !important;
+  }
+  
+  .retro-toast .toast-title {
+    font-size: 0.9375rem !important;
+  }
+  
+  .retro-toast .toast-message {
+    font-size: 0.8125rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .retro-toast {
+    margin: 0 0.5rem !important;
+    padding: 0.875rem 1rem !important;
+  }
+  
+  .retro-toast .action-btn {
+    padding: 0.625rem 1rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+width: 180px !important;
+  height: 180px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto 1rem auto !important;
+  background-color: #A3E635 !important;
+  border-radius: 1rem !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  padding: 20px !important;
+  overflow: hidden !important;
+}
+
+.ocr-processing-svg {
+  width: 140px !important;
+  height: 140px !important;
+  display: block !important;
+  border-radius: 0.75rem !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  background: #FFFFFF !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.ocr-processing-container .ocr-scan-line,
+.upload-container .ocr-scan-line,
+.ocr-scan-line {
+  position: absolute !important;
+  left: 50% !important;
+  width: 70% !important;
+  height: 12px !important;
+  background: linear-gradient(to bottom, 
+    transparent 0%,
+    transparent 20%,
+    rgba(163, 230, 53, 0.3) 40%, 
+    rgba(163, 230, 53, 0.9) 60%,
+    #A3E635 80%,
+    rgba(163, 230, 53, 0.6) 90%,
+    transparent 100%) !important;
+  border-radius: 4px !important;
+  box-shadow: 
+    0 0 8px rgba(163, 230, 53, 0.8),
+    0 0 16px rgba(163, 230, 53, 0.6),
+    0 0 24px rgba(163, 230, 53, 0.4),
+    0 0 32px rgba(163, 230, 53, 0.2) !important;
+  z-index: 25 !important;
+  pointer-events: none !important;
+  transform: translateX(-50%) !important;
+  animation: scanMove 2.5s ease-in-out infinite !important;
+}
+
+@keyframes scanMove {
+  0% {
+    top: 15% !important;
+    opacity: 0.5 !important;
+  }
+  50% {
+    top: 50% !important;
+    opacity: 1 !important;
+  }
+  100% {
+    top: 85% !important;
+    opacity: 0.5 !important;
+  }
+}
+
+.ocr-processing-container .ocr-scan-corner,
+.upload-container .ocr-scan-corner,
+.ocr-scan-corner {
+  position: absolute !important;
+  width: 20px !important;
+  height: 20px !important;
+  border: 3px solid #A3E635 !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  z-index: 20 !important;
+  border-radius: 2px !important;
+  box-shadow: 0 0 4px rgba(163, 230, 53, 0.5) !important;
+}
+
+.corner-top-left {
+  top: 10px !important;
+  left: 10px !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+.corner-top-right {
+  top: 10px !important;
+  right: 10px !important;
+  border-left: none !important;
+  border-bottom: none !important;
+  border-bottom: none !important;
+}
+
+.corner-bottom-left {
+  bottom: 10px !important;
+  left: 10px !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+.corner-bottom-right {
+  bottom: 10px !important;
+  right: 10px !important;
+  border-left: none !important;
+  border-top: none !important;
+}
+
+.ocr-processing-label {
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  letter-spacing: 0 !important;
+  color: #000000 !important;
+  margin: 0 0 1rem 0 !important;
+}
+
+.cancel-upload-btn {
+  align-self: center !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  min-width: auto !important;
+  background-color: var(--neo-white) !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  color: var(--neo-black) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.cancel-upload-btn:hover {
+  background-color: #FEE2E2 !important;
+  color: #EF4444 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
+}
+
+.cancel-upload-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+}
+
+.ocr-processing-subtext {
+  display: none !important;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .ocr-scan-line {
+    animation: none !important;
+    top: 50% !important;
+    opacity: 0.8 !important;
+    background: #A3E635 !important;
+    box-shadow: 0 0 8px rgba(163, 230, 53, 0.6) !important;
+  }
+}
+
+/* ========================================
+   ERROR MESSAGE
+   ======================================== */
+
+.error-message {
+  padding: 1rem 1.5rem !important;
+  background-color: #FEE2E2 !important;
+  border: 3px solid #EF4444 !important;
+  border-radius: 1rem !important;
+  color: #991B1B !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  margin: 1.5rem 0 0 0 !important;
+  box-shadow: 4px 4px 0px 0px rgba(239, 68, 68, 0.3) !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+.error-message::before {
+  content: '⚠️' !important;
+  font-size: 1.25rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* Error state for file items */
+.file-item.error {
+  border-color: #EF4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.file-item.error .file-preview {
+  border-color: #EF4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* ========================================
+   HIDDEN INPUT
+   ======================================== */
+
+.hidden {
+  display: none !important;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .upload-page {
+    padding: 0 !important;
+  }
+
+  .upload-header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .upload-header p {
+    font-size: 0.875rem !important;
+  }
+
+  .upload-section {
+    padding: 1.5rem 0 !important;
+  }
+
+  .mode-selector {
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+  }
+
+  .mode-btn {
+    width: auto !important;
+    padding: 0.625rem 1rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .drop-zone {
+    padding: 2rem 1rem !important;
+  }
+
+  .drop-zone p {
+    font-size: 0.875rem !important;
+  }
+
+  .ocr-processing-container {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    padding: 3rem 1.5rem !important;
+  }
+
+  .cancel-upload-btn {
+    align-self: center !important;
+  }
+
+  .drop-zone > div {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .select-btn {
+    width: 100% !important;
+    padding: 1rem 1.5rem !important;
+  }
+
+  .file-queue {
+    padding: 2rem 1.5rem !important;
+  }
+
+  .file-item {
+    flex-wrap: wrap !important;
+  }
+
+  .progress-bar {
+    width: 100% !important;
+    order: 3 !important;
+  }
+
+  .action-bar {
+    padding: 1.5rem !important;
+  }
+
+  .action-bar .btn-primary {
+    width: 100% !important;
+    padding: 1.25rem 2rem !important;
+    font-size: 1.1rem !important;
+  }
+
+  .upload-container {
+    box-shadow: var(--neo-shadow-sm) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --neo-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --neo-border: 0;
+  }
+
+  .upload-header {
+    padding: 0 0 1.5rem 0 !important;
+  }
+
+  .file-queue h3 {
+    font-size: 1rem !important;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.upload-container {
+  animation: fadeIn 0.3s ease-out !important;
+}
+
+.file-item {
+  animation: fadeIn 0.2s ease-out !important;
+}
+
+/* ========================================
+   NEO BUTTON SYSTEM - FLOATING ISLANDS STYLE
+   ======================================== */
+
+.neo-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.875rem 1.75rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  /* border removed - let button variants define their own borders */
+  border-radius: 0.75rem !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  text-decoration: none !important;
+  gap: 0.5rem !important;
+  /* box-shadow removed - let button variants define their own shadows */
+}
+
+.neo-btn:active {
+  transform: translateY(0) !important;
+  /* box-shadow removed - let button variants define their own shadows */
+}
+
+.neo-btn:disabled {
+  /* opacity removed - let button variants define their own disabled state */
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.neo-btn-white {
+  background-color: var(--neo-white) !important;
+  color: var(--neo-black) !important;
+}
+
+.neo-btn-white:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
+  background-color: #F9FAFB !important;
+}
+
+.neo-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.375rem 0.75rem !important;
+  background-color: var(--neo-yellow) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.neo-divider {
+  height: 1px !important;
+  background-color: #E5E7EB !important;
+  margin: 1.5rem 0 !important;
+}
+
+/* Card header optimizations for better hierarchy */
+/* Use more specific selector to avoid affecting other pages */
+.upload-page .card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1.5rem 2rem !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid #E5E7EB !important;
+}
+
+.card-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--neo-black) !important;
+  letter-spacing: -0.01em !important;
+  margin: 0 !important;
+}
+
+.card-subtitle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  margin-left: auto !important;
+  margin-right: 1rem !important;
+}
+
+.status-badge {
+  padding: 0.375rem 0.75rem !important;
+  background-color: var(--neo-yellow) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+.quick-edit-btn {
+  padding: 0.625rem 1.25rem !important;
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  font-weight: 800 !important;
+  font-size: 0.9rem !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+}
+
+.quick-edit-btn:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.quick-edit-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+}
+
+/* Enhanced checkbox styling */
+.neo-checkbox {
+  width: 32px !important;
+  height: 32px !important;
+  border: 4px solid var(--neo-black) !important;
+  background-color: var(--neo-white) !important;
+  position: relative !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.neo-checkbox:hover {
+  transform: scale(1.1) !important;
+}
+
+.neo-checkbox.checked {
+  background-color: var(--neo-purple) !important;
+  border-color: var(--neo-black) !important;
+}
+
+.neo-checkbox.checked::after {
+  content: '✓' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: var(--neo-white) !important;
+  font-size: 1.2rem !important;
+  font-weight: 900 !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Improved sticky bar */
+.sticky-bottom-bar {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background-color: var(--neo-yellow) !important;
+  border-top: 1px solid #E5E7EB !important;
+  padding: 1rem 2rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  box-shadow: var(--neo-shadow) !important;
+  z-index: 1000 !important;
+}
+
+.save-selected-btn {
+  padding: 0.75rem 1.5rem !important;
+  background-color: var(--neo-white) !important;
+  color: var(--neo-black) !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+  transition: var(--neo-transition) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  opacity: 0.6 !important;
+}
+
+.save-selected-btn.active {
+  background-color: var(--neo-black) !important;
+  color: var(--neo-white) !important;
+  opacity: 1 !important;
+}
+
+.save-selected-btn.active:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--neo-shadow) !important;
+}
+
+.save-selected-btn.active:active {
+  transform: translateY(0) !important;
+  box-shadow: var(--neo-shadow-pressed) !important;
+}
+
+/* ========================================
+   ENHANCED UPLOAD FEATURES - DECEMBER 2024
+   ======================================== */
+
+/* Disabled button state */
+.mode-btn.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #F5F5F5 !important;
+  color: #9CA3AF !important;
+}
+
+.mode-btn.disabled:hover {
+  transform: none !important;
+  background-color: #F5F5F5 !important;
+}
+
+/* Enhanced processing messages */
+.ocr-processing-messages {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.ocr-processing-container .ocr-processing-label.primary,
+.upload-container .ocr-processing-label.primary,
+.ocr-processing-label.primary {
+  color: #000000 !important;
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 2rem 0 0.5rem 0 !important;
+  line-height: 1.2 !important;
+}
+
+.ocr-processing-container .ocr-processing-label.secondary,
+.upload-container .ocr-processing-label.secondary,
+.ocr-processing-label.secondary {
+  color: #000000 !important;
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 2rem 0 0.5rem 0 !important;
+  line-height: 1.2 !important;
+}
+
+.ocr-processing-container .ocr-processing-label.success,
+.upload-container .ocr-processing-label.success,
+.ocr-processing-label.success {
+  color: #10B981 !important;
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  margin: 2rem 0 0.5rem 0 !important;
+  line-height: 1.2 !important;
+}
+
+.ocr-processing-container .ocr-processing-sublabel,
+.upload-container .ocr-processing-sublabel,
+.ocr-processing-sublabel {
+  color: #6B7280 !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  margin: 0 0 0.5rem 0 !important;
+  letter-spacing: 0.025em !important;
+  line-height: 1.5 !important;
+}
+
+.ocr-waiting-message {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.ocr-completion-message {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+.completion-icon {
+  font-size: 2.5rem !important;
+  color: #10B981 !important;
+  margin-bottom: 0.5rem !important;
+  animation: checkmarkPop 0.5s ease-out;
+  display: block !important;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmarkPop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile responsiveness for new elements */
+@media (max-width: 768px) {
+  .ocr-processing-label.primary,
+  .ocr-processing-label.secondary,
+  .ocr-processing-label.success {
+    font-size: 0.875rem !important;
+  }
+  
+  .completion-icon {
+    font-size: 2rem !important;
+  }
+}
+
+/* ========================================
+   CRITICAL: BUTTON OVERRIDES - MUST BE LAST
+   These styles override base .neo-btn class
+   ======================================== */
+
+/* Primary Button - Lime Green with Hard Shadow (Neobrutalism) */
+.action-bar .neo-btn.neo-btn-primary,
+.action-bar button.neo-btn-primary,
+.upload-container .neo-btn.neo-btn-primary,
+.upload-container button.neo-btn-primary {
+  width: 100% !important;
+  max-width: 400px !important;
+  padding: 1rem 3rem !important;
+  font-size: 1.125rem !important;
+  font-weight: 900 !important;
+  border: 3px solid #000000 !important;
+  border-radius: 9999px !important;
+  background-color: #A3E635 !important;
+  color: #000000 !important;
+  cursor: pointer !important;
+  box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.action-bar .neo-btn.neo-btn-primary:hover:not(:disabled),
+.action-bar button.neo-btn-primary:hover:not(:disabled),
+.upload-container .neo-btn.neo-btn-primary:hover:not(:disabled),
+.upload-container button.neo-btn-primary:hover:not(:disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+  background-color: #A3E635 !important;
+}
+
+.action-bar .neo-btn.neo-btn-primary:active:not(:disabled),
+.action-bar button.neo-btn-primary:active:not(:disabled),
+.upload-container .neo-btn.neo-btn-primary:active:not(:disabled),
+.upload-container button.neo-btn-primary:active:not(:disabled) {
+  transform: translate(5px, 5px) !important;
+  box-shadow: none !important;
+}
+
+.action-bar .neo-btn.neo-btn-primary:disabled,
+.action-bar button.neo-btn-primary:disabled,
+.upload-container .neo-btn.neo-btn-primary:disabled,
+.upload-container button.neo-btn-primary:disabled {
+  background-color: #E5E7EB !important;
+  color: #6B7280 !important;
+  cursor: not-allowed !important;
+  border: 3px solid #000000 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+/* Cancel Button - Red with Hard Shadow (Neobrutalism) */
+.action-bar .neo-btn.neo-btn-cancel,
+.action-bar button.neo-btn-cancel,
+.upload-container .neo-btn.neo-btn-cancel,
+.upload-container button.neo-btn-cancel {
+  width: 100% !important;
+  max-width: 400px !important;
+  padding: 1rem 3rem !important;
+  font-size: 1.125rem !important;
+  font-weight: 900 !important;
+  border: 3px solid #000000 !important;
+  border-radius: 9999px !important;
+  background-color: #EF4444 !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.action-bar .neo-btn.neo-btn-cancel:hover:not(:disabled),
+.action-bar button.neo-btn-cancel:hover:not(:disabled),
+.upload-container .neo-btn.neo-btn-cancel:hover:not(:disabled),
+.upload-container button.neo-btn-cancel:hover:not(:disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+  background-color: #DC2626 !important;
+}
+
+/* ========================================
+   CRITICAL: HIGHEST PRIORITY COLOR OVERRIDES
+   Force lime green laser scanning animation
+   ======================================== */
+
+/* Ensure visual container has overflow hidden for laser effect */
+div[class*="ocr"] .ocr-processing-visual,
+.ocr-processing-container .ocr-processing-visual {
+  overflow: hidden !important;
+  background-color: #A3E635 !important;
+  border: 3px solid #000000 !important;
+}
+
+/* Enhanced Lime Green Laser Scanner */
+div[class*="ocr"] .ocr-scan-line,
+.ocr-processing-visual .ocr-scan-line,
+*[class*="scan-line"] {
+  width: 70% !important;
+  height: 12px !important;
+  background: linear-gradient(to bottom, 
+    transparent 0%,
+    transparent 20%,
+    rgba(163, 230, 53, 0.3) 40%, 
+    rgba(163, 230, 53, 0.9) 60%,
+    #A3E635 80%,
+    rgba(163, 230, 53, 0.6) 90%,
+    transparent 100%) !important;
+  box-shadow: 
+    0 0 8px rgba(163, 230, 53, 0.8),
+    0 0 16px rgba(163, 230, 53, 0.6),
+    0 0 24px rgba(163, 230, 53, 0.4),
+    0 0 32px rgba(163, 230, 53, 0.2) !important;
+  border-radius: 4px !important;
+  animation: scanMove 2.5s ease-in-out infinite !important;
+}
+
+/* Enhanced scan corners with glow */
+div[class*="ocr"] .ocr-scan-corner,
+.ocr-processing-visual .ocr-scan-corner,
+*[class*="scan-corner"] {
+  border-color: #A3E635 !important;
+  box-shadow: 0 0 4px rgba(163, 230, 53, 0.5) !important;
+}
+
+/* Ensure processing labels are always black, never orange */
+div[class*="ocr"] .ocr-processing-label,
+.ocr-processing-container .ocr-processing-label,
+*[class*="processing-label"] {
+  color: #000000 !important;
+  font-weight: 900 !important;
+}

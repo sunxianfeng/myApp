@@ -1319,6 +1319,25 @@ body {
   display: none !important;
 }
 
+/* Collapsed sidebar styles */
+.sidebar.w-20 .sidebar-item {
+  justify-content: center !important;
+  padding: 0.75rem !important;
+  margin: 0 0.5rem 0.5rem 0.5rem !important;
+}
+
+.sidebar.w-20 .sidebar-item svg {
+  margin-right: 0 !important;
+}
+
+.sidebar.w-20 .sidebar-item:hover {
+  transform: scale(1.1) !important;
+}
+
+.sidebar.w-20 .sidebar-item.active:hover {
+  transform: scale(1.1) !important;
+}
+
 /* ============== MAIN CONTENT AREA ============== */
 main {
   /* Keep background transparent to allow component-level styling */
@@ -1642,6 +1661,94 @@ textarea:focus {
 /* ============== SHADOW STYLES ============== */
 .shadow-md {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07) !important;
+}
+
+/* ============== PROFILE BUTTON & DROPDOWN STYLES ============== */
+.profile-button {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
+.profile-button:active {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.profile-dropdown {
+  animation: dropdownSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Custom scrollbar for dropdown - Refined */
+.profile-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.profile-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.profile-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.profile-menu-item {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  border: none !important;
+  background: transparent !important;
+  text-decoration: none !important;
+  position: relative !important;
+}
+
+.profile-menu-item:active {
+  transform: scale(0.97) !important;
+}
+
+/* Add subtle hover effect */
+.profile-menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: #000000;
+  border-radius: 0 2px 2px 0;
+  transition: height 0.2s ease;
+}
+
+.profile-menu-item:hover::before {
+  height: 60%;
+}
+
+/* Border utilities for neobrutalism */
+.border-3 {
+  border-width: 3px !important;
+}
+
+.ring-3 {
+  box-shadow: 0 0 0 3px currentColor !important;
 }
 
 /* ============== POSITIONING ============== */
