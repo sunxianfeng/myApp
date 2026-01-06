@@ -55,9 +55,30 @@ api.interceptors.response.use(
       return Promise.reject(new Error('网络连接失败，请检查网络设置'))
     }
     
-    // 处理其他错误 - FastAPI returns {detail: "message"}
-    const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || '请求失败'
-    console.error(`API Error [${error.response?.status}]:`, errorMessage, error.config?.url)
+    // 处理其他错误 - FastAPI returns {detail: "message"} or {detail: [{...}]} for validation errors
+    let errorMessage = '请求失败'
+    
+    if (error.response?.data?.detail) {
+      const detail = error.response.data.detail
+      // FastAPI validation errors are arrays of error objects
+      if (Array.isArray(detail)) {
+        const validationErrors = detail.map((err: any) => {
+          const field = err.loc?.join('.') || 'unknown'
+          const msg = err.msg || 'validation error'
+          return `${field}: ${msg}`
+        }).join('; ')
+        errorMessage = `验证失败: ${validationErrors}`
+        console.error(`API Error [${error.response?.status}]:`, detail, error.config?.url)
+      } else {
+        // Single error message
+        errorMessage = detail
+        console.error(`API Error [${error.response?.status}]:`, errorMessage, error.config?.url)
+      }
+    } else {
+      errorMessage = error.response?.data?.message || error.message || '请求失败'
+      console.error(`API Error [${error.response?.status}]:`, errorMessage, error.config?.url)
+    }
+    
     return Promise.reject(new Error(errorMessage))
   }
 )

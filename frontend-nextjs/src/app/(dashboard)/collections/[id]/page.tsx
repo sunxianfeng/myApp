@@ -1015,7 +1015,7 @@ export default function CollectionDetailPage() {
                   }}
                 >
                   <IconFileDown size={16} />
-                  <span>导出 PDF</span>
+                  <span>导出错题</span>
                 </button>
                 
                 <button

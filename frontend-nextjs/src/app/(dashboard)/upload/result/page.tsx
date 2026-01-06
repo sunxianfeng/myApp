@@ -21,6 +21,7 @@ import MathRenderer from '@/components/common/MathRenderer'
 
 const questionTypeMap: Record<string, string> = {
   multiple_choice: '选择题',
+  single_choice: '选择题', // OCR可能识别为single_choice，显示为选择题
   fill_blank: '填空题',
   true_false: '判断题',
   essay: '解答题',
@@ -352,12 +353,22 @@ const UploadResultPage = (props: PageProps) => {
 
   const [items, setItems] = useState<EditableQuestion[]>([])
 
+  // 题目类型映射 - 将OCR识别的类型映射为系统支持的类型
+  const normalizeQuestionType = (type?: string): string => {
+    if (!type) return 'multiple_choice'
+    // 处理 single_choice -> multiple_choice 的映射
+    if (type === 'single_choice') return 'multiple_choice'
+    // 确保类型在允许的列表中
+    const validTypes = ['multiple_choice', 'fill_blank', 'true_false', 'essay', 'other']
+    return validTypes.includes(type) ? type : 'multiple_choice'
+  }
+
   useEffect(() => {
     if (questions.length > 0) {
       setItems(questions.map((q: any, idx: number): EditableQuestion => ({
         id: q.id || `temp-${idx}`,
         number: q.number || idx + 1,
-        question_type: q.type || q.question_type || 'multiple_choice',
+        question_type: normalizeQuestionType(q.type || q.question_type),
         content: q.content,
         full_content: q.full_content || q.content,
         options: q.options || [],
@@ -467,21 +478,83 @@ const UploadResultPage = (props: PageProps) => {
       }
       
       // 第一步：保存题目到数据库
+      // 验证并清理数据
+      const cleanedQuestions = selected.map((s: EditableQuestion) => {
+        // 处理 content - 可能是字符串或对象
+        let contentStr: string
+        if (typeof s.content === 'string') {
+          contentStr = s.content.trim()
+        } else if (typeof s.content === 'object' && s.content !== null) {
+          // 如果是对象，转换为 JSON 字符串
+          contentStr = JSON.stringify(s.content)
+        } else {
+          contentStr = String(s.content || '').trim()
+        }
+        
+        // 确保 content 不为空
+        if (!contentStr || contentStr === '') {
+          throw new Error(`题目 ${s.number} 的内容不能为空`)
+        }
+        
+        // 处理 full_content
+        let fullContentStr: string
+        if (s.full_content) {
+          if (typeof s.full_content === 'string') {
+            fullContentStr = s.full_content.trim()
+          } else if (typeof s.full_content === 'object' && s.full_content !== null) {
+            fullContentStr = JSON.stringify(s.full_content)
+          } else {
+            fullContentStr = String(s.full_content).trim()
+          }
+        } else {
+          fullContentStr = contentStr
+        }
+        
+        // 确保 question_type 是有效值
+        const validTypes = ['multiple_choice', 'fill_blank', 'true_false', 'essay', 'other']
+        if (!s.question_type || !validTypes.includes(s.question_type)) {
+          throw new Error(`题目 ${s.number} 的类型无效: ${s.question_type}`)
+        }
+        
+        // 清理 options - 确保格式正确
+        let cleanedOptions: Array<{ label: string; content: string }> | undefined = undefined
+        if (s.options && Array.isArray(s.options) && s.options.length > 0) {
+          cleanedOptions = s.options
+            .filter(opt => opt && opt.label && opt.content)
+            .map(opt => ({
+              label: String(opt.label).trim(),
+              content: String(opt.content).trim()
+            }))
+          // 如果过滤后为空数组，设为 undefined
+          if (cleanedOptions.length === 0) {
+            cleanedOptions = undefined
+          }
+        }
+        
+        // 确保 number 是整数
+        const questionNumber = Number.parseInt(String(s.number), 10)
+        if (isNaN(questionNumber) || questionNumber < 1) {
+          throw new Error(`题目编号无效: ${s.number}`)
+        }
+        
+        return {
+          number: questionNumber,
+          content: contentStr,
+          full_content: fullContentStr,
+          question_type: s.question_type,
+          ...(cleanedOptions && { options: cleanedOptions }),
+        }
+      })
+      
       const payload = {
         document_title: result?.data?.document_title || '用户确认文档',
         filename: result?.data?.filename || 'manual.docx',
         file_type: result?.data?.file_type || 'image',
-        file_size: result?.data?.file_size || undefined,
-        questions: selected.map((s: EditableQuestion) => ({
-          number: s.number,
-          content: s.content,
-          full_content: s.full_content,
-          question_type: s.question_type,
-          options: s.options,
-        }))
+        ...(result?.data?.file_size && { file_size: result?.data?.file_size }),
+        questions: cleanedQuestions,
       }
       
-      console.log('准备保存题目，payload:', payload)
+      console.log('准备保存题目，payload:', JSON.stringify(payload, null, 2))
       
       const resp = await bulkCreateQuestions(payload)
       
