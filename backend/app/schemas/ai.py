@@ -48,3 +48,16 @@ class SimilarQuestion(BaseModel):
 
 class SimilarQuestionsResponse(BaseModel):
     questions: List[SimilarQuestion] = Field(default_factory=list, description="Generated similar questions")
+
+
+class HintRequest(BaseModel):
+    """思路提示请求"""
+    question: AIQuestionContext
+    language: str = Field("zh", description="Output language: zh/en")
+
+
+class HintResponse(BaseModel):
+    """分层思路提示响应"""
+    level1_knowledge: List[str] = Field(default_factory=list, description="第1层：考查的知识点")
+    level2_approach: List[str] = Field(default_factory=list, description="第2层：解题思路/方向")
+    level3_steps: List[str] = Field(default_factory=list, description="第3层：关键步骤提示")

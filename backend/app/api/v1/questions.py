@@ -26,6 +26,8 @@ from app.schemas.ai import (
     SimilarQuestionsRequest,
     SimilarQuestionsResponse,
     SimilarQuestion,
+    HintRequest,
+    HintResponse,
 )
 from app.utils.auth import get_current_user
 from app.models.user import User
@@ -62,6 +64,32 @@ async def generate_reference_answer(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate reference answer: {str(e)}",
+        )
+
+
+@router.post("/ai/hint", response_model=HintResponse)
+async def generate_hint(
+    payload: HintRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Generate layered hints (分层思路提示) using Qwen."""
+    try:
+        svc = get_qwen_text_service()
+        result = await asyncio.to_thread(
+            svc.generate_hint,
+            payload.question.model_dump(),
+            payload.language,
+        )
+        return HintResponse(
+            level1_knowledge=result.level1_knowledge,
+            level2_approach=result.level2_approach,
+            level3_steps=result.level3_steps,
+        )
+    except Exception as e:
+        logger.error(f"Failed to generate hint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate hint: {str(e)}",
         )
 
 

@@ -40,6 +40,14 @@ class SimilarQuestionResult:
     explanation: Optional[str] = None
 
 
+@dataclass
+class HintResult:
+    """分层思路提示结果"""
+    level1_knowledge: List[str]  # 第1层：考查的知识点
+    level2_approach: List[str]   # 第2层：解题思路/方向
+    level3_steps: List[str]      # 第3层：关键步骤提示（不给完整答案）
+
+
 class QwenTextService:
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
         self.api_key = api_key or getattr(settings, "DASHSCOPE_API_KEY", None)
@@ -198,11 +206,36 @@ class QwenTextService:
             "}"
         )
 
+    def _build_hint_prompt(self, question: Dict[str, Any], language: str) -> str:
+        """构建分层思路提示的 prompt"""
+        q_json = self._format_question_payload(question)
+        return (
+            "你是一名循序渐进的解题教练。现在给你一条题目 JSON，请生成'分层思路提示'。\n"
+            "目标：帮助学生逐步思考，而不是直接给出答案。\n\n"
+            "要求：\n"
+            "1) 只输出严格 JSON（不要 Markdown，不要代码块，不要额外解释）。\n"
+            "2) 用" + ("中文" if language == "zh" else "英文") + "作答。\n"
+            "3) 保持数学公式为 LaTeX（例如 $\\frac{a}{b}$）。\n"
+            "4) 分为三个层次，每层2-4条提示：\n"
+            "   - level1_knowledge: 这道题考查哪些知识点/概念？\n"
+            "   - level2_approach: 解题的大方向是什么？可以用什么方法？\n"
+            "   - level3_steps: 关键步骤是什么？（提示方向，不给完整计算过程）\n"
+            "5) 提示要具体但不直接给答案，引导学生思考。\n\n"
+            "输入题目 JSON：\n"
+            f"{q_json}\n\n"
+            "输出 JSON schema：\n"
+            "{\n"
+            "  \"level1_knowledge\": [\"知识点1\", \"知识点2\", ...],\n"
+            "  \"level2_approach\": [\"思路1\", \"思路2\", ...],\n"
+            "  \"level3_steps\": [\"关键步骤1\", \"关键步骤2\", ...]\n"
+            "}"
+        )
+
     def _build_similar_questions_prompt(self, question: Dict[str, Any], count: int, language: str) -> str:
         q_json = self._format_question_payload(question)
         return (
             "你是一名出题老师。现在给你一条题目 JSON，请生成 "
-            f"{count} 道‘举一反三’相似题。\n"
+            f"{count} 道'举一反三'相似题。\n"
             "相似要求：考查同一知识点/同类方法，但题目数字/情境要变化，不能照抄原题。\n"
             "输出要求：\n"
             "1) 只输出严格 JSON 数组（不要 Markdown，不要代码块，不要额外解释）。\n"
@@ -222,6 +255,41 @@ class QwenTextService:
             "    \"explanation\": string\n"
             "  }\n"
             "]"
+        )
+
+    def generate_hint(self, question: Dict[str, Any], language: str = "zh") -> HintResult:
+        """生成分层思路提示"""
+        prompt = self._build_hint_prompt(question=question, language=language)
+        text = self._call_llm(prompt)
+        data = self._try_parse_json(text)
+
+        if not isinstance(data, dict):
+            raise ValueError("Model output is not a JSON object")
+
+        # 提取三个层级的提示
+        level1 = data.get("level1_knowledge") or []
+        level2 = data.get("level2_approach") or []
+        level3 = data.get("level3_steps") or []
+
+        if not isinstance(level1, list):
+            level1 = []
+        if not isinstance(level2, list):
+            level2 = []
+        if not isinstance(level3, list):
+            level3 = []
+
+        # 转换为字符串列表
+        level1 = [str(s).strip() for s in level1 if s]
+        level2 = [str(s).strip() for s in level2 if s]
+        level3 = [str(s).strip() for s in level3 if s]
+
+        if not level1 and not level2 and not level3:
+            raise ValueError("Model did not generate any hints")
+
+        return HintResult(
+            level1_knowledge=level1,
+            level2_approach=level2,
+            level3_steps=level3,
         )
 
     def generate_reference_answer(self, question: Dict[str, Any], language: str = "zh") -> ReferenceAnswerResult:

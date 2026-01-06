@@ -53,7 +53,7 @@ const getQuestionContentText = (content: string | { text?: string } | any): stri
   return String(content || '')
 }
 
-import { generateReferenceAnswer, generateSimilarQuestions } from '@/lib/api'
+import { generateReferenceAnswer, generateSimilarQuestions, generateHint } from '@/lib/api'
 
 // Question Detail Modal Component
 const QuestionDetailModal = ({ 
@@ -69,8 +69,15 @@ const QuestionDetailModal = ({
 }) => {
   const [isGeneratingAnswer, setIsGeneratingAnswer] = useState(false)
   const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false)
+  const [isGeneratingHint, setIsGeneratingHint] = useState(false)
   const [generatedAnswer, setGeneratedAnswer] = useState<string | null>(null)
   const [similarQuestions, setSimilarQuestions] = useState<any[] | null>(null)
+  const [hintData, setHintData] = useState<{
+    level1_knowledge: string[]
+    level2_approach: string[]
+    level3_steps: string[]
+  } | null>(null)
+  const [hintLevel, setHintLevel] = useState<number>(0)
   
   if (!isOpen || !question) return null
 
@@ -101,6 +108,38 @@ const QuestionDetailModal = ({
     }
   }
   
+  const handleGenerateHint = async () => {
+    if (hintData && hintLevel < 3) {
+      setHintLevel(hintLevel + 1)
+      return
+    }
+
+    if (!hintData) {
+      setIsGeneratingHint(true)
+      try {
+        const resp = await generateHint({
+          question: {
+            id: question.id,
+            number: question.number,
+            question_type: question.question_type || question.type,
+            content: question.content,
+            full_content: question.full_content,
+            options: question.options,
+          },
+          language: 'zh',
+        })
+
+        setHintData(resp)
+        setHintLevel(1)
+      } catch (error) {
+        console.error('Failed to generate hint:', error)
+        alert('生成思路提示失败，请稍后重试')
+      } finally {
+        setIsGeneratingHint(false)
+      }
+    }
+  }
+
   const handleGenerateSimilar = async () => {
     setIsGeneratingSimilar(true)
     try {
@@ -374,27 +413,90 @@ const QuestionDetailModal = ({
               </button>
               
               <button
-                onClick={handleGenerateSimilar}
-                disabled={isGeneratingSimilar}
+                onClick={handleGenerateHint}
+                disabled={isGeneratingHint}
                 style={{
                   padding: '12px 20px',
-                  backgroundColor: isGeneratingSimilar ? '#D1D5DB' : '#3B82F6',
+                  backgroundColor: isGeneratingHint ? '#D1D5DB' : '#F59E0B',
                   color: 'white',
                   border: '3px solid black',
                   borderRadius: '8px',
                   fontWeight: 700,
                   fontSize: '0.9rem',
-                  cursor: isGeneratingSimilar ? 'not-allowed' : 'pointer',
+                  cursor: isGeneratingHint ? 'not-allowed' : 'pointer',
                   boxShadow: '4px 4px 0 rgba(0,0,0,1)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                 }}
               >
-                {isGeneratingSimilar ? '🔄 生成中...' : '举一反三'}
+                {isGeneratingHint ? '🔄 生成中...' : (hintLevel === 0 ? '💡 思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示')}
               </button>
             </div>
           </div>
+
+          {/* Hint Display */}
+          {hintData && hintLevel > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>💡 思路提示</h3>
+              
+              {hintLevel >= 1 && hintData.level1_knowledge.length > 0 && (
+                <div style={{ 
+                  padding: '16px',
+                  backgroundColor: '#FEF3C7',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  marginBottom: '12px',
+                }}>
+                  <div style={{ fontWeight: 700, marginBottom: '8px', color: '#92400E', fontSize: '0.9rem' }}>
+                    📚 第1层：考查的知识点
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                    {hintData.level1_knowledge.map((item, idx) => (
+                      <li key={idx} style={{ marginBottom: '4px' }}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {hintLevel >= 2 && hintData.level2_approach.length > 0 && (
+                <div style={{ 
+                  padding: '16px',
+                  backgroundColor: '#FED7AA',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  marginBottom: '12px',
+                }}>
+                  <div style={{ fontWeight: 700, marginBottom: '8px', color: '#7C2D12', fontSize: '0.9rem' }}>
+                    🎯 第2层：解题思路
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                    {hintData.level2_approach.map((item, idx) => (
+                      <li key={idx} style={{ marginBottom: '4px' }}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {hintLevel >= 3 && hintData.level3_steps.length > 0 && (
+                <div style={{ 
+                  padding: '16px',
+                  backgroundColor: '#FECACA',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                }}>
+                  <div style={{ fontWeight: 700, marginBottom: '8px', color: '#7F1D1D', fontSize: '0.9rem' }}>
+                    🔑 第3层：关键步骤
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                    {hintData.level3_steps.map((item, idx) => (
+                      <li key={idx} style={{ marginBottom: '4px' }}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Generated Answer */}
           {generatedAnswer && (

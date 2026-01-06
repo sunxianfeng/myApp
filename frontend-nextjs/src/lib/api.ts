@@ -282,6 +282,24 @@ export const generateSimilarQuestions = async (payload: {
   return await api.post('/v1/questions/ai/similar-questions', payload)
 }
 
+export const generateHint = async (payload: {
+  question: {
+    id?: string
+    number?: number
+    question_type?: string
+    content: any
+    full_content?: string
+    options?: Array<{ label: string; content: string }>
+  }
+  language?: 'zh' | 'en'
+}): Promise<{
+  level1_knowledge: string[]
+  level2_approach: string[]
+  level3_steps: string[]
+}> => {
+  return await api.post('/v1/questions/ai/hint', payload)
+}
+
 // 统计相关 API
 export const getDashboardStats = async (): Promise<any> => {
   return await api.get('/v1/stats/dashboard')

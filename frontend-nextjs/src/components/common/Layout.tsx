@@ -122,6 +122,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     let active = false
     if (path === '/') {
       active = pathname === '/'
+    } else if (path === '/questions') {
+      // Special case: 题目管理 should be active for both /questions and /collections
+      active = pathname.startsWith('/questions') || pathname.startsWith('/collections')
     } else {
       active = pathname.startsWith(path)
     }
@@ -231,7 +234,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
                       <Icon name="dashboard" className="w-4 h-4 text-black" />
                     </div>
-                    <span className="font-bold text-black text-sm">首页</span>
+                    <span className="font-bold text-black text-sm">搜索</span>
                   </Link>
                   
                   <Link
@@ -294,24 +297,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Navigation - All items in one list */}
           <nav className="flex flex-col space-y-2 px-4 pb-4">
-            {/* 首页 */}
+            {/* 搜索 */}
             <Link
               href="/"
               className={getNavItemClassName('/')}
-              title={isCollapsed ? '首页' : ''}
+              title={isCollapsed ? '搜索' : ''}
             >
               <Icon name="dashboard" className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
-              {!isCollapsed && <span>首页</span>}
+              {!isCollapsed && <span>搜索</span>}
             </Link>
 
             {/* 题目解析 */}
             <Link
               href="/upload"
               className={getNavItemClassName('/upload')}
-              title={isCollapsed ? '题目解析' : ''}
+              title={isCollapsed ? '题目上传' : ''}
             >
               <Icon name="upload" className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
-              {!isCollapsed && <span>题目解析</span>}
+              {!isCollapsed && <span>题目上传</span>}
             </Link>
 
             {/* 题目管理 */}

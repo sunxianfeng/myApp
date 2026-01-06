@@ -7,7 +7,7 @@ export default function DashboardRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    // 重定向到首页
+    // 重定向到搜索
     router.replace('/')
   }, [router])
 
