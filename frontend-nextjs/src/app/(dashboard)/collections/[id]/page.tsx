@@ -389,14 +389,16 @@ const QuestionDetailModal = ({
             <div style={{ 
               display: 'flex', 
               gap: '12px', 
-              flexWrap: 'wrap' 
+              flexWrap: 'nowrap',
+              alignItems: 'center',
             }}>
               <button
                 onClick={handleGetReferenceAnswer}
                 disabled={isGeneratingAnswer}
                 style={{
+                  flex: 1,
                   padding: '12px 20px',
-                  backgroundColor: isGeneratingAnswer ? '#D1D5DB' : '#10B981',
+                  backgroundColor: isGeneratingAnswer ? '#D1D5DB' : '#3B82F6',
                   color: 'white',
                   border: '3px solid black',
                   borderRadius: '8px',
@@ -406,18 +408,32 @@ const QuestionDetailModal = ({
                   boxShadow: '4px 4px 0 rgba(0,0,0,1)',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '8px',
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isGeneratingAnswer) {
+                    e.currentTarget.style.transform = 'translate(-2px, -2px)'
+                    e.currentTarget.style.boxShadow = '6px 6px 0 rgba(0,0,0,1)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translate(0, 0)'
+                  e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingAnswer ? '🤔 生成中...' : ' 获取参考答案'}
+                {isGeneratingAnswer ? '🤔 生成中...' : '📖 获取参考答案'}
               </button>
               
               <button
                 onClick={handleGenerateHint}
                 disabled={isGeneratingHint}
                 style={{
+                  flex: 1,
                   padding: '12px 20px',
-                  backgroundColor: isGeneratingHint ? '#D1D5DB' : '#F59E0B',
+                  backgroundColor: isGeneratingHint ? '#D1D5DB' : '#10B981',
                   color: 'white',
                   border: '3px solid black',
                   borderRadius: '8px',
@@ -427,10 +443,23 @@ const QuestionDetailModal = ({
                   boxShadow: '4px 4px 0 rgba(0,0,0,1)',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '8px',
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isGeneratingHint) {
+                    e.currentTarget.style.transform = 'translate(-2px, -2px)'
+                    e.currentTarget.style.boxShadow = '6px 6px 0 rgba(0,0,0,1)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translate(0, 0)'
+                  e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingHint ? '🔄 生成中...' : (hintLevel === 0 ? '💡 思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示')}
+                {isGeneratingHint ? '🔄 生成中...' : (hintLevel === 0 ? '💡 获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示')}
               </button>
             </div>
           </div>
@@ -518,7 +547,7 @@ const QuestionDetailModal = ({
           {/* Similar Questions */}
           {similarQuestions && similarQuestions.length > 0 && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>举一反三 - 相似题目</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>相似题目</h3>
               <div style={{ 
                 backgroundColor: '#EFF6FF',
                 border: '3px solid black',

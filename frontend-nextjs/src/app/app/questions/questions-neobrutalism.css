@@ -293,13 +293,20 @@
 
 /* For question cards - text should be left-aligned and clamped */
 .unified-question-card .card-content {
-  display: block;
-  text-align: left;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
+  display: block !important;
+  text-align: left !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 4 !important;
+  line-clamp: 4 !important;
+  -webkit-box-orient: vertical !important;
+  padding-top: 36px !important;
+  padding-right: 8px !important;
+  padding-bottom: 10px !important;
+  padding-left: 10px !important;
+  /* Override globals.css */
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
 }
 
 .card-footer {

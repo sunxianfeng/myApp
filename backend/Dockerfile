@@ -18,7 +18,8 @@ COPY pyproject.toml uv.lock ./
 RUN [ -f README.md ] || echo "# placeholder README" > README.md
 
 # 安装依赖（使用锁文件确保一致性）
-RUN uv sync --frozen --no-dev
+# Note: Removed --frozen to allow lockfile updates if needed
+RUN uv sync --no-dev
 
 # 复制应用代码
 COPY . .

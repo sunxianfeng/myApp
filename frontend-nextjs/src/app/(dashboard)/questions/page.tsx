@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import MathRenderer from '@/components/common/MathRenderer'
 
+// Lucide React icons
 import {
   Folder as IconFolder,
   LayoutGrid as IconGrid,
@@ -17,8 +18,6 @@ import {
   ArrowRightLeft as IconMove,
   X as IconX,
   Search as IconSearch,
-  BookOpen as IconBookOpen,
-  Lightbulb as IconLightbulb,
   Loader2 as IconLoader,
   Sparkles as IconSparkles,
 } from 'lucide-react'
@@ -58,6 +57,19 @@ const getQuestionContentText = (content: string | { text?: string } | any): stri
   return String(content || '')
 }
 
+// Helper function to translate question types
+const translateQuestionType = (type: string) => {
+  const typeMap: { [key: string]: string } = {
+    'multiple_choice': '多选题',
+    'fill_blank': '填空题',
+    'fill-blank': '填空题',
+    'true_false': '判断题',
+    'essay': '问答题',
+    'other': '其他',
+  }
+  return typeMap[type] || type
+}
+
 // Question Detail Modal Component
 const QuestionDetailModal = ({ 
   question, 
@@ -80,7 +92,7 @@ const QuestionDetailModal = ({
     level2_approach: string[]
     level3_steps: string[]
   } | null>(null)
-  const [hintLevel, setHintLevel] = useState<number>(0) // 0=未显示, 1=第1层, 2=第2层, 3=第3层
+  const [hintLevel, setHintLevel] = useState<number>(0)
   
   if (!isOpen || !question) return null
 
@@ -112,13 +124,11 @@ const QuestionDetailModal = ({
   }
   
   const handleGenerateHint = async () => {
-    // 如果已经有提示数据，则逐层展开
     if (hintData && hintLevel < 3) {
       setHintLevel(hintLevel + 1)
       return
     }
 
-    // 如果没有数据，则调用 API 获取
     if (!hintData) {
       setIsGeneratingHint(true)
       try {
@@ -135,7 +145,7 @@ const QuestionDetailModal = ({
         })
 
         setHintData(resp)
-        setHintLevel(1) // 显示第一层
+        setHintLevel(1)
       } catch (error) {
         console.error('Failed to generate hint:', error)
         alert('生成思路提示失败，请稍后重试')
@@ -400,15 +410,16 @@ const QuestionDetailModal = ({
             <div style={{ 
               display: 'flex', 
               gap: '12px', 
-              flexWrap: 'wrap' 
+              flexWrap: 'nowrap',
+              alignItems: 'center',
             }}>
               <button
                 onClick={handleGetReferenceAnswer}
                 disabled={isGeneratingAnswer}
-                className="neo-btn-primary"
                 style={{
+                  flex: 1,
                   padding: '12px 20px',
-                  backgroundColor: isGeneratingAnswer ? '#D1D5DB' : '#10B981',
+                  backgroundColor: isGeneratingAnswer ? '#D1D5DB' : '#3B82F6',
                   color: 'white',
                   border: '3px solid black',
                   borderRadius: '8px',
@@ -418,8 +429,10 @@ const QuestionDetailModal = ({
                   boxShadow: '4px 4px 0 rgba(0,0,0,1)',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '8px',
                   transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
                 }}
                 onMouseEnter={(e) => {
                   if (!isGeneratingAnswer) {
@@ -432,26 +445,16 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingAnswer ? (
-                  <>
-                    <IconLoader size={16} className="animate-spin" />
-                    <span>生成中...</span>
-                  </>
-                ) : (
-                  <>
-                    <IconBookOpen size={16} />
-                    <span>获取参考答案</span>
-                  </>
-                )}
+                {isGeneratingAnswer ? '🤔 生成中...' : '📖 获取参考答案'}
               </button>
               
               <button
                 onClick={handleGenerateHint}
                 disabled={isGeneratingHint}
-                className="neo-btn-primary"
                 style={{
+                  flex: 1,
                   padding: '12px 20px',
-                  backgroundColor: isGeneratingHint ? '#D1D5DB' : '#F59E0B',
+                  backgroundColor: isGeneratingHint ? '#D1D5DB' : '#10B981',
                   color: 'white',
                   border: '3px solid black',
                   borderRadius: '8px',
@@ -461,8 +464,10 @@ const QuestionDetailModal = ({
                   boxShadow: '4px 4px 0 rgba(0,0,0,1)',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '8px',
                   transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
                 }}
                 onMouseEnter={(e) => {
                   if (!isGeneratingHint) {
@@ -475,17 +480,7 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingHint ? (
-                  <>
-                    <IconLoader size={16} className="animate-spin" />
-                    <span>生成中...</span>
-                  </>
-                ) : (
-                  <>
-                    <IconLightbulb size={16} />
-                    <span>{hintLevel === 0 ? '💡 思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示'}</span>
-                  </>
-                )}
+                {isGeneratingHint ? '🔄 生成中...' : (hintLevel === 0 ? '💡 获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示')}
               </button>
             </div>
           </div>
@@ -493,19 +488,8 @@ const QuestionDetailModal = ({
           {/* Hint Display */}
           {hintData && hintLevel > 0 && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ 
-                fontWeight: 900, 
-                marginBottom: '12px', 
-                fontSize: '1.125rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}>
-                <IconLightbulb size={20} style={{ color: '#F59E0B' }} />
-                <span>💡 思路提示</span>
-              </h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>💡 思路提示</h3>
               
-              {/* Level 1: Knowledge Points */}
               {hintLevel >= 1 && hintData.level1_knowledge.length > 0 && (
                 <div style={{ 
                   padding: '16px',
@@ -514,20 +498,10 @@ const QuestionDetailModal = ({
                   borderRadius: '8px',
                   marginBottom: '12px',
                 }}>
-                  <div style={{ 
-                    fontWeight: 700, 
-                    marginBottom: '8px',
-                    color: '#92400E',
-                    fontSize: '0.9rem',
-                  }}>
+                  <div style={{ fontWeight: 700, marginBottom: '8px', color: '#92400E', fontSize: '0.9rem' }}>
                     📚 第1层：考查的知识点
                   </div>
-                  <ul style={{ 
-                    margin: 0, 
-                    paddingLeft: '20px',
-                    fontSize: '0.95rem',
-                    lineHeight: '1.6',
-                  }}>
+                  <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.95rem', lineHeight: '1.6' }}>
                     {hintData.level1_knowledge.map((item, idx) => (
                       <li key={idx} style={{ marginBottom: '4px' }}>{item}</li>
                     ))}
@@ -535,7 +509,6 @@ const QuestionDetailModal = ({
                 </div>
               )}
 
-              {/* Level 2: Approach */}
               {hintLevel >= 2 && hintData.level2_approach.length > 0 && (
                 <div style={{ 
                   padding: '16px',
@@ -544,20 +517,10 @@ const QuestionDetailModal = ({
                   borderRadius: '8px',
                   marginBottom: '12px',
                 }}>
-                  <div style={{ 
-                    fontWeight: 700, 
-                    marginBottom: '8px',
-                    color: '#7C2D12',
-                    fontSize: '0.9rem',
-                  }}>
+                  <div style={{ fontWeight: 700, marginBottom: '8px', color: '#7C2D12', fontSize: '0.9rem' }}>
                     🎯 第2层：解题思路
                   </div>
-                  <ul style={{ 
-                    margin: 0, 
-                    paddingLeft: '20px',
-                    fontSize: '0.95rem',
-                    lineHeight: '1.6',
-                  }}>
+                  <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.95rem', lineHeight: '1.6' }}>
                     {hintData.level2_approach.map((item, idx) => (
                       <li key={idx} style={{ marginBottom: '4px' }}>{item}</li>
                     ))}
@@ -565,7 +528,6 @@ const QuestionDetailModal = ({
                 </div>
               )}
 
-              {/* Level 3: Key Steps */}
               {hintLevel >= 3 && hintData.level3_steps.length > 0 && (
                 <div style={{ 
                   padding: '16px',
@@ -573,20 +535,10 @@ const QuestionDetailModal = ({
                   border: '3px solid black',
                   borderRadius: '8px',
                 }}>
-                  <div style={{ 
-                    fontWeight: 700, 
-                    marginBottom: '8px',
-                    color: '#7F1D1D',
-                    fontSize: '0.9rem',
-                  }}>
+                  <div style={{ fontWeight: 700, marginBottom: '8px', color: '#7F1D1D', fontSize: '0.9rem' }}>
                     🔑 第3层：关键步骤
                   </div>
-                  <ul style={{ 
-                    margin: 0, 
-                    paddingLeft: '20px',
-                    fontSize: '0.95rem',
-                    lineHeight: '1.6',
-                  }}>
+                  <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.95rem', lineHeight: '1.6' }}>
                     {hintData.level3_steps.map((item, idx) => (
                       <li key={idx} style={{ marginBottom: '4px' }}>{item}</li>
                     ))}
@@ -599,17 +551,7 @@ const QuestionDetailModal = ({
           {/* Generated Answer */}
           {generatedAnswer && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ 
-                fontWeight: 900, 
-                marginBottom: '12px', 
-                fontSize: '1.125rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}>
-                <IconBookOpen size={20} style={{ color: '#10B981' }} />
-                <span>参考答案</span>
-              </h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>参考答案</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#DCFCE7',
@@ -1027,7 +969,7 @@ const QuestionCard = ({
   // Handle unassigned questions with a special color and icon
   const isUnassigned = question.isUnassigned || collection?.id === 'unassigned' || !collection?.id
   const collectionColor = isUnassigned ? '#E5E7EB' : generateColorFromString(collection.id)
-  const collectionTitle = isUnassigned ? 'Uncategorized' : (collection?.title || 'Uncategorized')
+  const collectionTitle = isUnassigned ? '未分类' : (collection?.title || '未分类')
 
   return (
     <div
@@ -1047,17 +989,27 @@ const QuestionCard = ({
         e.dataTransfer.effectAllowed = 'move'
       }}
     >
-      <div className="questions-card-header" style={{ backgroundColor: 'var(--neo-bg-offset)' }}>
-        <div className="collection-tag">
-          <IconFolder size={14} style={{ marginRight: '6px' }} />
-          {collectionTitle}
-        </div>
+      {/* Header removed - only show menu button in top-right corner */}
+      <div style={{ position: 'absolute', top: '6px', right: '6px', zIndex: 1 }}>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
             <button
               className="card-action-btn"
-              aria-label="Question Actions"
+              aria-label="题目操作"
               onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                padding: '4px',
+                opacity: 0.6,
+                transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.6'
+              }}
             >
               <IconMore size={20} />
             </button>
@@ -1069,21 +1021,21 @@ const QuestionCard = ({
                 onSelect={() => onAction('edit', question)}
               >
                 <IconEdit />
-                <span>Edit Question</span>
+                <span>编辑题目</span>
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 className="card-dropdown-item"
                 onSelect={() => onAction('tags', question)}
               >
                 <IconTag size={14} />
-                <span>Manage Tags</span>
+                <span>管理标签</span>
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 className="card-dropdown-item"
                 onSelect={() => onAction('move', question)}
               >
                 <IconMove size={14} />
-                <span>Change Collection</span>
+                <span>更改错题集</span>
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="card-dropdown-separator" />
               <DropdownMenu.Item
@@ -1091,17 +1043,17 @@ const QuestionCard = ({
                 onSelect={() => onAction('delete', question)}
               >
                 <IconTrash size={14} />
-                <span>Delete</span>
+                <span>删除</span>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
       </div>
-      <div className="card-content">
+      <div className="card-content" style={{ paddingTop: '36px', paddingRight: '8px' }}>
         <MathRenderer content={question.content} />
       </div>
-      <div className="card-footer">
-        <span className="card-meta-tag">{question.question_type}</span>
+      <div className="card-footer" style={{ borderTop: 'none' }}>
+        <span className="card-meta-tag">{translateQuestionType(question.question_type)}</span>
         <span className="card-meta-date">{new Date(question.created_at).toLocaleDateString()}</span>
       </div>
     </div>
@@ -1487,11 +1439,11 @@ const QuestionsContent = () => {
                   <DropdownMenu.Content className="card-dropdown-content" sideOffset={8} align="end">
                     <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('question')}>
                       <IconEdit />
-                      <span>New Question</span>
+                      <span>新建题目</span>
                     </DropdownMenu.Item>
                     <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleCreate('collection')}>
                       <IconFolder size={14} />
-                      <span>New Collection</span>
+                      <span>新建错题集</span>
                     </DropdownMenu.Item>
                   </DropdownMenu.Content>
                 </DropdownMenu.Portal>
@@ -1517,7 +1469,7 @@ const QuestionsContent = () => {
                 style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >
                 <IconGrid size={14} />
-                Card
+                卡片
               </button>
 
               <button
@@ -1528,7 +1480,7 @@ const QuestionsContent = () => {
                 style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >
                 <IconList size={14} />
-                List
+                列表
               </button>
             </div>
           </div>
@@ -1545,10 +1497,10 @@ const QuestionsContent = () => {
         {viewMode === 'list' && (
           <div className="list-view-header">
             <div></div>
-            <div>Name</div>
-            <div>Type</div>
-            <div>Collection</div>
-            <div>Date Created</div>
+            <div>名称</div>
+            <div>类型</div>
+            <div>错题集</div>
+            <div>创建日期</div>
             <div></div>
           </div>
         )}
@@ -1606,12 +1558,12 @@ const QuestionsContent = () => {
                         {Array.isArray(c.questions) ? c.questions.length : 0}
                       </div>
                       <div style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: 600 }}>
-                        {Array.isArray(c.questions) && c.questions.length === 1 ? 'question' : 'questions'}
+                        道题
                       </div>
                     </div>
                   </div>
                   <div className="card-footer">
-                    <span className="card-meta-tag">Collection</span>
+                    <span className="card-meta-tag">错题集</span>
                     <span className="card-meta-date">{new Date(c.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -1649,7 +1601,7 @@ const QuestionsContent = () => {
                     <IconFolder size={20} color={generateColorFromString(cId)} />
                   </div>
                   <div className="list-view-name">{c.title}</div>
-                  <div className="list-view-type">Collection</div>
+                  <div className="list-view-type">错题集</div>
                   <div className="list-view-collection">—</div>
                   <div className="list-view-date">{new Date(c.created_at).toLocaleDateString()}</div>
                   <div className="list-view-actions">
@@ -1667,12 +1619,12 @@ const QuestionsContent = () => {
                         <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
                           <DropdownMenu.Item className="card-dropdown-item" onSelect={() => router.push(`/collections/${cId}`)}>
                             <IconFolder size={14} />
-                            <span>Open Collection</span>
+                            <span>打开错题集</span>
                           </DropdownMenu.Item>
                           <DropdownMenu.Separator className="card-dropdown-separator" />
-                          <DropdownMenu.Item className="card-dropdown-item danger" onSelect={() => window.alert('Delete collection')}>
+                          <DropdownMenu.Item className="card-dropdown-item danger" onSelect={() => window.alert('删除错题集')}>
                             <IconTrash size={14} />
-                            <span>Delete</span>
+                            <span>删除</span>
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu.Portal>
@@ -1702,14 +1654,14 @@ const QuestionsContent = () => {
                   <IconEdit />
                 </div>
                 <div className="list-view-name">{q.content}</div>
-                <div className="list-view-type">{q.question_type || 'Question'}</div>
+                <div className="list-view-type">{translateQuestionType(q.question_type) || '题目'}</div>
                 <div className="list-view-collection">
                   <IconFolder size={12} />
                   <span style={{ 
                     color: q.isUnassigned ? '#9CA3AF' : 'inherit',
                     fontStyle: q.isUnassigned ? 'italic' : 'normal'
                   }}>
-                    {q.collection?.title || 'Uncategorized'}
+                    {q.collection?.title || '未分类'}
                   </span>
                 </div>
                 <div className="list-view-date">{new Date(q.created_at).toLocaleDateString()}</div>
@@ -1728,20 +1680,20 @@ const QuestionsContent = () => {
                       <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
                         <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('edit', q)}>
                           <IconEdit />
-                          <span>Edit Question</span>
+                          <span>编辑题目</span>
                         </DropdownMenu.Item>
                         <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('tags', q)}>
                           <IconTag size={14} />
-                          <span>Manage Tags</span>
+                          <span>管理标签</span>
                         </DropdownMenu.Item>
                         <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('move', q)}>
                           <IconMove size={14} />
-                          <span>Change Collection</span>
+                          <span>更改错题集</span>
                         </DropdownMenu.Item>
                         <DropdownMenu.Separator className="card-dropdown-separator" />
                         <DropdownMenu.Item className="card-dropdown-item danger" onSelect={() => handleAction('delete', q)}>
                           <IconTrash size={14} />
-                          <span>Delete</span>
+                          <span>删除</span>
                         </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Portal>

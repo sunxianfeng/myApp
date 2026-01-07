@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NEXT_DISABLE_TURBOPACK=1 next dev",
+    "dev": "TURBOPACK=0 next dev",
+    "dev:turbo": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

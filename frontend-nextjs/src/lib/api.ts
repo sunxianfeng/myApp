@@ -252,7 +252,7 @@ export const getRecentQuestions = async (limit: number = 5): Promise<any> => {
   return await api.get('/v1/questions/recent', { params: { limit } })
 }
 
-// AI 相关 API（参考答案 / 举一反三）
+// AI 相关 API（参考答案 / 思路提示 / 相似题目）
 export const generateReferenceAnswer = async (payload: {
   question: {
     id?: string
