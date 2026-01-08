@@ -1,7 +1,24 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 
 // API 配置
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+// Default to same-origin '/api' so browser requests go through Nginx reverse proxy.
+// This avoids calling 'http://localhost:8000' from the user's browser in production.
+const rawBase = process.env.NEXT_PUBLIC_API_URL
+
+const API_BASE_URL = (() => {
+  if (rawBase) {
+    // Allow either '/api' or 'https://example.com/api'.
+    // Our functions call paths like '/v1/...', so ensure base ends with '/api'.
+    if (rawBase.endsWith('/api')) return rawBase
+    return `${rawBase.replace(/\/+$/, '')}/api`
+  }
+
+  // Local dev fallback
+  if (process.env.NODE_ENV !== 'production') return 'http://localhost:8000/api'
+
+  // Production default
+  return '/api'
+})()
 
 // 创建 axios 实例
 const api: AxiosInstance = axios.create({

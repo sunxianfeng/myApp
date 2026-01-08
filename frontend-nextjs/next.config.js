@@ -5,9 +5,28 @@ const nextConfig = {
   poweredByHeader: false,
   images: {
     remotePatterns: [
+      // Local dev backend
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '8000',
+        pathname: '/api/**',
+      },
+      // Production (same origin through Nginx)
+      {
+        protocol: 'http',
+        hostname: '43.167.176.123',
+        pathname: '/api/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '43.167.176.123',
+        pathname: '/api/**',
+      },
+      // Docker internal backend (SSR/server-side image fetches)
+      {
+        protocol: 'http',
+        hostname: 'backend',
         port: '8000',
         pathname: '/api/**',
       },
@@ -17,16 +36,23 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  // Do NOT default to localhost in production builds.
+  // In production behind Nginx, the frontend should call same-origin '/api'.
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '/api',
   },
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
-      },
-    ];
+    // In local dev, proxy /api -> local backend.
+    // In Docker/production, Nginx handles this at the edge, so no rewrite needed here.
+    if (process.env.NODE_ENV !== 'production') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:8000/api/:path*',
+        },
+      ];
+    }
+    return [];
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

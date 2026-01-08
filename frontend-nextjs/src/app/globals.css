@@ -1836,3 +1836,28 @@ textarea:focus {
   justify-content: flex-start !important;
   display: block !important;
 }
+
+/* ============== LANDING2 PAGE SCROLL REVEAL ANIMATIONS ============== */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.scroll-reveal.animate-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger animations for cards */
+.scroll-reveal:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.scroll-reveal:nth-child(2) {
+  transition-delay: 150ms;
+}
+
+.scroll-reveal:nth-child(3) {
+  transition-delay: 300ms;
+}

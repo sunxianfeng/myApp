@@ -35,6 +35,9 @@ services:
   nginx:
     image: nginx:alpine
     container_name: notebook_nginx_prod
+    depends_on:
+      - backend
+      - frontend
     ports:
       - "80:80"
       - "443:443"
