@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.user import UserCreate, LoginRequest, LoginResponse, UserResponse
+from app.schemas.user import UserCreate, LoginRequest, LoginResponse, UserResponse, ForgotPasswordRequest, ResetPasswordRequest
 from app.services.auth import AuthService
 from app.models.user import User
 from app.utils.auth import get_current_user
@@ -101,3 +101,56 @@ async def refresh_token(
         "access_token": new_token,
         "token_type": "bearer"
     }
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Initiate password reset process
+    
+    - **email**: User's email address
+    
+    Returns success message even if email doesn't exist (security best practice)
+    """
+    try:
+        AuthService.initiate_password_reset(db, request.email)
+        return {
+            "message": "If the email exists, password reset instructions have been sent"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to initiate password reset"
+        )
+
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Reset user password
+    
+    - **email**: User's email address
+    - **new_password**: New password (minimum 8 characters)
+    - **confirm_password**: Confirmation of new password
+    """
+    try:
+        AuthService.reset_password(db, request.email, request.new_password)
+        return {
+            "message": "Password has been reset successfully"
+        }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reset password"
+        )

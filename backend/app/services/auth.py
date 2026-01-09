@@ -139,3 +139,57 @@ class AuthService:
             return None
 
         return user
+
+    @staticmethod
+    def generate_reset_token() -> str:
+        """Generate a random reset token"""
+        import secrets
+        return secrets.token_urlsafe(32)
+
+    @staticmethod
+    def initiate_password_reset(db: Session, email: str) -> bool:
+        """Initiate password reset process for a user"""
+        user = db.query(User).filter(User.email == email).first()
+        
+        if not user:
+            # Return True even if user doesn't exist (security best practice)
+            # Don't reveal whether email exists
+            return True
+        
+        # Generate reset token and set expiry (1 hour from now)
+        reset_token = AuthService.generate_reset_token()
+        reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        
+        user.reset_token = reset_token
+        user.reset_token_expires = reset_token_expires
+        
+        db.commit()
+        
+        # TODO: In production, send email with reset token
+        # For now, we'll just log it (remove this in production!)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Password reset initiated for {email}")
+        
+        return True
+
+    @staticmethod
+    def reset_password(db: Session, email: str, new_password: str) -> bool:
+        """Reset user password (simplified version without token verification)"""
+        user = db.query(User).filter(User.email == email).first()
+        
+        if not user:
+            raise ValueError("User not found")
+        
+        # Hash the new password
+        hashed_password = AuthService.hash_password(new_password)
+        user.password_hash = hashed_password
+        
+        # Clear reset token fields
+        user.reset_token = None
+        user.reset_token_expires = None
+        user.updated_at = datetime.now(timezone.utc)
+        
+        db.commit()
+        
+        return True

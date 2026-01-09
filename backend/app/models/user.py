@@ -13,6 +13,8 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
+    reset_token = Column(String(255), nullable=True)  # Token for password reset
+    reset_token_expires = Column(DateTime, nullable=True)  # Expiry time for reset token
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

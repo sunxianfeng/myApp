@@ -14,6 +14,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [resetSuccess, setResetSuccess] = useState(false)
+  const [resetError, setResetError] = useState('')
   const router = useRouter()
   const dispatch = useDispatch<AppDispatch>()
   const { isLoading, error: reduxError } = useSelector((state: RootState) => state.auth)
@@ -38,6 +44,52 @@ export default function LoginPage() {
       setError(err.message || '登录失败，请检查邮箱和密码')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetError('')
+    setResetSuccess(false)
+
+    if (newPassword !== confirmPassword) {
+      setResetError('密码不匹配')
+      return
+    }
+
+    if (newPassword.length < 8) {
+      setResetError('密码至少需要8个字符')
+      return
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: resetEmail,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.detail || '密码重置失败')
+      }
+
+      setResetSuccess(true)
+      setTimeout(() => {
+        setShowForgotPassword(false)
+        setResetSuccess(false)
+        setResetEmail('')
+        setNewPassword('')
+        setConfirmPassword('')
+      }, 2000)
+    } catch (err: any) {
+      setResetError(err.message || '密码重置失败')
     }
   }
 
@@ -390,6 +442,106 @@ export default function LoginPage() {
           }
         }
 
+        /* Modal styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.75);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          animation: fadeIn 200ms ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        .modal-content {
+          background-color: #FFFFFF;
+          border: 3px solid #000000;
+          border-radius: 12px;
+          box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+          width: 90%;
+          max-width: 480px;
+          padding: 2.5rem;
+          position: relative;
+          animation: modalSlideIn 300ms ease-out;
+        }
+
+        @keyframes modalSlideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        .modal-close {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: #6B7280;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+          background-color: #F3F4F6;
+          color: #000000;
+        }
+
+        .modal-header {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
+        .modal-header h2 {
+          font-size: 1.75rem;
+          font-weight: 900;
+          color: #000000;
+          margin-bottom: 0.5rem;
+        }
+
+        .modal-header p {
+          font-size: 0.95rem;
+          color: #6B7280;
+          font-weight: 600;
+        }
+
+        .success-message {
+          padding: 0.75rem 1rem;
+          margin-bottom: 1.5rem;
+          background-color: #D1FAE5;
+          color: #065F46;
+          border: 2px solid #000000;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          animation: slideIn 300ms ease-out;
+        }
+
         @media (max-width: 768px) {
           .main-container {
             flex-direction: column;
@@ -533,7 +685,17 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-              <a href="#" className="forgot-password">忘记密码？</a>
+              <a 
+                href="#" 
+                className="forgot-password"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setShowForgotPassword(true)
+                  setResetEmail(email) // Pre-fill with login email if available
+                }}
+              >
+                忘记密码？
+              </a>
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading || isLoading}>
@@ -546,6 +708,73 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="modal-overlay" onClick={() => setShowForgotPassword(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="modal-close"
+              onClick={() => setShowForgotPassword(false)}
+              aria-label="关闭"
+            >
+              ×
+            </button>
+
+            <div className="modal-header">
+              <h2>重置密码</h2>
+              <p>请输入您的邮箱和新密码</p>
+            </div>
+
+            {resetSuccess && <div className="success-message">✓ 密码重置成功！正在返回登录页...</div>}
+            {resetError && <div className="error-message">{resetError}</div>}
+
+            <form onSubmit={handleForgotPassword}>
+              <div className="form-group">
+                <label htmlFor="resetEmail">电子邮箱</label>
+                <input
+                  type="email"
+                  id="resetEmail"
+                  placeholder="your@email.com"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="newPassword">新密码</label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  placeholder="至少8个字符"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">确认密码</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  placeholder="再次输入密码"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary">
+                重置密码
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

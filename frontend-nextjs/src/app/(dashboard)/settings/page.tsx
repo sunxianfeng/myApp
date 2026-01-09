@@ -69,7 +69,7 @@ export default function SettingsPage() {
             alignItems: 'center',
             gap: '16px'
           }}>
-            ⚙️ 账户设置
+            账户设置
           </h1>
           <p style={{ color: '#6B7280', fontSize: '1rem' }}>
             管理您的账户、会员订阅和支付方式

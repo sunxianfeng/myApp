@@ -348,7 +348,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               title={isCollapsed ? '搜索' : ''}
             >
               <Icon name="dashboard" className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
-              {!isCollapsed && <span>搜索</span>}
+              {!isCollapsed && <span>题目搜索</span>}
             </Link>
 
             {/* 题目解析 */}
