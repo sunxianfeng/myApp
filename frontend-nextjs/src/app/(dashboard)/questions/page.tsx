@@ -1237,6 +1237,8 @@ const QuestionsContent = () => {
 
   // Track if we're in the middle of a delete action
   const [isDeleteActionInProgress, setIsDeleteActionInProgress] = useState(false)
+  // Use ref for immediate blocking without waiting for state update
+  const isDeleteActionInProgressRef = useRef(false)
 
   useEffect(() => {
     setMounted(true)
@@ -1563,6 +1565,7 @@ const QuestionsContent = () => {
       setConfirmModal({ isOpen: false, question: null, isLoading: false })
       setIsProcessing(false)
       setIsDeleteActionInProgress(false) // Reset delete action state
+      isDeleteActionInProgressRef.current = false // Also reset ref
     }
   }
 
@@ -1963,7 +1966,8 @@ const QuestionsContent = () => {
                 className="list-view-row"
                 onClick={() => {
                   // Don't open modal if a delete action is in progress
-                  if (!isDeleteActionInProgress) {
+                  // Check both ref (immediate) and state
+                  if (!isDeleteActionInProgressRef.current && !isDeleteActionInProgress) {
                     setSelectedQuestion(q)
                     setSelectedQuestionCollection(q.collection)
                     setIsModalOpen(true)
@@ -2010,20 +2014,25 @@ const QuestionsContent = () => {
                           e.preventDefault()
                         }}
                       >
-                        <DropdownMenu.Item className="card-dropdown-item" onSelect={(e) => { e.preventDefault(); handleAction('edit', q) }}>
-                          <IconEdit />
-                          <span>编辑题目</span>
-                        </DropdownMenu.Item>
-                        <DropdownMenu.Item className="card-dropdown-item" onSelect={(e) => { e.preventDefault(); handleAction('tags', q) }}>
-                          <IconTag size={14} />
-                          <span>管理标签</span>
-                        </DropdownMenu.Item>
-                        <DropdownMenu.Item className="card-dropdown-item" onSelect={(e) => { e.preventDefault(); handleAction('move', q) }}>
+                        <DropdownMenu.Item className="card-dropdown-item" onSelect={(e) => { 
+                          e.preventDefault()
+                          handleAction('move', q)
+                        }}>
                           <IconMove size={14} />
                           <span>更改错题集</span>
                         </DropdownMenu.Item>
                         <DropdownMenu.Separator className="card-dropdown-separator" />
-                        <DropdownMenu.Item className="card-dropdown-item danger" onSelect={(e) => { e.preventDefault(); handleAction('delete', q) }}>
+                        <DropdownMenu.Item 
+                          className="card-dropdown-item danger" 
+                          onSelect={(e) => { 
+                            e.preventDefault()
+                            // Set delete action in progress IMMEDIATELY using ref
+                            // This prevents the row click handler from opening the detail modal
+                            isDeleteActionInProgressRef.current = true
+                            setIsDeleteActionInProgress(true)
+                            handleAction('delete', q)
+                          }}
+                        >
                           <IconTrash size={14} />
                           <span>删除</span>
                         </DropdownMenu.Item>
@@ -2096,6 +2105,7 @@ const QuestionsContent = () => {
           if (!confirmModal.isLoading) {
             setConfirmModal({ ...confirmModal, isOpen: false })
             setIsDeleteActionInProgress(false) // Reset delete action state when modal is closed
+            isDeleteActionInProgressRef.current = false // Also reset ref
           }
         }}
         onConfirm={() => {
