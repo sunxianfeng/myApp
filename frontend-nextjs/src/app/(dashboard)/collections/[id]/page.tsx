@@ -20,6 +20,8 @@ import {
   TrendingUp as IconTrendingUp,
   LayoutGrid as IconLayoutGrid,
   List as IconList,
+  Lightbulb as IconLightbulb,
+  Loader2 as IconLoader,
 } from 'lucide-react'
 
 import type { AppDispatch } from '@/lib/store'
@@ -218,7 +220,7 @@ const QuestionDetailModal = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <IconFolder size={24} />
             <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>
-              Question Details
+              题目详情
             </h2>
           </div>
           <button
@@ -242,7 +244,7 @@ const QuestionDetailModal = ({
         <div style={{ padding: '24px' }}>
           {/* Question Content */}
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Question</h3>
+            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>题目</h3>
             <div style={{ 
               padding: '16px',
               backgroundColor: '#FEFCE8',
@@ -258,7 +260,7 @@ const QuestionDetailModal = ({
           {/* Full Content (if available) */}
           {question.full_content && question.full_content !== question.content && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Full Content</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>完整内容</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#F0FDF4',
@@ -275,7 +277,7 @@ const QuestionDetailModal = ({
           {/* Options (if available) - only show for multiple choice questions */}
           {question.options && question.question_type !== 'fill_blank' && question.question_type !== 'fill-blank' && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Options</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>选项</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#EFF6FF',
@@ -348,7 +350,7 @@ const QuestionDetailModal = ({
           {/* Correct Answer (if available) */}
           {question.correct_answer && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Correct Answer</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>正确答案</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#DCFCE7',
@@ -364,7 +366,7 @@ const QuestionDetailModal = ({
           {/* Explanation (if available) */}
           {question.explanation && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Explanation</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>解析</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#FEF3C7',
@@ -424,7 +426,17 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingAnswer ? '🤔 生成中...' : '📖 获取参考答案'}
+                {isGeneratingAnswer ? (
+                  <>
+                    <IconLoader size={18} className="animate-spin" />
+                    生成中...
+                  </>
+                ) : (
+                  <>
+                    <IconBookOpen size={18} />
+                    获取参考答案
+                  </>
+                )}
               </button>
               
               <button
@@ -459,7 +471,17 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingHint ? '🔄 生成中...' : (hintLevel === 0 ? '💡 获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示')}
+                {isGeneratingHint ? (
+                  <>
+                    <IconLoader size={18} className="animate-spin" />
+                    生成中...
+                  </>
+                ) : (
+                  <>
+                    <IconLightbulb size={18} />
+                    {hintLevel === 0 ? '获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示'}
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -608,47 +630,47 @@ const QuestionDetailModal = ({
             borderTop: '2px dashed black',
           }}>
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Type</div>
-              <div style={{ fontWeight: 900 }}>{question.question_type || 'N/A'}</div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>类型</div>
+              <div style={{ fontWeight: 900 }}>{question.question_type || '未知'}</div>
             </div>
             
             {question.difficulty_level && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Difficulty</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>难度</div>
                 <div style={{ fontWeight: 900 }}>{question.difficulty_level}</div>
               </div>
             )}
             
             {question.subject && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Subject</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>科目</div>
                 <div style={{ fontWeight: 900 }}>{question.subject}</div>
               </div>
             )}
             
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Created</div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>创建时间</div>
               <div style={{ fontWeight: 900 }}>{new Date(question.created_at || question.added_at).toLocaleDateString()}</div>
             </div>
             
             {/* Collection-specific fields */}
             {question.mastery_level !== undefined && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Mastery Level</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>掌握程度</div>
                 <div style={{ fontWeight: 900 }}>{question.mastery_level}/5</div>
               </div>
             )}
             
             {question.times_practiced !== undefined && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Times Practiced</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>练习次数</div>
                 <div style={{ fontWeight: 900 }}>{question.times_practiced}</div>
               </div>
             )}
             
             {question.notes && (
               <div style={{ gridColumn: '1 / -1' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>Notes</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>笔记</div>
                 <div style={{ 
                   padding: '12px',
                   backgroundColor: '#F8FAFC',
@@ -664,7 +686,7 @@ const QuestionDetailModal = ({
             
             {question.topic_tags && (
               <div style={{ gridColumn: '1 / -1' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>Tags</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>标签</div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {(typeof question.topic_tags === 'string' 
                     ? question.topic_tags.split(',') 
@@ -709,7 +731,7 @@ const QuestionCard = ({
   onClick?: () => void
 }) => {
   const collectionColor = collection?.id ? generateColorFromString(collection.id) : '#E5E7EB'
-  const collectionTitle = collection?.title || 'Uncategorized'
+  const collectionTitle = collection?.title || '未分类'
 
   return (
     <div
@@ -723,17 +745,27 @@ const QuestionCard = ({
         if (e.key === 'Enter' || e.key === ' ') onClick()
       }}
     >
-      <div className="card-header">
-        <div className="collection-tag">
-          <IconFolder size={14} style={{ marginRight: '6px' }} />
-          {collectionTitle}
-        </div>
+      {/* Header removed - only show menu button in top-right corner */}
+      <div style={{ position: 'absolute', top: '6px', right: '6px', zIndex: 1 }}>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
             <button
               className="card-action-btn"
-              aria-label="Question Actions"
+              aria-label="题目操作"
               onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                padding: '4px',
+                opacity: 0.6,
+                transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.6'
+              }}
             >
               <IconMore size={20} />
             </button>
@@ -745,14 +777,14 @@ const QuestionCard = ({
                 onSelect={() => onAction('edit', question)}
               >
                 <IconEdit size={14} />
-                <span>Edit Notes</span>
+                <span>编辑笔记</span>
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 className="card-dropdown-item"
                 onSelect={() => onAction('tags', question)}
               >
                 <IconTag size={14} />
-                <span>Manage Tags</span>
+                <span>管理标签</span>
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="card-dropdown-separator" />
               <DropdownMenu.Item
@@ -760,15 +792,15 @@ const QuestionCard = ({
                 onSelect={() => onAction('remove', question)}
               >
                 <IconTrash size={14} />
-                <span>Remove from Collection</span>
+                <span>从错题本移除</span>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
       </div>
-      <div className="card-content">{question.content}</div>
-      <div className="card-footer">
-        <span className="card-meta-tag">{(question as any).question_type || (question as any).type || 'N/A'}</span>
+      <div className="card-content" style={{ paddingTop: '36px', paddingRight: '8px' }}>{question.content}</div>
+      <div className="card-footer" style={{ borderTop: 'none' }}>
+        <span className="card-meta-tag">{(question as any).question_type || (question as any).type || '未知类型'}</span>
         <span className="card-meta-date">{new Date((question as any).created_at || question.added_at).toLocaleDateString()}</span>
       </div>
     </div>
@@ -1572,11 +1604,11 @@ export default function CollectionDetailPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: '1.5rem' }}>Update Progress</h2>
+            <h2 style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: '1.5rem' }}>更新学习进度</h2>
             
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', fontWeight: 800, marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-                Mastery Level
+                掌握程度
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
                 {[0, 1, 2, 3, 4, 5].map((level) => (
@@ -1602,13 +1634,13 @@ export default function CollectionDetailPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6B7280', marginTop: '8px' }}>
-                <span>Not Mastered</span>
-                <span>Perfect</span>
+                <span>未掌握</span>
+                <span>完美掌握</span>
               </div>
             </div>
             
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontWeight: 700, marginBottom: '8px', fontSize: '0.875rem' }}>Notes</label>
+              <label style={{ display: 'block', fontWeight: 700, marginBottom: '8px', fontSize: '0.875rem' }}>笔记</label>
               <textarea
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
@@ -1622,7 +1654,7 @@ export default function CollectionDetailPage() {
                   resize: 'vertical',
                 }}
                 rows={4}
-                placeholder="Add your notes here..."
+                placeholder="在这里添加你的笔记..."
               />
             </div>
             
@@ -1639,7 +1671,7 @@ export default function CollectionDetailPage() {
                   fontSize: '0.9rem',
                 }}
               >
-                Cancel
+                取消
               </button>
               <button
                 onClick={() => handleUpdateQuestion(editingQuestion)}
@@ -1654,7 +1686,7 @@ export default function CollectionDetailPage() {
                   fontSize: '0.9rem',
                 }}
               >
-                Save Changes
+                保存更改
               </button>
             </div>
           </div>
