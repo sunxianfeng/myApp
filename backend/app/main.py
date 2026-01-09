@@ -43,6 +43,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     lifespan=lifespan,
+    redirect_slashes=False,  # Disable automatic redirect to prevent losing Authorization header
 )
 
 # CORS middleware

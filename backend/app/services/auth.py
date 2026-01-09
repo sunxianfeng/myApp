@@ -79,6 +79,11 @@ class AuthService:
     @staticmethod
     def verify_token(token: str) -> Optional[str]:
         """Verify a JWT token and return the user_id"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"🔐 Verifying token: {token[:20] if token else 'None'}...")
+        
         try:
             payload = jwt.decode(
                 token,
@@ -86,14 +91,19 @@ class AuthService:
                 algorithms=[settings.JWT_ALGORITHM]
             )
             user_id: str = payload.get("sub")
+            logger.info(f"✅ Token valid, user_id: {user_id}")
             if user_id is None:
+                logger.error("❌ No 'sub' in token payload")
                 return None
             return user_id
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as e:
+            logger.error(f"❌ Token expired: {e}")
             return None
-        except jwt.InvalidTokenError:
+        except jwt.InvalidTokenError as e:
+            logger.error(f"❌ Invalid token: {e}")
             return None
-        except Exception:
+        except Exception as e:
+            logger.error(f"❌ Token verification error: {e}")
             return None
 
     @staticmethod

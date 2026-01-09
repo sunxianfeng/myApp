@@ -33,9 +33,19 @@ export const loginUser = createAsyncThunk(
 
       const accessToken = response.access_token
 
+      console.log('🔍 Window check:', typeof window !== 'undefined' ? 'CLIENT' : 'SERVER')
+      console.log('🔍 AccessToken received:', accessToken ? accessToken.substring(0, 20) + '...' : 'NULL')
+
       // 保存token到localStorage
       if (typeof window !== 'undefined') {
+        console.log('💾 Attempting to save token to localStorage...')
         localStorage.setItem('token', accessToken)
+        
+        // Immediately verify it was saved
+        const verification = localStorage.getItem('token')
+        console.log('✅ Verification - Token in localStorage:', verification ? verification.substring(0, 20) + '...' : '❌ NOT SAVED!')
+      } else {
+        console.error('❌ Cannot save token - running on server side!')
       }
 
       // 获取当前用户信息
@@ -93,6 +103,7 @@ export const logoutUser = createAsyncThunk(
       
       // 清除localStorage
       if (typeof window !== 'undefined') {
+        console.log('🗑️ Removing token from localStorage (logout)')
         localStorage.removeItem('token')
       }
       
@@ -100,6 +111,7 @@ export const logoutUser = createAsyncThunk(
     } catch (error: any) {
       // 即使API调用失败，也要清除本地数据
       if (typeof window !== 'undefined') {
+        console.log('🗑️ Removing token from localStorage (logout error)')
         localStorage.removeItem('token')
       }
       return rejectWithValue(error.message || '登出失败')
@@ -126,18 +138,25 @@ export const initializeAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       if (typeof window === 'undefined') {
+        console.log('⚠️ initializeAuth: Running on server side, skipping')
         return null
       }
       
       const token = localStorage.getItem('token')
       const refreshToken = localStorage.getItem('refreshToken')
       
+      console.log('🔄 initializeAuth: Starting...')
+      console.log('🔄 Token from localStorage:', token ? token.substring(0, 20) + '...' : 'NULL')
+      
       if (!token) {
+        console.log('⚠️ initializeAuth: No token found, skipping')
         return null
       }
       
       // 验证token并获取用户信息
+      console.log('🔄 initializeAuth: Calling getCurrentUser()...')
       const user: User = await getCurrentUser()
+      console.log('✅ initializeAuth: getCurrentUser() succeeded')
       
       return {
         user,
@@ -146,7 +165,10 @@ export const initializeAuth = createAsyncThunk(
       }
     } catch (error: any) {
       // token无效，清除本地存储
+      console.error('❌ initializeAuth: getCurrentUser() failed:', error)
+      console.error('❌ initializeAuth: Removing invalid token from localStorage')
       if (typeof window !== 'undefined') {
+        console.log('🗑️ Removing invalid token from localStorage (init failed)')
         localStorage.removeItem('token')
         localStorage.removeItem('refreshToken')
       }

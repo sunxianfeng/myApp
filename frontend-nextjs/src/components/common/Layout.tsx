@@ -2,7 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState, AppDispatch } from '@/lib/store'
+import { logoutUser } from '@/lib/slices/authSlice'
 import { AppLogo } from './Icons'
 
 function Icon({ name, className }: { name: 'dashboard' | 'file' | 'upload' | 'settings' | 'search' | 'chevronDown' | 'menu' | 'chevronLeft' | 'chevronRight'; className?: string }) {
@@ -82,6 +85,9 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const pathname = usePathname()
+  const router = useRouter()
+  const dispatch = useDispatch<AppDispatch>()
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth)
   const [mounted, setMounted] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -162,7 +168,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           onMouseLeave={() => setIsProfileOpen(false)}
         >
           <button 
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            onClick={() => {
+              if (!isAuthenticated) {
+                router.push('/login')
+              } else {
+                setIsProfileOpen(!isProfileOpen)
+              }
+            }}
             className="profile-button flex items-center gap-3 bg-white rounded-full px-4 py-2 border-3 border-black transition-all duration-200 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
             style={{
               boxShadow: '3px 3px 0px 0px rgba(0,0,0,1)'
@@ -182,18 +194,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             <div className="hidden sm:flex sm:flex-col text-left">
-              <p className="font-black text-black text-sm leading-tight">Username</p>
-              <p className="text-xs text-gray-600 font-semibold">高级会员</p>
+              <p className="font-black text-black text-sm leading-tight">
+                {isAuthenticated && user ? user.name || user.email : '登录'}
+              </p>
+              {isAuthenticated && user && (
+                <p className="text-xs text-gray-600 font-semibold">高级会员</p>
+              )}
             </div>
 
-            <Icon 
-              name="chevronDown" 
-              className={`w-4 h-4 text-black transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} 
-            />
+            {isAuthenticated && (
+              <Icon 
+                name="chevronDown" 
+                className={`w-4 h-4 text-black transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} 
+              />
+            )}
           </button>
 
-          {/* Dropdown Menu - Neobrutalism Style */}
-          {isProfileOpen && (
+          {/* Dropdown Menu - Neobrutalism Style - Only show when logged in */}
+          {isAuthenticated && isProfileOpen && (
             <>
               {/* Backdrop to close dropdown when clicking outside */}
               <div 
@@ -216,7 +234,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {/* User Info Section - Email Focused */}
                 <div className="px-6 py-4 border-b-3 border-black bg-gradient-to-br from-yellow-50 to-amber-50">
                   <div className="space-y-2.5">
-                    <p className="text-base text-gray-700 font-bold break-all leading-relaxed">user@example.com</p>
+                    <p className="text-base text-gray-700 font-bold break-all leading-relaxed">
+                      {user?.email || 'user@example.com'}
+                    </p>
                     <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black text-white rounded-full text-xs font-bold shadow-sm">
                       <span className="text-sm">⭐</span>
                       <span>高级会员</span>
@@ -252,9 +272,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                   <button
                     className="profile-menu-item w-full flex items-center gap-3.5 px-6 py-3.5 hover:bg-red-50 active:bg-red-100 transition-all duration-150 text-left group"
-                    onClick={() => {
-                      // Add logout logic here
-                      setIsProfileOpen(false)
+                    onClick={async () => {
+                      try {
+                        await dispatch(logoutUser()).unwrap()
+                        setIsProfileOpen(false)
+                        router.push('/login')
+                      } catch (error) {
+                        console.error('Logout failed:', error)
+                      }
                     }}
                   >
                     <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">

@@ -656,6 +656,7 @@ async def bulk_create_questions(
 
 
 @router.get("/", response_model=QuestionListResponse)
+@router.get("", response_model=QuestionListResponse)  # Also handle without trailing slash
 async def list_questions(
     skip: int = 0,
     limit: int = 50,

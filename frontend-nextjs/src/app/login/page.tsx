@@ -24,9 +24,17 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await dispatch(loginUser({ email, password })).unwrap()
+      const result = await dispatch(loginUser({ email, password })).unwrap()
+      console.log('✅ Login successful:', result)
+      
+      // Verify token was saved
+      const storedToken = localStorage.getItem('token')
+      console.log('🔑 Token in localStorage:', storedToken ? storedToken.substring(0, 20) + '...' : 'NOT FOUND')
+      
+      console.log('🚀 Navigating to home page...')
       router.push('/')
     } catch (err: any) {
+      console.error('❌ Login failed:', err)
       setError(err.message || '登录失败，请检查邮箱和密码')
     } finally {
       setLoading(false)

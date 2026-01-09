@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import ReduxProvider from '@/components/providers/ReduxProvider'
+import AuthInitializer from '@/components/providers/AuthInitializer'
 import ErrorBoundary from '@/components/common/ErrorBoundary'
 import ErrorFallback from '@/components/common/ErrorFallback'
 import AntdRegistry from '@/lib/AntdRegistry'
@@ -91,8 +92,10 @@ export default function RootLayout({
         <ErrorBoundary fallback={ErrorFallback}>
           <AntdRegistry>
             <ReduxProvider>
-              <NotificationBar />
-              {children}
+              <AuthInitializer>
+                <NotificationBar />
+                {children}
+              </AuthInitializer>
             </ReduxProvider>
           </AntdRegistry>
         </ErrorBoundary>

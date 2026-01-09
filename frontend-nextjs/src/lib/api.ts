@@ -35,9 +35,16 @@ api.interceptors.request.use(
     // 在客户端获取 token
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token')
+      console.log(`🔑 [API Request] ${config.method?.toUpperCase()} ${config.url}`)
+      console.log(`🔑 [API Request] Token in localStorage: ${token ? token.substring(0, 20) + '...' : 'NULL'}`)
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`
+        console.log(`🔑 [API Request] Authorization header SET`)
+      } else {
+        console.log(`⚠️ [API Request] No token or headers - Authorization NOT set!`)
       }
+    } else {
+      console.log(`⚠️ [API Request] SSR context - window undefined`)
     }
     return config
   },
@@ -54,10 +61,14 @@ api.interceptors.response.use(
   (error) => {
     // 处理 401 未授权错误
     if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
-      }
+      console.error('❌ 401 Unauthorized:', error.config?.url)
+      // DON'T remove token or redirect here!
+      // The token might still be valid - 401 could be due to:
+      // 1. Request sent before token was attached (race condition)
+      // 2. Temporary network issue  
+      // 3. Backend issue
+      // Let the calling component decide what to do
+      console.log('⚠️ 401 error - NOT removing token or redirecting')
     }
     
     // 处理取消请求的错误
@@ -179,7 +190,8 @@ export const getQuestions = async (params?: {
         : undefined
 
   // category is currently ignored by backend; keep it for future use without breaking callers.
-  return await api.get('/v1/questions', {
+  // IMPORTANT: Use trailing slash to avoid 307 redirect which loses Authorization header
+  return await api.get('/v1/questions/', {
     params: {
       skip: computedSkip,
       limit,
@@ -194,7 +206,8 @@ export const getQuestion = async (id: string): Promise<any> => {
 }
 
 export const createQuestion = async (questionData: any): Promise<any> => {
-  return await api.post('/v1/questions', questionData)
+  // Use trailing slash to avoid 307 redirect
+  return await api.post('/v1/questions/', questionData)
 }
 
 export const updateQuestion = async (id: string, questionData: any): Promise<any> => {

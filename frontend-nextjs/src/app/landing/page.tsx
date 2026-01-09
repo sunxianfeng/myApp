@@ -2,10 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Landing2Page() {
   const router = useRouter()
+  const [isMounted, setIsMounted] = useState(false)
+  const [recognitionRate, setRecognitionRate] = useState(99.8)
+  const [thinkingBoost, setThinkingBoost] = useState(200)
 
   // Scroll reveal animation
   useEffect(() => {
@@ -22,6 +25,44 @@ export default function Landing2Page() {
 
     document.querySelectorAll('.scroll-reveal').forEach((el) => observer.observe(el))
     return () => observer.disconnect()
+  }, [])
+
+  // 等待组件挂载后再开始动画
+  useEffect(() => {
+    setIsMounted(true)
+    
+    // 重置为起始值
+    setRecognitionRate(95.0)
+    setThinkingBoost(0)
+
+    // 延迟启动动画
+    const startDelay = setTimeout(() => {
+      // 识别率动画
+      const rateInterval = setInterval(() => {
+        setRecognitionRate((prev) => {
+          if (prev >= 99.8) {
+            clearInterval(rateInterval)
+            return 99.8
+          }
+          return Math.min(prev + 0.2, 99.8)
+        })
+      }, 30)
+
+      // 思考力提升动画
+      const thinkingInterval = setInterval(() => {
+        setThinkingBoost((prev) => {
+          if (prev >= 200) {
+            clearInterval(thinkingInterval)
+            return 200
+          }
+          return Math.min(prev + 8, 200)
+        })
+      }, 30)
+    }, 500)
+
+    return () => {
+      clearTimeout(startDelay)
+    }
   }, [])
 
   return (
@@ -61,9 +102,19 @@ export default function Landing2Page() {
           </h1>
           
           {/* 副标题 P - 大号粗体 */}
-          <p className="text-2xl md:text-4xl font-bold text-black mb-12 transform rotate-1">
-            智能错题管理 · AI 思路启发 · 可视化进步
+          <p className="text-2xl md:text-4xl font-bold text-black mb-6 transform rotate-1">
+            拍照识题 · AI思路提示 · 进步可视化
           </p>
+          
+          {/* 核心数据展示 */}
+          <div className="flex flex-wrap justify-center gap-4 md:gap-8 mb-12">
+            <div className="bg-white border-[3px] border-black rounded-xl px-6 py-3 shadow-[3px_3px_0px_0px_#000000] transform -rotate-1">
+              <span className="text-2xl md:text-3xl font-black">99.8% 识别率</span>
+            </div>
+            <div className="bg-white border-[3px] border-black rounded-xl px-6 py-3 shadow-[3px_3px_0px_0px_#000000] transform rotate-1">
+              <span className="text-2xl md:text-3xl font-black">+200% 独立思考</span>
+            </div>
+          </div>
 
           {/* 核心 CTA 按钮 - 绿色背景，粗黑边框，硬投影，按压交互 */}
           <button
@@ -85,7 +136,7 @@ export default function Landing2Page() {
 
           {/* 功能卡片网格 - 3列布局 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* 卡片 1 - 拍照录入 - 浅蓝色背景 + 轻微旋转 */}
+            {/* 卡片 1 - 拍照识题 - 浅蓝色背景 + 轻微旋转 */}
             <div className="scroll-reveal bg-[#E0F2FE] border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] p-8 rounded-xl transform -rotate-1 hover:-rotate-0.5 transition-transform duration-300">
               {/* 相机图标 + 扫描框示意 */}
               <div className="mb-6 relative">
@@ -104,13 +155,27 @@ export default function Landing2Page() {
                 {/* 扫描线动画 */}
                 <div className="absolute top-12 left-1/2 -translate-x-1/2 w-16 h-1 bg-red-500 animate-pulse" />
               </div>
-              <h3 className="text-3xl font-black mb-4 text-center">一键拍照收录</h3>
-              <p className="text-lg font-bold text-center text-gray-800 leading-relaxed">
-                告别手抄，秒变可编辑文本。
+              
+              <h3 className="text-3xl font-black mb-4 text-center">拍照识题</h3>
+              
+              <p className="text-lg font-bold text-center text-gray-800 leading-relaxed mb-6">
+                拍一下，AI立即识别题目，
+                <br />
+                连草稿纸上的涂改都能看懂
               </p>
+              
+              {/* 识别率数据展示 */}
+              <div className="bg-white border-[2px] border-black rounded-lg p-4 mt-4">
+                <div className="text-center">
+                  <div className="text-4xl font-black text-black">
+                    {recognitionRate.toFixed(1)}%
+                  </div>
+                  <div className="text-sm font-bold text-gray-600 mt-1">识别率</div>
+                </div>
+              </div>
             </div>
 
-            {/* 卡片 2 - 思路启发（重点强调）- 浅紫色标题栏 + 加粗文字 */}
+            {/* 卡片 2 - 渐进式引导（重点强调）- 浅紫色标题栏 + 加粗文字 */}
             <div className="scroll-reveal bg-white border-[3px] border-black shadow-[6px_6px_0px_0px_#000000] p-8 rounded-xl transform rotate-1.5 hover:rotate-0.5 transition-transform duration-300">
               {/* 浅紫色标题栏背景 */}
               <div className="bg-[#E9D5FF] border-b-[3px] border-black -mx-8 -mt-8 px-8 pt-6 pb-4 mb-6 rounded-t-xl">
@@ -128,13 +193,30 @@ export default function Landing2Page() {
                   <line x1="80" y1="40" x2="95" y2="40" strokeWidth="3" />
                 </svg>
               </div>
-              <h3 className="text-3xl font-black mb-6 text-center">AI 思路引导（独家）</h3>
+              
+              <h3 className="text-3xl font-black mb-4 text-center">渐进式引导</h3>
+              <p className="text-xl font-black text-center text-purple-600 mb-4">AI 思路提示</p>
+              
               <p className="text-lg font-bold text-center text-gray-800 leading-relaxed mb-6">
-                不直接给答案，引导你一步步思考解题关键。
+                不给答案给思路，
+                <br />
+                像游戏里的提示系统，
+                <br />
+                一步步引导你自己解决
               </p>
+              
+              {/* 独立思考提升数据 */}
+              <div className="bg-[#E9D5FF] border-[2px] border-black rounded-lg p-4 mt-4">
+                <div className="text-center">
+                  <div className="text-4xl font-black text-black">
+                    +{thinkingBoost}%
+                  </div>
+                  <div className="text-sm font-bold text-gray-600 mt-1">独立思考能力</div>
+                </div>
+              </div>
             </div>
 
-            {/* 卡片 3 - 可视化报告 - 浅粉色背景 + 轻微旋转 */}
+            {/* 卡片 3 - 数据驱动 - 浅粉色背景 + 轻微旋转 */}
             <div className="scroll-reveal bg-[#FFE4E6] border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] p-8 rounded-xl transform rotate-1 hover:rotate-0.5 transition-transform duration-300">
               {/* 柱状图图标 + 进度条 */}
               <div className="mb-6">
@@ -149,10 +231,30 @@ export default function Landing2Page() {
                   <rect x="20" y="90" width="50" height="6" rx="3" fill="#A3E635" />
                 </svg>
               </div>
-              <h3 className="text-3xl font-black mb-4 text-center">掌握度可视化</h3>
+              
+              <h3 className="text-3xl font-black mb-4 text-center">数据驱动</h3>
+              <p className="text-xl font-black text-center text-pink-600 mb-4">进步可视化</p>
+              
               <p className="text-lg font-bold text-center text-gray-800 leading-relaxed">
-                看着进度条涨满，成就感爆棚。
+                看到每天的进度曲线，
+                <br />
+                薄弱点一目了然，
+                <br />
+                成就感爆棚
               </p>
+              
+              {/* 进度展示 */}
+              <div className="bg-white border-[2px] border-black rounded-lg p-4 mt-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>本周进步</span>
+                    <span className="text-green-600">↑ 85%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 border-[2px] border-black">
+                    <div className="bg-[#A3E635] h-full rounded-full transition-all duration-1000" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

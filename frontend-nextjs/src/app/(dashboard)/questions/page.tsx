@@ -29,6 +29,7 @@ const IconEdit = () => (
 )
 
 import type { AppDispatch } from '@/lib/store'
+import type { RootState } from '@/lib/store'
 import {
   addCollection,
   fetchCollections,
@@ -1066,6 +1067,7 @@ const QuestionsContent = () => {
 
   const collections = useSelector(selectCollections)
   const isLoading = useSelector(selectCollectionLoading)
+  const { isAuthenticated, isLoading: authLoading } = useSelector((state: RootState) => state.auth)
 
   const [allQuestions, setAllQuestions] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -1093,11 +1095,78 @@ const QuestionsContent = () => {
 
   // Track UI drag state (optional feedback)
   const [dragOverCollectionId, setDragOverCollectionId] = useState<string | null>(null)
+  const [authChecked, setAuthChecked] = useState(false)
 
+  // Separate useEffect for auth redirect - only runs once after auth is initialized
   useEffect(() => {
+    if (!mounted) {
+      return
+    }
+
+    // Wait for auth loading to complete
+    if (authLoading) {
+      console.log('🔐 Questions: Auth still loading...')
+      return
+    }
+
+    // Check token in localStorage as well to avoid false negatives
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+    
+    console.log('=== 🔐 Questions: Auth check ===')
+    console.log('isAuthenticated:', isAuthenticated)
+    console.log('hasToken:', !!token)
+    console.log('authLoading:', authLoading)
+    console.log('authChecked:', authChecked)
+    console.log('================================')
+
+    // Only redirect if auth is fully loaded AND no token exists AND not authenticated
+    if (!authChecked && !authLoading) {
+      setAuthChecked(true)
+      
+      if (!isAuthenticated && !token) {
+        console.log('❌ Questions: Not authenticated, redirecting to login')
+        router.push('/login')
+      } else {
+        console.log('✅ Questions: Authenticated, ready to load data')
+      }
+    }
+  }, [mounted, authLoading, isAuthenticated, router, authChecked])
+
+  // Separate useEffect for data loading
+  useEffect(() => {
+    console.log('📊 Data loading useEffect triggered:', {
+      authChecked,
+      authLoading,
+      mounted,
+      isAuthenticated
+    })
+
+    // Wait for auth to be checked first
+    if (!authChecked || authLoading || !mounted) {
+      console.log('⏸️ Waiting for auth check or mount...')
+      return
+    }
+
+    // Check if we have authentication (either from Redux or localStorage)
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+    console.log('🔍 Token check:', {
+      hasReduxAuth: isAuthenticated,
+      hasLocalToken: !!token
+    })
+
+    if (!isAuthenticated && !token) {
+      // Don't load data if not authenticated
+      console.log('⏸️ Questions: Skipping data load - not authenticated')
+      return
+    }
+
+    console.log('✅ Proceeding with data load...')
+
     const loadInitialData = async () => {
       setIsProcessing(true)
       setPageError(null)
+      
+      console.log('🔄 Starting API calls...')
       
       // Add timeout to prevent infinite loading
       const timeoutId = setTimeout(() => {
@@ -1146,7 +1215,7 @@ const QuestionsContent = () => {
     }
 
     loadInitialData()
-  }, []) // Remove dispatch dependency to prevent re-triggering
+  }, [mounted, authChecked, authLoading, isAuthenticated, dispatch]) // Update dependencies
 
   const defaultCollectionBlock = useMemo(() => {
     // We treat "default" collection as the one coming back with a falsy id or title "Uncategorized" or "默认错题本".
