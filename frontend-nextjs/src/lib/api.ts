@@ -271,9 +271,10 @@ export const generateDocument = async (questionIds: string[]): Promise<any> => {
 
 // 全局搜索相关 API
 export const globalSearch = async (params: {
-  q: string;
-  skip?: number;
-  limit?: number;
+  q: string  // 搜索查询
+  skip?: number
+  limit?: number
+  use_vector?: boolean  // 是否使用向量搜索
 }): Promise<any> => {
   return await api.get('/v1/questions/search', { params })
 }
