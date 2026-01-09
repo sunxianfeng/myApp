@@ -229,7 +229,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   minWidth: '210px',
                   width: 'max-content',
                   maxWidth: '240px',
-                  fontFamily: "'JetBrains Mono', monospace"
+                  fontFamily: "'Poppins', sans-serif"
                 }}
               >
                 {/* User Info Section - Email Focused */}
