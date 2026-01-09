@@ -384,7 +384,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </aside>
 
         {/* Main Content Area - Right Side - Floating White Island */}
-        <main className="flex-1 bg-white rounded-3xl p-8 overflow-y-auto" style={{ border: 'none' }}>
+        <main className="flex-1 bg-white rounded-3xl p-8 overflow-y-auto" style={{ border: 'none', boxShadow: 'none' }}>
           {children}
         </main>
       </div>

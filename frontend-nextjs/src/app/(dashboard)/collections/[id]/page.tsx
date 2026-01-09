@@ -1691,10 +1691,23 @@ export default function CollectionDetailPage() {
                           fontSize: '0.875rem',
                         }}
                       >
-                        Edit
+                        编辑
                       </button>
                       <button
-                        onClick={() => handleRemoveQuestion(question.id)}
+                        onClick={() => handleAction('remove', question)}
+                        style={{
+                          color: '#F59E0B',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        移出
+                      </button>
+                      <button
+                        onClick={() => handleAction('delete', question)}
                         style={{
                           color: '#EF4444',
                           background: 'none',
@@ -1704,7 +1717,7 @@ export default function CollectionDetailPage() {
                           fontSize: '0.875rem',
                         }}
                       >
-                        Remove
+                        删除
                       </button>
                     </div>
                   </td>

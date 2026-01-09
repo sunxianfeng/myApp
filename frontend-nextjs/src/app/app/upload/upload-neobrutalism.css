@@ -39,15 +39,15 @@
   margin: 2rem auto !important;
   background-color: var(--neo-white) !important;
   border: 4px solid var(--neo-black) !important;
-  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  box-shadow: none !important;
   padding: 2.5rem !important;
   border-radius: 1.5rem !important;
   transition: all 0.2s ease !important;
 }
 
 .upload-container:hover {
-  transform: translate(-2px, -2px) !important;
-  box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* Page wrapper: content already within the white floating island from Layout */
@@ -963,7 +963,7 @@ width: 180px !important;
   }
 
   .upload-container {
-    box-shadow: var(--neo-shadow-sm) !important;
+    box-shadow: none !important;
   }
 }
 

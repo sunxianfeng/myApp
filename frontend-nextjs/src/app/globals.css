@@ -201,18 +201,27 @@ body {
   font-family: var(--font-sans) !important;
   min-height: 100vh !important;
   padding: 1rem !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
 }
 
-.upload-container {
+.upload-container,
+.upload-container:hover,
+.upload-container:focus,
+.upload-container:active {
   width: 100% !important;
   max-width: 800px !important;
   background-color: var(--card) !important;
   border-radius: var(--radius-xl) !important;
-  box-shadow: var(--shadow-lg) !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
   overflow: hidden !important;
   animation: fadeIn 600ms ease-out !important;
   margin: 0 auto !important;
   border: 1px solid var(--border) !important; /* Changed from dashed to solid as requested */
+  transform: none !important;
 }
 
 .upload-header {
