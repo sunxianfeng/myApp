@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '@/lib/store'
 import { logoutUser } from '@/lib/slices/authSlice'
 import { AppLogo } from './Icons'
+import { ThemeToggle } from './ThemeToggle'
 
 function Icon({ name, className }: { name: 'dashboard' | 'file' | 'upload' | 'settings' | 'search' | 'chevronDown' | 'menu' | 'chevronLeft' | 'chevronRight'; className?: string }) {
   // Slightly thicker stroke so icons appear bold and consistent with neobrutalism
@@ -141,32 +142,44 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col text-sm w-full h-screen overflow-hidden" style={{
-      background: '#FDE047',
-      backgroundImage: 'radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
-      backgroundSize: '20px 20px'
-    }}>
-      {/* Full-Width Top Header - Seamless Butter Yellow Background */}
-      <header className="w-full h-20 border-0 shadow-none flex items-center justify-between flex-shrink-0" style={{
-        background: '#FDE047',
-        backgroundImage: 'radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
-        backgroundSize: '20px 20px',
-        paddingTop: '8px',
-        paddingBottom: '8px',
-        paddingLeft: '2rem',
-        paddingRight: '2.5rem'
-      }} suppressHydrationWarning>
+    <div 
+      className="flex flex-col text-sm w-full h-screen overflow-hidden transition-colors duration-300" 
+      style={{
+        background: 'var(--bg-main)',
+        backgroundImage: 'radial-gradient(rgba(128, 128, 128, 0.08) 1px, transparent 1px)',
+        backgroundSize: '20px 20px'
+      }}
+    >
+      {/* Full-Width Top Header - Seamless Background */}
+      <header 
+        className="w-full h-20 border-0 shadow-none flex items-center justify-between flex-shrink-0 transition-colors duration-300" 
+        style={{
+          background: 'var(--bg-main)',
+          backgroundImage: 'radial-gradient(rgba(128, 128, 128, 0.08) 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+          paddingTop: '8px',
+          paddingBottom: '8px',
+          paddingLeft: '2rem',
+          paddingRight: '2.5rem'
+        }} 
+        suppressHydrationWarning
+      >
         {/* Left: Logo - Text-based with small icon square */}
         <div className="flex items-center gap-2.5">
           <AppLogo className="w-11 h-11" />
-          <h1 className="text-2xl font-black text-black tracking-tight">题宝</h1>
+          <h1 className="text-2xl font-black tracking-tight transition-colors duration-300" style={{ color: 'var(--text-primary)' }}>题宝</h1>
         </div>
 
-        {/* Right: User Profile with Dropdown */}
-        <div 
-          className="relative"
-          onMouseLeave={() => setIsProfileOpen(false)}
-        >
+        {/* Right: Theme Toggle + User Profile with Dropdown */}
+        <div className="flex items-center gap-4">
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
+          
+          {/* User Profile Dropdown */}
+          <div 
+            className="relative"
+            onMouseLeave={() => setIsProfileOpen(false)}
+          >
           <button 
             onClick={() => {
               if (!isAuthenticated) {
@@ -299,6 +312,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </>
           )}
+          </div>
         </div>
       </header>
 

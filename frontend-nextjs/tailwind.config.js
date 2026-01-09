@@ -21,6 +21,9 @@ module.exports = {
           900: '#1e3a8a',
         },
       },
+      borderWidth: {
+        '3': '3px',
+      },
     },
   },
   plugins: [],

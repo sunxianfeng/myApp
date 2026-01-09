@@ -95,15 +95,44 @@
 /* Ensure enough hit target on mobile */
 .question-select-box, .correction-btn { min-height: 40px !important; padding: 0 12px !important; }
 
-/* Light mode colors */
-:root {
+/* ===================================
+   THEME SYSTEM - Light & Soft Light
+   =================================== */
+
+/* Default Light Mode - Energetic Yellow */
+:root,
+:root[data-theme="light"] {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 253, 224, 71;
   --background-end-rgb: 253, 224, 71;
+  --bg-main: #FDE047;
+  --bg-card: #ffffff;
+  --bg-card-elevated: #fbfbfe;
+  --text-primary: #000000;
+  --text-secondary: #4a5568;
+  --border-color: #000000;
+  --shadow-color: rgba(0, 0, 0, 1);
+  --accent-hover: #FEF08A;
 }
 
+/* Soft Light Mode - Easy on the Eyes */
+:root[data-theme="soft-light"] {
+  --foreground-rgb: 30, 30, 30;
+  --background-start-rgb: 240, 240, 240;
+  --background-end-rgb: 240, 240, 240;
+  --bg-main: #F0F0F0;
+  --bg-card: #FFFFFF;
+  --bg-card-elevated: #FAFAFA;
+  --text-primary: #1E1E1E;
+  --text-secondary: #6B7280;
+  --border-color: #2D2D2D;
+  --shadow-color: rgba(45, 45, 45, 1);
+  --accent-hover: #E8E8E8;
+}
+
+/* Legacy support */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --foreground-rgb: 0, 0, 0;
     --background-start-rgb: 253, 224, 71;
     --background-end-rgb: 253, 224, 71;
@@ -112,14 +141,15 @@
 
 html {
   min-height: 100%;
-  background: #FDE047 !important;
+  background: var(--bg-main) !important;
+  transition: background-color 0.3s ease;
 }
 
 body {
   min-height: 100%;
-  color: rgb(var(--foreground-rgb)) !important;
-  /* Butter yellow background - NO gradients */
-  background: #FDE047 !important;
+  color: var(--text-primary) !important;
+  background: var(--bg-main) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .ant-layout {
@@ -1876,4 +1906,95 @@ textarea:focus {
 
 .scroll-reveal:nth-child(3) {
   transition-delay: 300ms;
+}
+
+/* ===================================
+   THEME SUPPORT FOR COMPONENTS
+   =================================== */
+
+/* Card Styles with Theme Support */
+[data-theme="light"] .sidebar,
+[data-theme="soft-light"] .sidebar,
+[data-theme="light"] .profile-button,
+[data-theme="soft-light"] .profile-button,
+[data-theme="light"] .profile-dropdown,
+[data-theme="soft-light"] .profile-dropdown {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 3px 3px 0px 0px var(--shadow-color) !important;
+}
+
+/* Text Colors with Theme Support */
+[data-theme="light"] .sidebar-item {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .sidebar-item.active {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="light"] .sidebar-item.active svg,
+[data-theme="light"] .sidebar-item.active path {
+  stroke: #FFFFFF !important;
+}
+
+[data-theme="soft-light"] .sidebar-item {
+  color: #1E1E1E !important;
+}
+
+[data-theme="soft-light"] .sidebar-item.active {
+  background-color: rgba(253, 224, 71, 0.2) !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="soft-light"] .sidebar-item.active svg,
+[data-theme="soft-light"] .sidebar-item.active path {
+  stroke: #000000 !important;
+}
+
+/* Background transitions */
+.sidebar,
+.profile-button,
+.profile-dropdown,
+.theme-toggle-button {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Sidebar Theme Support */
+[data-theme="soft-light"] .sidebar {
+  border-color: var(--border-color) !important;
+  background-color: var(--bg-card) !important;
+}
+
+/* Upload Container Theme Support */
+[data-theme="soft-light"] .upload-container {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="soft-light"] .upload-page {
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Keep logout button red in all themes */
+.profile-menu-item.group .text-red-600,
+.profile-menu-item.group svg.text-red-600 {
+  color: #dc2626 !important;
+  stroke: #dc2626 !important;
+}
+
+/* Soft Light Mode Specific */
+[data-theme="soft-light"] .profile-button,
+[data-theme="soft-light"] .sidebar,
+[data-theme="soft-light"] .theme-toggle-button {
+  box-shadow: 3px 3px 0px 0px var(--shadow-color) !important;
+}
+
+[data-theme="soft-light"] .profile-button:hover,
+[data-theme="soft-light"] .theme-toggle-button:hover {
+  box-shadow: 4px 4px 0px 0px var(--shadow-color) !important;
 }
