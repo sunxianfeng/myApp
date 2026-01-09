@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { globalSearch, generateReferenceAnswer, generateHint, generateSimilarQuestions } from '@/lib/api'
 import MathRenderer from '@/components/common/MathRenderer'
+import ConfirmModal from '@/components/ConfirmModal'
 import { BookOpen, Lightbulb, Loader2, Sparkles } from 'lucide-react'
 
 // Helper function to generate colors from collection ID
@@ -82,6 +83,16 @@ const questionTypeMap: Record<string, string> = {
   other: '其他',
 }
 
+// Difficulty Level Map - 翻译难度等级
+const difficultyLevelMap: Record<string, string> = {
+  easy: '简单',
+  medium: '中等',
+  hard: '困难',
+  Easy: '简单',
+  Medium: '中等',
+  Hard: '困难',
+}
+
 // Question Card Component
 function QuestionCard({ question, onClick }: { question: any; onClick: () => void }) {
   const [isHovered, setIsHovered] = useState(false)
@@ -107,32 +118,62 @@ function QuestionCard({ question, onClick }: { question: any; onClick: () => voi
           ? '8px 8px 0px 0px rgba(0,0,0,1)' 
           : '4px 4px 0px 0px rgba(0,0,0,1)',
         transform: isHovered ? 'translate(-2px, -2px)' : 'translate(0, 0)',
+        position: 'relative',
+        overflow: 'visible',
       }}
     >
+      {/* 装饰性色块 */}
+      {isHovered && (
+        <>
+          <div style={{
+            position: 'absolute',
+            top: '-8px',
+            left: '-8px',
+            width: '30px',
+            height: '30px',
+            backgroundColor: '#FDE68A',
+            borderRadius: '50%',
+            zIndex: -1,
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-6px',
+            right: '-6px',
+            width: '40px',
+            height: '40px',
+            backgroundColor: '#A7F3D0',
+            borderRadius: '8px',
+            transform: 'rotate(15deg)',
+            zIndex: -1,
+          }} />
+        </>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span style={{
             backgroundColor: '#FEF08A',
             color: '#000000',
-            padding: '0.25rem 0.75rem',
-            borderRadius: '0.5rem',
-            border: '2px solid #000000',
+            padding: '0.35rem 0.85rem',
+            borderRadius: '6px',
+            border: '3px solid #000000',
             fontSize: '0.875rem',
-            fontWeight: 700,
+            fontWeight: 800,
+            fontFamily: "'ZCOOL KuaiLe', cursive, sans-serif",
           }}>
             {questionTypeMap[question.question_type] || question.question_type}
           </span>
           {question.difficulty_level && (
             <span style={{
-              backgroundColor: '#DBEAFE',
+              backgroundColor: '#A3E635',
               color: '#000000',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '0.5rem',
-              border: '2px solid #000000',
+              padding: '0.35rem 0.85rem',
+              borderRadius: '6px',
+              border: '3px solid #000000',
               fontSize: '0.875rem',
-              fontWeight: 700,
+              fontWeight: 800,
+              fontFamily: "'ZCOOL KuaiLe', cursive, sans-serif",
             }}>
-              {question.difficulty_level}
+              {difficultyLevelMap[question.difficulty_level] || question.difficulty_level}
             </span>
           )}
         </div>
@@ -140,9 +181,13 @@ function QuestionCard({ question, onClick }: { question: any; onClick: () => voi
           <span style={{
             fontSize: '0.875rem',
             fontWeight: 700,
+            fontFamily: "'Courier New', monospace",
             color: '#6b7280',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.25rem',
           }}>
-            #{question.number}
+            📝 #{question.number}
           </span>
         )}
       </div>
@@ -150,9 +195,9 @@ function QuestionCard({ question, onClick }: { question: any; onClick: () => voi
       <div style={{
         fontSize: '1rem',
         color: '#000000',
-        lineHeight: '1.6',
+        lineHeight: '1.7',
         marginBottom: '0.75rem',
-        maxHeight: '4.5rem',
+        maxHeight: '5rem',
         overflow: 'hidden',
         display: '-webkit-box',
         WebkitLineClamp: 3,
@@ -162,9 +207,32 @@ function QuestionCard({ question, onClick }: { question: any; onClick: () => voi
       </div>
 
       {question.options && question.options.length > 0 && (
-        <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+        <div style={{ 
+          fontSize: '0.875rem', 
+          color: '#6b7280',
+          padding: '0.5rem',
+          backgroundColor: '#F9FAFB',
+          borderRadius: '6px',
+          border: '2px solid #E5E7EB',
+        }}>
           {question.options.slice(0, 2).map((opt: any, idx: number) => (
-            <div key={idx}>
+            <div 
+              key={idx}
+              style={{
+                padding: '0.35rem',
+                marginBottom: '0.25rem',
+                borderRadius: '4px',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#FEF08A'
+                e.currentTarget.style.border = '2px solid #000000'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.border = '2px solid transparent'
+              }}
+            >
               <strong>{opt.label}.</strong> {opt.content.substring(0, 30)}...
             </div>
           ))}
@@ -182,8 +250,12 @@ function QuestionCard({ question, onClick }: { question: any; onClick: () => voi
           color: '#9ca3af',
           marginTop: '0.75rem',
           fontWeight: 600,
+          fontFamily: "'Courier New', monospace",
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.25rem',
         }}>
-          创建于 {new Date(question.created_at).toLocaleDateString('zh-CN')}
+          📅 {new Date(question.created_at).toLocaleDateString('zh-CN')}
         </div>
       )}
     </div>
@@ -530,7 +602,7 @@ const QuestionDetailModal = ({
             <div style={{ 
               display: 'flex', 
               gap: '12px', 
-              flexWrap: 'nowrap',
+              flexWrap: 'wrap',
               alignItems: 'center',
             }}>
               <button
@@ -538,6 +610,7 @@ const QuestionDetailModal = ({
                 disabled={isGeneratingAnswer}
                 style={{
                   flex: 1,
+                  minWidth: '160px',
                   padding: '12px 20px',
                   backgroundColor: isGeneratingAnswer ? '#D1D5DB' : '#3B82F6',
                   color: 'white',
@@ -583,6 +656,7 @@ const QuestionDetailModal = ({
                 disabled={isGeneratingHint}
                 style={{
                   flex: 1,
+                  minWidth: '160px',
                   padding: '12px 20px',
                   backgroundColor: isGeneratingHint ? '#D1D5DB' : '#10B981',
                   color: 'white',
@@ -749,14 +823,14 @@ const QuestionDetailModal = ({
                       </span>
                       {simQuestion.question_type && (
                         <span style={{ 
-                          padding: '2px 8px',
-                          backgroundColor: 'white',
-                          border: '2px solid black',
-                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          backgroundColor: '#FEF08A',
+                          border: '3px solid black',
+                          borderRadius: '6px',
                           fontSize: '0.75rem',
-                          fontWeight: 700,
+                          fontWeight: 800,
                         }}>
-                          {simQuestion.question_type}
+                          {questionTypeMap[simQuestion.question_type] || simQuestion.question_type}
                         </span>
                       )}
                     </div>
@@ -794,13 +868,13 @@ const QuestionDetailModal = ({
           }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>类型</div>
-              <div style={{ fontWeight: 900 }}>{question.question_type || 'N/A'}</div>
+              <div style={{ fontWeight: 900 }}>{questionTypeMap[question.question_type] || question.question_type || '未知'}</div>
             </div>
             
             {question.difficulty_level && (
               <div>
                 <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>难度</div>
-                <div style={{ fontWeight: 900 }}>{question.difficulty_level}</div>
+                <div style={{ fontWeight: 900 }}>{difficultyLevelMap[question.difficulty_level] || question.difficulty_level}</div>
               </div>
             )}
             
@@ -813,7 +887,7 @@ const QuestionDetailModal = ({
             
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>创建时间</div>
-              <div style={{ fontWeight: 900 }}>{new Date(question.created_at).toLocaleDateString()}</div>
+              <div style={{ fontWeight: 900, fontFamily: "'Courier New', monospace" }}>{new Date(question.created_at).toLocaleDateString('zh-CN')}</div>
             </div>
             
             {question.topic_tags && (
@@ -1113,6 +1187,7 @@ export default function HomePage() {
                 outline: 'none',
                 outlineWidth: '0',
                 outlineStyle: 'none',
+                outlineColor: 'transparent',
                 transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 transform: isFocusedInput 
                   ? 'translate(-5px, -5px) scale(1.01)' 
@@ -1242,17 +1317,39 @@ export default function HomePage() {
             justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '1.5rem',
-            padding: '0 0.5rem',
+            padding: '1rem',
+            backgroundColor: '#FFFFFF',
+            border: '3px solid #000000',
+            borderRadius: '12px',
+            boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)',
+            position: 'relative',
           }}>
+            {/* 装饰emoji */}
+            <div style={{
+              position: 'absolute',
+              top: '-15px',
+              right: '20px',
+              fontSize: '2rem',
+              transform: 'rotate(15deg)',
+            }}>
+              ✨
+            </div>
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: '1.75rem',
               fontWeight: 900,
               color: '#000000',
+              fontFamily: "'ZCOOL KuaiLe', cursive, sans-serif",
             }}>
               {searchResults.length === 0 ? (
-                '未找到结果'
+                '未找到结果 😔'
               ) : (
-                <>找到 <span style={{ color: '#A3E635' }}>{searchResults.length}</span> 道题目</>
+                <>找到 <span style={{ 
+                color: '#A3E635',
+                backgroundColor: '#000000',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '6px',
+                fontFamily: "'ZCOOL KuaiLe', cursive, sans-serif",
+              }}>{searchResults.length}</span> 道题目</>
               )}
             </h2>
             <button

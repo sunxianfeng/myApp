@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
@@ -35,8 +35,10 @@ import {
   selectCollectionError,
   clearCurrentCollection
 } from '@/lib/slices/collectionSlice'
+import { deleteExistingQuestion } from '@/lib/slices/questionSlice'
 import type { QuestionInCollection } from '@/types/api'
 import '../../questions/questions-neobrutalism.css'
+import ConfirmModal from '@/components/ConfirmModal'
 
 // Helper to generate a consistent, visually appealing color from a string
 const generateColorFromString = (str: string) => {
@@ -839,6 +841,27 @@ const QuestionCard = ({
 }) => {
   const collectionColor = collection?.id ? generateColorFromString(collection.id) : '#E5E7EB'
   const collectionTitle = collection?.title || '未分类'
+  
+  // Track if we just performed an action (to prevent onClick from firing)
+  const actionPerformedRef = useRef(false)
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't trigger if an action was just performed
+    if (actionPerformedRef.current) {
+      actionPerformedRef.current = false
+      return
+    }
+    onClick?.()
+  }
+
+  const handleAction = (action: string) => {
+    actionPerformedRef.current = true
+    onAction(action, question)
+    // Reset after a short delay in case click doesn't fire
+    setTimeout(() => {
+      actionPerformedRef.current = false
+    }, 100)
+  }
 
   return (
     <div
@@ -846,7 +869,7 @@ const QuestionCard = ({
       style={{ borderLeftColor: collectionColor }}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onClick={onClick}
+      onClick={handleCardClick}
       onKeyDown={(e) => {
         if (!onClick) return
         if (e.key === 'Enter' || e.key === ' ') onClick()
@@ -878,13 +901,34 @@ const QuestionCard = ({
             </button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
-            <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
+            <DropdownMenu.Content 
+              className="card-dropdown-content" 
+              sideOffset={5}
+              onCloseAutoFocus={(e) => {
+                // Prevent focus from returning to trigger, which can cause card click
+                e.preventDefault()
+              }}
+            >
+              <DropdownMenu.Item
+                className="card-dropdown-item"
+                onSelect={(e) => {
+                  e.preventDefault()
+                  handleAction('remove')
+                }}
+              >
+                <IconEdit size={14} />
+                <span>从错题本移除</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator className="card-dropdown-separator" />
               <DropdownMenu.Item
                 className="card-dropdown-item danger"
-                onSelect={() => onAction('remove', question)}
+                onSelect={(e) => {
+                  e.preventDefault()
+                  handleAction('delete')
+                }}
               >
                 <IconTrash size={14} />
-                <span>从错题本移除</span>
+                <span>删除</span>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
@@ -921,6 +965,17 @@ export default function CollectionDetailPage() {
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null)
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false)
   
+  // Confirmation modal states
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    type: 'remove' as 'remove' | 'delete',
+    question: null as any,
+    isLoading: false,
+  })
+
+  // Track if we're in the middle of a delete/remove action
+  const [isActionInProgress, setIsActionInProgress] = useState(false)
+  
   useEffect(() => {
     if (collectionId) {
       dispatch(fetchCollection({ id: collectionId, includeQuestions: true }))
@@ -932,18 +987,34 @@ export default function CollectionDetailPage() {
   }, [collectionId, dispatch])
   
   const handleRemoveQuestion = async (questionId: string) => {
-    if (confirm('确定要从题目集中移除这道题目吗？')) {
-      try {
-        setIsProcessing(true)
-        await dispatch(removeQuestionFromCol({ collectionId, questionId })).unwrap()
-        // Refresh the collection data
-        await dispatch(fetchCollection({ id: collectionId, includeQuestions: true }))
-      } catch (error) {
-        console.error('Failed to remove question:', error)
-        alert('从题目集移除题目失败')
-      } finally {
-        setIsProcessing(false)
-      }
+    setConfirmModal(prev => ({ ...prev, isLoading: true }))
+    try {
+      await dispatch(removeQuestionFromCol({ collectionId, questionId })).unwrap()
+      // Refresh the collection data
+      await dispatch(fetchCollection({ id: collectionId, includeQuestions: true }))
+    } catch (error) {
+      console.error('Failed to remove question:', error)
+      alert('从题目集移除题目失败')
+    } finally {
+      setConfirmModal({ isOpen: false, type: 'remove', question: null, isLoading: false })
+      setIsProcessing(false)
+      setIsActionInProgress(false) // Reset action state
+    }
+  }
+
+  const handleDeleteQuestion = async (questionId: string) => {
+    setConfirmModal(prev => ({ ...prev, isLoading: true }))
+    try {
+      await dispatch(deleteExistingQuestion(questionId)).unwrap()
+      // Refresh the collection data
+      await dispatch(fetchCollection({ id: collectionId, includeQuestions: true }))
+    } catch (error) {
+      console.error('Failed to delete question:', error)
+      alert('删除题目失败')
+    } finally {
+      setConfirmModal({ isOpen: false, type: 'delete', question: null, isLoading: false })
+      setIsProcessing(false)
+      setIsActionInProgress(false) // Reset action state
     }
   }
   
@@ -990,7 +1061,22 @@ export default function CollectionDetailPage() {
         alert('管理标签功能即将推出...')
         break
       case 'remove':
-        handleRemoveQuestion(payload.id)
+        setIsActionInProgress(true) // Set action in progress
+        setConfirmModal({
+          isOpen: true,
+          type: 'remove',
+          question: payload,
+          isLoading: false,
+        })
+        break
+      case 'delete':
+        setIsActionInProgress(true) // Set action in progress
+        setConfirmModal({
+          isOpen: true,
+          type: 'delete',
+          question: payload,
+          isLoading: false,
+        })
         break
       default:
         break
@@ -1465,8 +1551,11 @@ export default function CollectionDetailPage() {
               collection={collection}
               onAction={handleAction}
               onClick={() => {
-                setSelectedQuestion(question)
-                setIsQuestionModalOpen(true)
+                // Don't open modal if an action is in progress
+                if (!isActionInProgress) {
+                  setSelectedQuestion(question)
+                  setIsQuestionModalOpen(true)
+                }
               }}
             />
           ))}
@@ -1794,6 +1883,37 @@ export default function CollectionDetailPage() {
           setSelectedQuestion(null)
           setIsQuestionModalOpen(false)
         }}
+      />
+      
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => {
+          if (!confirmModal.isLoading) {
+            setConfirmModal({ ...confirmModal, isOpen: false })
+            setIsActionInProgress(false) // Reset action state when modal is closed
+          }
+        }}
+        onConfirm={() => {
+          const questionId = confirmModal.question?.id
+          if (!questionId) return
+          
+          if (confirmModal.type === 'remove') {
+            handleRemoveQuestion(questionId)
+          } else if (confirmModal.type === 'delete') {
+            handleDeleteQuestion(questionId)
+          }
+        }}
+        title={confirmModal.type === 'remove' ? '从错题本移除' : '删除题目'}
+        message={
+          confirmModal.type === 'remove' 
+            ? '确定要从当前题目集中移除这道题目吗？题目本身不会被删除。' 
+            : '确定要永久删除这道题目吗？此操作无法撤销，题目将从所有题目集中被移除。'
+        }
+        confirmText={confirmModal.type === 'remove' ? '移除' : '删除'}
+        cancelText="取消"
+        type={confirmModal.type === 'delete' ? 'danger' : 'warning'}
+        isLoading={confirmModal.isLoading}
       />
       
       {/* Loading Overlay */}

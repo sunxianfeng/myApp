@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense, useEffect, useMemo, useState } from 'react'
+import React, { Suspense, useEffect, useMemo, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
@@ -40,8 +40,10 @@ import {
   addQuestionsToCol,
 } from '@/lib/slices/collectionSlice'
 import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection, getQuestions, generateReferenceAnswer, generateSimilarQuestions, generateHint, updateQuestion } from '@/lib/api'
+import { deleteExistingQuestion } from '@/lib/slices/questionSlice'
 
 import './questions-neobrutalism.css'
+import ConfirmModal from '@/components/ConfirmModal'
 
 // Helper to generate a consistent, visually appealing color from a string (e.g., collection ID)
 const generateColorFromString = (str: string) => {
@@ -1085,13 +1087,34 @@ const QuestionCard = ({
   const collectionColor = isUnassigned ? '#E5E7EB' : generateColorFromString(collection.id)
   const collectionTitle = isUnassigned ? '未分类' : (collection?.title || '未分类')
 
+  // Track if we just performed an action (to prevent onClick from firing)
+  const actionPerformedRef = useRef(false)
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't trigger if an action was just performed
+    if (actionPerformedRef.current) {
+      actionPerformedRef.current = false
+      return
+    }
+    onClick?.()
+  }
+
+  const handleAction = (action: string) => {
+    actionPerformedRef.current = true
+    onAction(action, question)
+    // Reset after a short delay in case click doesn't fire
+    setTimeout(() => {
+      actionPerformedRef.current = false
+    }, 100)
+  }
+
   return (
     <div
       className="unified-question-card"
       style={{ borderLeftColor: collectionColor }}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onClick={onClick}
+      onClick={handleCardClick}
       onKeyDown={(e) => {
         if (!onClick) return
         if (e.key === 'Enter' || e.key === ' ') onClick()
@@ -1129,10 +1152,20 @@ const QuestionCard = ({
             </button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
-            <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
+            <DropdownMenu.Content 
+              className="card-dropdown-content" 
+              sideOffset={5}
+              onCloseAutoFocus={(e) => {
+                // Prevent focus from returning to trigger, which can cause card click
+                e.preventDefault()
+              }}
+            >
               <DropdownMenu.Item
                 className="card-dropdown-item"
-                onSelect={() => onAction('move', question)}
+                onSelect={(e) => {
+                  e.preventDefault()
+                  handleAction('move')
+                }}
               >
                 <IconMove size={14} />
                 <span>更改错题集</span>
@@ -1140,7 +1173,10 @@ const QuestionCard = ({
               <DropdownMenu.Separator className="card-dropdown-separator" />
               <DropdownMenu.Item
                 className="card-dropdown-item danger"
-                onSelect={() => onAction('delete', question)}
+                onSelect={(e) => {
+                  e.preventDefault()
+                  handleAction('delete')
+                }}
               >
                 <IconTrash size={14} />
                 <span>删除</span>
@@ -1184,6 +1220,23 @@ const QuestionsContent = () => {
   // Modal state for collection assignment
   const [assignmentQuestion, setAssignmentQuestion] = useState<any>(null)
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
+
+  // Confirmation modal states
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    question: null as any,
+    isLoading: false,
+  })
+
+  // Collection deletion modal states
+  const [collectionDeleteModal, setCollectionDeleteModal] = useState({
+    isOpen: false,
+    collection: null as any,
+    isLoading: false,
+  })
+
+  // Track if we're in the middle of a delete action
+  const [isDeleteActionInProgress, setIsDeleteActionInProgress] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -1450,9 +1503,12 @@ const QuestionsContent = () => {
         window.alert(`Editing: ${payload.content}`)
         break
       case 'delete':
-        if (window.confirm(`Are you sure you want to delete this question?`)) {
-          // dispatch(deleteQuestion(payload.id))
-        }
+        setIsDeleteActionInProgress(true) // Set delete action in progress
+        setConfirmModal({
+          isOpen: true,
+          question: payload,
+          isLoading: false,
+        })
         break
       case 'move':
         setAssignmentQuestion(payload)
@@ -1474,6 +1530,71 @@ const QuestionsContent = () => {
       }
     } else {
       window.alert('Creating a new question...')
+    }
+  }
+
+  const handleDeleteQuestion = async (questionId: string) => {
+    setConfirmModal(prev => ({ ...prev, isLoading: true }))
+    try {
+      await dispatch(deleteExistingQuestion(questionId)).unwrap()
+      
+      // Refresh both collections and all questions data to reflect changes
+      const [collectionsData, allQuestionsData] = await Promise.all([
+        getCollectionsWithQuestions(),
+        getQuestions({ limit: 1000 })
+      ])
+
+      if (Array.isArray(collectionsData)) {
+        setCollectionsWithQuestions(collectionsData)
+      }
+
+      if (allQuestionsData && Array.isArray(allQuestionsData.questions)) {
+        setAllQuestions(allQuestionsData.questions)
+      } else if (Array.isArray(allQuestionsData)) {
+        setAllQuestions(allQuestionsData)
+      }
+
+      // Also refresh the Redux collections state to keep it in sync
+      await dispatch(fetchCollections()).unwrap()
+    } catch (error) {
+      console.error('Failed to delete question:', error)
+      setPageError('删除题目失败，请稍后重试')
+    } finally {
+      setConfirmModal({ isOpen: false, question: null, isLoading: false })
+      setIsProcessing(false)
+      setIsDeleteActionInProgress(false) // Reset delete action state
+    }
+  }
+
+  const handleDeleteCollection = async (collectionId: string) => {
+    setCollectionDeleteModal(prev => ({ ...prev, isLoading: true }))
+    try {
+      // TODO: Implement actual collection deletion API call
+      // await dispatch(deleteCollection(collectionId)).unwrap()
+      
+      // For now, just show that it's coming soon
+      console.log('Delete collection:', collectionId)
+      alert('删除功能即将实现')
+      
+      // Refresh data after deletion
+      // const [collectionsData, allQuestionsData] = await Promise.all([
+      //   getCollectionsWithQuestions(),
+      //   getQuestions({ limit: 1000 })
+      // ])
+      // if (Array.isArray(collectionsData)) {
+      //   setCollectionsWithQuestions(collectionsData)
+      // }
+      // if (allQuestionsData && Array.isArray(allQuestionsData.questions)) {
+      //   setAllQuestions(allQuestionsData.questions)
+      // } else if (Array.isArray(allQuestionsData)) {
+      //   setAllQuestions(allQuestionsData)
+      // }
+    } catch (error) {
+      console.error('Failed to delete collection:', error)
+      setPageError('删除错题集失败，请稍后重试')
+    } finally {
+      setCollectionDeleteModal({ isOpen: false, collection: null, isLoading: false })
+      setIsProcessing(false)
     }
   }
 
@@ -1715,10 +1836,11 @@ const QuestionsContent = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (confirm(`确定要删除错题集"${c.title}"吗？`)) {
-                          // Delete collection logic here
-                          window.alert('删除功能即将实现')
-                        }
+                        setCollectionDeleteModal({
+                          isOpen: true,
+                          collection: c,
+                          isLoading: false,
+                        })
                       }}
                       style={{
                         backgroundColor: 'transparent',
@@ -1775,9 +1897,12 @@ const QuestionsContent = () => {
                 collection={q.collection}
                 onAction={handleAction}
                 onClick={() => {
-                  setSelectedQuestion(q)
-                  setSelectedQuestionCollection(q.collection)
-                  setIsModalOpen(true)
+                  // Don't open modal if a delete action is in progress
+                  if (!isDeleteActionInProgress) {
+                    setSelectedQuestion(q)
+                    setSelectedQuestionCollection(q.collection)
+                    setIsModalOpen(true)
+                  }
                 }}
                 draggable
               />
@@ -1837,9 +1962,12 @@ const QuestionsContent = () => {
                 key={`list-question-${String(q.id)}`}
                 className="list-view-row"
                 onClick={() => {
-                  setSelectedQuestion(q)
-                  setSelectedQuestionCollection(q.collection)
-                  setIsModalOpen(true)
+                  // Don't open modal if a delete action is in progress
+                  if (!isDeleteActionInProgress) {
+                    setSelectedQuestion(q)
+                    setSelectedQuestionCollection(q.collection)
+                    setIsModalOpen(true)
+                  }
                 }}
                 draggable
                 onDragStart={(e) => {
@@ -1874,21 +2002,28 @@ const QuestionsContent = () => {
                       </button>
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Portal>
-                      <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
-                        <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('edit', q)}>
+                      <DropdownMenu.Content 
+                        className="card-dropdown-content" 
+                        sideOffset={5}
+                        onCloseAutoFocus={(e) => {
+                          // Prevent focus from returning to trigger, which can cause row click
+                          e.preventDefault()
+                        }}
+                      >
+                        <DropdownMenu.Item className="card-dropdown-item" onSelect={(e) => { e.preventDefault(); handleAction('edit', q) }}>
                           <IconEdit />
                           <span>编辑题目</span>
                         </DropdownMenu.Item>
-                        <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('tags', q)}>
+                        <DropdownMenu.Item className="card-dropdown-item" onSelect={(e) => { e.preventDefault(); handleAction('tags', q) }}>
                           <IconTag size={14} />
                           <span>管理标签</span>
                         </DropdownMenu.Item>
-                        <DropdownMenu.Item className="card-dropdown-item" onSelect={() => handleAction('move', q)}>
+                        <DropdownMenu.Item className="card-dropdown-item" onSelect={(e) => { e.preventDefault(); handleAction('move', q) }}>
                           <IconMove size={14} />
                           <span>更改错题集</span>
                         </DropdownMenu.Item>
                         <DropdownMenu.Separator className="card-dropdown-separator" />
-                        <DropdownMenu.Item className="card-dropdown-item danger" onSelect={() => handleAction('delete', q)}>
+                        <DropdownMenu.Item className="card-dropdown-item danger" onSelect={(e) => { e.preventDefault(); handleAction('delete', q) }}>
                           <IconTrash size={14} />
                           <span>删除</span>
                         </DropdownMenu.Item>
@@ -1952,6 +2087,47 @@ const QuestionsContent = () => {
           setAssignmentQuestion(null)
         }}
         onAssign={handleAssignToCollections}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => {
+          if (!confirmModal.isLoading) {
+            setConfirmModal({ ...confirmModal, isOpen: false })
+            setIsDeleteActionInProgress(false) // Reset delete action state when modal is closed
+          }
+        }}
+        onConfirm={() => {
+          const questionId = confirmModal.question?.id
+          if (!questionId) return
+          
+          handleDeleteQuestion(questionId)
+        }}
+        title="删除题目"
+        message="确定要永久删除这道题目吗？此操作无法撤销，题目将从所有题目集中被移除。"
+        confirmText="删除"
+        cancelText="取消"
+        type="danger"
+        isLoading={confirmModal.isLoading}
+      />
+
+      {/* Collection Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={collectionDeleteModal.isOpen}
+        onClose={() => !collectionDeleteModal.isLoading && setCollectionDeleteModal({ ...collectionDeleteModal, isOpen: false })}
+        onConfirm={() => {
+          const collectionId = collectionDeleteModal.collection?.id
+          if (!collectionId) return
+          
+          handleDeleteCollection(collectionId)
+        }}
+        title="删除错题本"
+        message={`确定要永久删除错题本"${collectionDeleteModal.collection?.title}"吗？此操作无法撤销，错题本中的所有题目将被移除（但题目本身不会被删除）。`}
+        confirmText="删除"
+        cancelText="取消"
+        type="danger"
+        isLoading={collectionDeleteModal.isLoading}
       />
     </div>
   )
