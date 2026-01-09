@@ -28,6 +28,7 @@ class QuestionBase(BaseModel):
     correct_answer: Optional[str] = Field(None, description="正确答案")
     explanation: Optional[str] = Field(None, description="题目解析")
     answer_key: Optional[str] = Field(None, description="答案详解")
+    user_notes: Optional[str] = Field(None, description="用户笔记")
 
     @validator('question_type')
     def validate_question_type(cls, v):
@@ -66,6 +67,7 @@ class QuestionUpdate(BaseModel):
     correct_answer: Optional[str] = Field(None, description="正确答案")
     explanation: Optional[str] = Field(None, description="题目解析")
     answer_key: Optional[str] = Field(None, description="答案详解")
+    user_notes: Optional[str] = Field(None, description="用户笔记")
     is_verified: Optional[bool] = Field(None, description="是否已人工验证")
     is_active: Optional[bool] = Field(None, description="是否启用")
 

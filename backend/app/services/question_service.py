@@ -400,7 +400,7 @@ class QuestionService:
             allowed_fields = [
                 'content', 'full_content', 'question_type', 'difficulty_level',
                 'subject', 'topic_tags', 'options', 'correct_answer',
-                'explanation', 'answer_key', 'is_verified', 'is_active'
+                'explanation', 'answer_key', 'is_verified', 'is_active', 'user_notes'
             ]
             
             for field, value in update_data.items():

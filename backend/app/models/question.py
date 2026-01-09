@@ -33,6 +33,9 @@ class Question(Base):
     explanation = Column(Text, comment="题目解析")
     answer_key = Column(Text, comment="答案详解")
     
+    # 用户笔记
+    user_notes = Column(Text, comment="用户笔记")
+    
     # 来源信息
     source_image_path = Column(String(500), comment="来源图片路径")
     source_image_url = Column(String(500), comment="来源图片URL(如果存储在云存储)")
@@ -79,6 +82,7 @@ class Question(Base):
             'correct_answer': self.correct_answer,
             'explanation': self.explanation,
             'answer_key': self.answer_key,
+            'user_notes': self.user_notes,
             'source_image_path': self.source_image_path,
             'source_image_url': self.source_image_url,
             'source_document_id': str(self.source_document_id) if self.source_document_id else None,

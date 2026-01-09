@@ -20,6 +20,8 @@ import {
   Search as IconSearch,
   Loader2 as IconLoader,
   Sparkles as IconSparkles,
+  BookOpen as IconBookOpen,
+  Lightbulb as IconLightbulb,
 } from 'lucide-react'
 
 const IconEdit = () => (
@@ -37,7 +39,7 @@ import {
   selectCollectionLoading,
   addQuestionsToCol,
 } from '@/lib/slices/collectionSlice'
-import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection, getQuestions, generateReferenceAnswer, generateSimilarQuestions, generateHint } from '@/lib/api'
+import { getCollectionsWithQuestions, getCollectionsForAssignment, addQuestionsToCollection, getQuestions, generateReferenceAnswer, generateSimilarQuestions, generateHint, updateQuestion } from '@/lib/api'
 
 import './questions-neobrutalism.css'
 
@@ -61,7 +63,8 @@ const getQuestionContentText = (content: string | { text?: string } | any): stri
 // Helper function to translate question types
 const translateQuestionType = (type: string) => {
   const typeMap: { [key: string]: string } = {
-    'multiple_choice': '多选题',
+    'multiple_choice': '选择题',
+    'single_choice': '选择题',
     'fill_blank': '填空题',
     'fill-blank': '填空题',
     'true_false': '判断题',
@@ -69,6 +72,16 @@ const translateQuestionType = (type: string) => {
     'other': '其他',
   }
   return typeMap[type] || type
+}
+
+// Helper function to translate difficulty levels
+const translateDifficulty = (difficulty: string) => {
+  const difficultyMap: { [key: string]: string } = {
+    'easy': '简单',
+    'medium': '中等',
+    'hard': '困难',
+  }
+  return difficultyMap[difficulty?.toLowerCase()] || difficulty
 }
 
 // Question Detail Modal Component
@@ -94,10 +107,34 @@ const QuestionDetailModal = ({
     level3_steps: string[]
   } | null>(null)
   const [hintLevel, setHintLevel] = useState<number>(0)
+  const [userNotes, setUserNotes] = useState<string>('')
+  const [isSavingNotes, setIsSavingNotes] = useState(false)
+  
+  // Initialize notes from question
+  useEffect(() => {
+    if (question?.user_notes) {
+      setUserNotes(question.user_notes)
+    } else {
+      setUserNotes('')
+    }
+  }, [question])
   
   if (!isOpen || !question) return null
 
   const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+  
+  const handleSaveNotes = async () => {
+    setIsSavingNotes(true)
+    try {
+      await updateQuestion(question.id, { user_notes: userNotes })
+      alert('笔记保存成功！')
+    } catch (error) {
+      console.error('Failed to save notes:', error)
+      alert('保存笔记失败，请稍后重试')
+    } finally {
+      setIsSavingNotes(false)
+    }
+  }
   
   const handleGetReferenceAnswer = async () => {
     setIsGeneratingAnswer(true)
@@ -234,7 +271,7 @@ const QuestionDetailModal = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <IconFolder size={24} />
             <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>
-              Question Details
+              题目详情
             </h2>
           </div>
           <button
@@ -258,7 +295,7 @@ const QuestionDetailModal = ({
         <div style={{ padding: '24px' }}>
           {/* Question Content */}
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Question</h3>
+            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>题目</h3>
             <div style={{ 
               padding: '16px',
               backgroundColor: '#FEFCE8',
@@ -274,7 +311,7 @@ const QuestionDetailModal = ({
           {/* Full Content (if available) */}
           {question.full_content && question.full_content !== question.content && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Full Content</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>完整内容</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#F0FDF4',
@@ -291,7 +328,7 @@ const QuestionDetailModal = ({
           {/* Options (if available) - only show for multiple choice questions */}
           {question.options && question.question_type !== 'fill_blank' && question.question_type !== 'fill-blank' && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Options</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>选项</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#EFF6FF',
@@ -370,7 +407,7 @@ const QuestionDetailModal = ({
           {/* Correct Answer (if available) */}
           {question.correct_answer && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Correct Answer</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>正确答案</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#DCFCE7',
@@ -386,7 +423,7 @@ const QuestionDetailModal = ({
           {/* Explanation (if available) */}
           {question.explanation && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Explanation</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>解析</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#FEF3C7',
@@ -399,6 +436,62 @@ const QuestionDetailModal = ({
               </div>
             </div>
           )}
+
+          {/* User Notes Section */}
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>我的笔记</h3>
+            <div style={{ 
+              marginBottom: '12px',
+            }}>
+              <textarea
+                value={userNotes}
+                onChange={(e) => setUserNotes(e.target.value)}
+                placeholder="在这里记录你的思考、解题思路或需要注意的地方..."
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  backgroundColor: '#FFFBEB',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  fontSize: '0.95rem',
+                  lineHeight: '1.6',
+                  fontFamily: 'inherit',
+                  resize: 'vertical',
+                  minHeight: '120px',
+                  boxSizing: 'border-box',
+                }}
+                rows={5}
+              />
+            </div>
+            <button
+              onClick={handleSaveNotes}
+              disabled={isSavingNotes}
+              style={{
+                padding: '10px 24px',
+                backgroundColor: isSavingNotes ? '#D1D5DB' : '#10B981',
+                color: 'white',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: isSavingNotes ? 'not-allowed' : 'pointer',
+                boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isSavingNotes) {
+                  e.currentTarget.style.transform = 'translate(-2px, -2px)'
+                  e.currentTarget.style.boxShadow = '6px 6px 0 rgba(0,0,0,1)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)'
+                e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
+              }}
+            >
+              {isSavingNotes ? '保存中...' : '保存笔记'}
+            </button>
+          </div>
 
           {/* Action Buttons */}
           <div style={{ 
@@ -446,7 +539,17 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingAnswer ? '🤔 生成中...' : '📖 获取参考答案'}
+                {isGeneratingAnswer ? (
+                  <>
+                    <IconLoader size={18} className="animate-spin" />
+                    生成中...
+                  </>
+                ) : (
+                  <>
+                    <IconBookOpen size={18} />
+                    获取参考答案
+                  </>
+                )}
               </button>
               
               <button
@@ -481,7 +584,17 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingHint ? '🔄 生成中...' : (hintLevel === 0 ? '💡 获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示')}
+                {isGeneratingHint ? (
+                  <>
+                    <IconLoader size={18} className="animate-spin" />
+                    生成中...
+                  </>
+                ) : (
+                  <>
+                    <IconLightbulb size={18} />
+                    {hintLevel === 0 ? '获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示'}
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -654,32 +767,32 @@ const QuestionDetailModal = ({
             borderTop: '2px dashed black',
           }}>
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Type</div>
-              <div style={{ fontWeight: 900 }}>{question.question_type || 'N/A'}</div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>类型</div>
+              <div style={{ fontWeight: 900 }}>{translateQuestionType(question.question_type) || 'N/A'}</div>
             </div>
             
             {question.difficulty_level && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Difficulty</div>
-                <div style={{ fontWeight: 900 }}>{question.difficulty_level}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>难度</div>
+                <div style={{ fontWeight: 900 }}>{translateDifficulty(question.difficulty_level)}</div>
               </div>
             )}
             
             {question.subject && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Subject</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>科目</div>
                 <div style={{ fontWeight: 900 }}>{question.subject}</div>
               </div>
             )}
             
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Created</div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>创建时间</div>
               <div style={{ fontWeight: 900 }}>{new Date(question.created_at).toLocaleDateString()}</div>
             </div>
             
             {question.topic_tags && (
               <div style={{ gridColumn: '1 / -1' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>Tags</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>标签</div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {(typeof question.topic_tags === 'string' 
                     ? question.topic_tags.split(',') 
@@ -1017,20 +1130,6 @@ const QuestionCard = ({
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
-              <DropdownMenu.Item
-                className="card-dropdown-item"
-                onSelect={() => onAction('edit', question)}
-              >
-                <IconEdit />
-                <span>编辑题目</span>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                className="card-dropdown-item"
-                onSelect={() => onAction('tags', question)}
-              >
-                <IconTag size={14} />
-                <span>管理标签</span>
-              </DropdownMenu.Item>
               <DropdownMenu.Item
                 className="card-dropdown-item"
                 onSelect={() => onAction('move', question)}
@@ -1608,11 +1707,40 @@ const QuestionsContent = () => {
                     handleDropQuestionToCollection(cId, qId)
                   }}
                 >
-                  <div className="questions-card-header" style={{ backgroundColor: generateColorFromString(cId), opacity: 0.7 }}>
+                  <div className="questions-card-header" style={{ backgroundColor: generateColorFromString(cId), opacity: 0.7, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <IconFolder size={16} />
                       <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{c.title}</span>
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (confirm(`确定要删除错题集"${c.title}"吗？`)) {
+                          // Delete collection logic here
+                          window.alert('删除功能即将实现')
+                        }
+                      }}
+                      style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        padding: '4px',
+                        cursor: 'pointer',
+                        opacity: 0.6,
+                        transition: 'opacity 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '1'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '0.6'
+                      }}
+                      aria-label="删除错题集"
+                    >
+                      <IconTrash size={16} />
+                    </button>
                   </div>
                   <div className="card-content">
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, textAlign: 'center', height: '100%' }}>

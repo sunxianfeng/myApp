@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { globalSearch, generateReferenceAnswer, generateHint, generateSimilarQuestions } from '@/lib/api'
 import MathRenderer from '@/components/common/MathRenderer'
+import { BookOpen, Lightbulb, Loader2, Sparkles } from 'lucide-react'
 
 // Helper function to generate colors from collection ID
 const generateColorFromString = (str: string) => {
@@ -51,24 +52,6 @@ const IconX = ({ size = 24 }: { size?: number }) => (
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     <path d="M18 6l-12 12" />
     <path d="M6 6l12 12" />
-  </svg>
-)
-
-// IconSparkles component (from Tabler icons)
-const IconSparkles = ({ size = 24, style }: { size?: number; style?: React.CSSProperties }) => (
-  <svg
-    width={size}
-    height={size}
-    style={style}
-    viewBox="0 0 24 24"
-    strokeWidth="2"
-    stroke="currentColor"
-    fill="none"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6z" />
   </svg>
 )
 
@@ -370,7 +353,7 @@ const QuestionDetailModal = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <IconFolder size={24} />
             <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>
-              Question Details
+              题目详情
             </h2>
           </div>
           <button
@@ -394,7 +377,7 @@ const QuestionDetailModal = ({
         <div style={{ padding: '24px' }}>
           {/* Question Content */}
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Question</h3>
+            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>题目</h3>
             <div style={{ 
               padding: '16px',
               backgroundColor: '#FEFCE8',
@@ -410,7 +393,7 @@ const QuestionDetailModal = ({
           {/* Full Content (if available) */}
           {question.full_content && question.full_content !== question.content && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Full Content</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>完整内容</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#F0FDF4',
@@ -427,7 +410,7 @@ const QuestionDetailModal = ({
           {/* Options (if available) - only show for multiple choice questions */}
           {question.options && question.question_type !== 'fill_blank' && question.question_type !== 'fill-blank' && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Options</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>选项</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#EFF6FF',
@@ -506,7 +489,7 @@ const QuestionDetailModal = ({
           {/* Correct Answer (if available) */}
           {question.correct_answer && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Correct Answer</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>正确答案</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#DCFCE7',
@@ -522,7 +505,7 @@ const QuestionDetailModal = ({
           {/* Explanation (if available) */}
           {question.explanation && (
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>Explanation</h3>
+              <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>解析</h3>
               <div style={{ 
                 padding: '16px',
                 backgroundColor: '#FEF3C7',
@@ -582,7 +565,17 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingAnswer ? '🤔 生成中...' : '📖 获取参考答案'}
+                {isGeneratingAnswer ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    生成中...
+                  </>
+                ) : (
+                  <>
+                    <BookOpen size={18} />
+                    获取参考答案
+                  </>
+                )}
               </button>
               
               <button
@@ -617,7 +610,17 @@ const QuestionDetailModal = ({
                   e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
                 }}
               >
-                {isGeneratingHint ? '🔄 生成中...' : (hintLevel === 0 ? '💡 获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示')}
+                {isGeneratingHint ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    生成中...
+                  </>
+                ) : (
+                  <>
+                    <Lightbulb size={18} />
+                    {hintLevel === 0 ? '获取思路提示' : hintLevel < 3 ? '查看更多提示' : '思路提示'}
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -714,7 +717,7 @@ const QuestionDetailModal = ({
                 alignItems: 'center',
                 gap: '8px',
               }}>
-                <IconSparkles size={20} style={{ color: '#3B82F6' }} />
+                <Sparkles size={20} style={{ color: '#3B82F6' }} />
                 <span>举一反三 - 相似题目</span>
               </h3>
               <div style={{ 
@@ -790,32 +793,32 @@ const QuestionDetailModal = ({
             borderTop: '2px dashed black',
           }}>
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Type</div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>类型</div>
               <div style={{ fontWeight: 900 }}>{question.question_type || 'N/A'}</div>
             </div>
             
             {question.difficulty_level && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Difficulty</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>难度</div>
                 <div style={{ fontWeight: 900 }}>{question.difficulty_level}</div>
               </div>
             )}
             
             {question.subject && (
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Subject</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>科目</div>
                 <div style={{ fontWeight: 900 }}>{question.subject}</div>
               </div>
             )}
             
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>Created</div>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>创建时间</div>
               <div style={{ fontWeight: 900 }}>{new Date(question.created_at).toLocaleDateString()}</div>
             </div>
             
             {question.topic_tags && (
               <div style={{ gridColumn: '1 / -1' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>Tags</div>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '8px', color: '#6B7280' }}>标签</div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {(typeof question.topic_tags === 'string' 
                     ? question.topic_tags.split(',') 

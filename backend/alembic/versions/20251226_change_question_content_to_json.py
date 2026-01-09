@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '20251226_change_question_content_to_json'
-down_revision = '20251222_add_collections_and_categories'
+down_revision = '20251222_collections'
 branch_labels = None
 depends_on = None
 

@@ -55,7 +55,34 @@ const getQuestionContentText = (content: string | { text?: string } | any): stri
   return String(content || '')
 }
 
-import { generateReferenceAnswer, generateSimilarQuestions, generateHint } from '@/lib/api'
+// Helper function to translate question types
+const translateQuestionType = (type: string) => {
+  const typeMap: { [key: string]: string } = {
+    'multiple_choice': '选择题',
+    'single_choice': '选择题',
+    'fill_blank': '填空题',
+    'fill-blank': '填空题',
+    'true_false': '判断题',
+    'essay': '问答题',
+    'other': '其他',
+  }
+  return typeMap[type] || type
+}
+
+// Helper function to translate difficulty levels
+const translateDifficulty = (difficulty: string) => {
+  const difficultyMap: { [key: string]: string } = {
+    'easy': '简单',
+    'medium': '中等',
+    'hard': '困难',
+    'Easy': '简单',
+    'Medium': '中等',
+    'Hard': '困难',
+  }
+  return difficultyMap[difficulty] || difficulty
+}
+
+import { generateReferenceAnswer, generateSimilarQuestions, generateHint, updateQuestion } from '@/lib/api'
 
 // Question Detail Modal Component
 const QuestionDetailModal = ({ 
@@ -80,10 +107,34 @@ const QuestionDetailModal = ({
     level3_steps: string[]
   } | null>(null)
   const [hintLevel, setHintLevel] = useState<number>(0)
+  const [userNotes, setUserNotes] = useState<string>('')
+  const [isSavingNotes, setIsSavingNotes] = useState(false)
+  
+  // Initialize notes from question
+  useEffect(() => {
+    if (question?.user_notes) {
+      setUserNotes(question.user_notes)
+    } else {
+      setUserNotes('')
+    }
+  }, [question])
   
   if (!isOpen || !question) return null
 
   const collectionColor = collection ? generateColorFromString(collection.id) : '#E5E7EB'
+  
+  const handleSaveNotes = async () => {
+    setIsSavingNotes(true)
+    try {
+      await updateQuestion(question.id, { user_notes: userNotes })
+      alert('笔记保存成功！')
+    } catch (error) {
+      console.error('Failed to save notes:', error)
+      alert('保存笔记失败，请稍后重试')
+    } finally {
+      setIsSavingNotes(false)
+    }
+  }
   
   const handleGetReferenceAnswer = async () => {
     setIsGeneratingAnswer(true)
@@ -380,6 +431,62 @@ const QuestionDetailModal = ({
             </div>
           )}
 
+          {/* User Notes Section */}
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ fontWeight: 900, marginBottom: '12px', fontSize: '1.125rem' }}>我的笔记</h3>
+            <div style={{ 
+              marginBottom: '12px',
+            }}>
+              <textarea
+                value={userNotes}
+                onChange={(e) => setUserNotes(e.target.value)}
+                placeholder="在这里记录你的思考、解题思路或需要注意的地方..."
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  backgroundColor: '#FFFBEB',
+                  border: '3px solid black',
+                  borderRadius: '8px',
+                  fontSize: '0.95rem',
+                  lineHeight: '1.6',
+                  fontFamily: 'inherit',
+                  resize: 'vertical',
+                  minHeight: '120px',
+                  boxSizing: 'border-box',
+                }}
+                rows={5}
+              />
+            </div>
+            <button
+              onClick={handleSaveNotes}
+              disabled={isSavingNotes}
+              style={{
+                padding: '10px 24px',
+                backgroundColor: isSavingNotes ? '#D1D5DB' : '#10B981',
+                color: 'white',
+                border: '3px solid black',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: isSavingNotes ? 'not-allowed' : 'pointer',
+                boxShadow: '4px 4px 0 rgba(0,0,0,1)',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isSavingNotes) {
+                  e.currentTarget.style.transform = 'translate(-2px, -2px)'
+                  e.currentTarget.style.boxShadow = '6px 6px 0 rgba(0,0,0,1)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)'
+                e.currentTarget.style.boxShadow = '4px 4px 0 rgba(0,0,0,1)'
+              }}
+            >
+              {isSavingNotes ? '保存中...' : '保存笔记'}
+            </button>
+          </div>
+
           {/* Action Buttons */}
           <div style={{ 
             marginBottom: '24px',
@@ -631,13 +738,13 @@ const QuestionDetailModal = ({
           }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>类型</div>
-              <div style={{ fontWeight: 900 }}>{question.question_type || '未知'}</div>
+              <div style={{ fontWeight: 900 }}>{translateQuestionType(question.question_type) || '未知'}</div>
             </div>
             
             {question.difficulty_level && (
               <div>
                 <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '4px', color: '#6B7280' }}>难度</div>
-                <div style={{ fontWeight: 900 }}>{question.difficulty_level}</div>
+                <div style={{ fontWeight: 900 }}>{translateDifficulty(question.difficulty_level)}</div>
               </div>
             )}
             
@@ -773,21 +880,6 @@ const QuestionCard = ({
           <DropdownMenu.Portal>
             <DropdownMenu.Content className="card-dropdown-content" sideOffset={5}>
               <DropdownMenu.Item
-                className="card-dropdown-item"
-                onSelect={() => onAction('edit', question)}
-              >
-                <IconEdit size={14} />
-                <span>编辑笔记</span>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                className="card-dropdown-item"
-                onSelect={() => onAction('tags', question)}
-              >
-                <IconTag size={14} />
-                <span>管理标签</span>
-              </DropdownMenu.Item>
-              <DropdownMenu.Separator className="card-dropdown-separator" />
-              <DropdownMenu.Item
                 className="card-dropdown-item danger"
                 onSelect={() => onAction('remove', question)}
               >
@@ -800,8 +892,8 @@ const QuestionCard = ({
       </div>
       <div className="card-content" style={{ paddingTop: '36px', paddingRight: '8px' }}>{question.content}</div>
       <div className="card-footer" style={{ borderTop: 'none' }}>
-        <span className="card-meta-tag">{(question as any).question_type || (question as any).type || '未知类型'}</span>
-        <span className="card-meta-date">{new Date((question as any).created_at || question.added_at).toLocaleDateString()}</span>
+        <span className="card-meta-tag">{translateQuestionType((question as any).question_type || (question as any).type) || '未知类型'}</span>
+        <span className="card-meta-date">{new Date((question as any).created_at || question.added_at).toLocaleDateString('zh-CN')}</span>
       </div>
     </div>
   )
@@ -840,7 +932,7 @@ export default function CollectionDetailPage() {
   }, [collectionId, dispatch])
   
   const handleRemoveQuestion = async (questionId: string) => {
-    if (confirm('Are you sure you want to remove this question from the collection?')) {
+    if (confirm('确定要从题目集中移除这道题目吗？')) {
       try {
         setIsProcessing(true)
         await dispatch(removeQuestionFromCol({ collectionId, questionId })).unwrap()
@@ -848,7 +940,7 @@ export default function CollectionDetailPage() {
         await dispatch(fetchCollection({ id: collectionId, includeQuestions: true }))
       } catch (error) {
         console.error('Failed to remove question:', error)
-        alert('Failed to remove question from collection')
+        alert('从题目集移除题目失败')
       } finally {
         setIsProcessing(false)
       }
@@ -895,7 +987,7 @@ export default function CollectionDetailPage() {
         handleStartEdit(payload)
         break
       case 'tags':
-        alert('Manage tags feature coming soon...')
+        alert('管理标签功能即将推出...')
         break
       case 'remove':
         handleRemoveQuestion(payload.id)
@@ -1455,11 +1547,11 @@ export default function CollectionDetailPage() {
             <thead style={{ backgroundColor: '#F3F4F6', borderBottom: '2px solid black' }}>
               <tr>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>#</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>Content</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>Type</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>Mastery</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>Practiced</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>Actions</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>内容</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>类型</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>掌握度</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>练习次数</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#6B7280' }}>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -1476,7 +1568,7 @@ export default function CollectionDetailPage() {
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '0.875rem' }}>
                     <span style={{ padding: '4px 8px', backgroundColor: '#DBEAFE', color: '#1E40AF', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
-                      {(question as any).question_type || (question as any).type || 'N/A'}
+                      {translateQuestionType((question as any).question_type || (question as any).type) || '未知'}
                     </span>
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '0.875rem' }}>
