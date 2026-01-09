@@ -198,7 +198,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {isAuthenticated && user ? user.name || user.email : '登录'}
               </p>
               {isAuthenticated && user && (
-                <p className="text-xs text-gray-600 font-semibold">高级会员</p>
+                <p className="text-xs text-gray-600 font-semibold" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Premium</p>
               )}
             </div>
 
@@ -228,7 +228,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   overflowY: 'auto',
                   minWidth: '210px',
                   width: 'max-content',
-                  maxWidth: '240px'
+                  maxWidth: '240px',
+                  fontFamily: "'JetBrains Mono', monospace"
                 }}
               >
                 {/* User Info Section - Email Focused */}
@@ -237,10 +238,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <p className="text-base text-gray-700 font-bold break-all leading-relaxed">
                       {user?.email || 'user@example.com'}
                     </p>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black text-white rounded-full text-xs font-bold shadow-sm">
-                      <span className="text-sm">⭐</span>
-                      <span>高级会员</span>
-                    </div>
+                    <Link
+                      href="/settings"
+                      onClick={() => setIsProfileOpen(false)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-black rounded-full text-xs font-bold shadow-sm border-2 border-black hover:from-amber-500 hover:to-yellow-500 transition-all duration-200 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
+                    >
+                      <span className="text-sm">⚡</span>
+                      <span>升级会员</span>
+                    </Link>
                   </div>
                 </div>
 
